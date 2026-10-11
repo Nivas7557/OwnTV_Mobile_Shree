@@ -89,6 +89,8 @@ moves per centimetre of finger, without changing how far you must travel to star
 **Where:** Settings → Sources → **Playlists** → Add, or the first-run wizard
 **Xtream** (server, user, password), **M3U** (a URL, or a file picked with your phone's file picker),
 or **Stalker/Ministra** (portal URL + MAC, with optional Serial Number, Device IDs and Signature).
+An M3U link of the form `…/get.php?username=…&password=…` is really an Xtream account: when the
+provider's server confirms it, it is added as **Xtream**, with movies and series in their own tabs.
 Under **User-Agent** there is an optional **Referer** — leave it empty unless your provider asks
 for one; it is then sent with every stream of that playlist.
 
@@ -269,7 +271,8 @@ bar, in the grid and the list alike; a show carries the bar of its latest part-w
 
 ### ▶️ A film or a show
 Tap for its page: backdrop, cast, chips, **Resume** or **Play**, favourite, download, season chips
-and episode progress. A show **opens on the episode you last watched**.
+(**Specials** last, when the show has them) and episode progress. A show **opens on the episode you last watched**; one you have not started
+plays from Season 1 Episode 1, with **Specials** after the last season.
 
 Starting something part-watched anywhere else — a **Continue watching** row, the hero card, an
 episode in a series — asks **Resume or start over?** Settings → Video player → Resume & auto-play → **Resume playback**

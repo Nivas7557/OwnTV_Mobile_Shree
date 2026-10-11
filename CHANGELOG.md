@@ -42,6 +42,12 @@
 - **📱 Cheaper home, guide, search and downloads lists** (community PR #64 by @saltimbanco)
 - **🔋 The idle downloads screen stays asleep** (community PR #64 by @saltimbanco)
 - **📐 Aspect ratio changes on live channels again**
+- **🔗 A provider's get.php M3U link is added as Xtream, so movies and series land in their own sections**
+- **📺 Shows with a Season 0 load all their episodes on Xtream**
+- **🔢 Xtream episodes with no number are numbered in order instead of all showing E0**
+- **🔁 A show's episode list retries once when the provider drops the connection**
+- **▶️ Play on a new show starts at Season 1 Episode 1; Specials come after the last season**
+- **🔤 M3U episodes named "Season 1 Episode 5" or "S2019E05" are recognised**
 
 ## v1.0.3 — 2026-09-26
 

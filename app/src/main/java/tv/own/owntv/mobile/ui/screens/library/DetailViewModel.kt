@@ -117,10 +117,11 @@ class DetailViewModel(
         }
     }
 
-    /** The seasons this show actually has episodes for, in the order the user chose. */
+    /** The seasons this show actually has episodes for, in the order the user chose — Specials
+     *  (season 0) after the numbered seasons in either order, as on the television (#228). */
     val seasons: StateFlow<List<Int>> = combine(episodes, order) { list, o ->
         val numbers = list.map { it.seasonNumber }.distinct().sorted()
-        if (o.seasonsDescending) numbers.reversed() else numbers
+        (if (o.seasonsDescending) numbers.reversed() else numbers).sortedBy { it == 0 }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
 
@@ -197,7 +198,7 @@ class DetailViewModel(
      */
     val nextUpId: StateFlow<Long?> = combine(episodes, episodeProgress) { eps, prog ->
         if (eps.isEmpty()) return@combine null
-        val ordered = eps.sortedWith(compareBy({ it.seasonNumber }, { it.episodeNumber }))
+        val ordered = eps.sortedWith(tv.own.owntv.core.content.EpisodeOrder.episodes)
         val lastWatched = prog.values.maxByOrNull { it.updatedAt } ?: return@combine ordered.first().id
         if (lastWatched.isFinished()) {
             val index = ordered.indexOfFirst { it.id == lastWatched.itemId }
@@ -413,7 +414,7 @@ class DetailViewModel(
         val t = target.value ?: return null
         val pid = profileId.value
         val lastWatched = if (pid >= 0) progressDao.lastWatchedEpisodeId(pid, t.id) else null
-        return lastWatched ?: episodes.value.minByOrNull { it.seasonNumber * 1000 + it.episodeNumber }?.id
+        return lastWatched ?: episodes.value.minWithOrNull(tv.own.owntv.core.content.EpisodeOrder.episodes)?.id
     }
 
     private suspend fun currentProfileId(): Long? {
