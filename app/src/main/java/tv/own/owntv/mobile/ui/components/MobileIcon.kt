@@ -76,6 +76,13 @@ object MobileIcons {
     val Layers: ImageVector by lazy { stage(StageGlyph.LAYERS) }
     /** The TV Guide place (the mockup's `guide`). */
     val Guide: ImageVector by lazy { stage(StageGlyph.EPG) }
+    /** The order tool (`sort`). */
+    val Sort: ImageVector by lazy { stage(StageGlyph.SORT) }
+    /** Record (`rec`), Multiview (`mv`) and Move (`move`) in the channel menu. */
+    val Record: ImageVector by lazy { stage(StageGlyph.REC) }
+    val Warning: ImageVector by lazy { stage(StageGlyph.WARNING) }
+    val Multiview: ImageVector by lazy { stage(StageGlyph.MULTIVIEW) }
+    val Move: ImageVector by lazy { stage(StageGlyph.MOVE) }
     /** Home's trending eyebrow (the mockup's `trend`). */
     val Trend: ImageVector by lazy { stage(StageGlyph.TREND) }
     /** The Series place (the mockup's `series`). */

@@ -1,5 +1,7 @@
 package tv.own.owntv.mobile.ui.components
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -55,6 +57,8 @@ data class SheetAction(
     val icon: ImageVector? = null,
     val destructive: Boolean = false,
     val group: Int = 0,
+    /** A Stage menu item's value at the end ("7 days", "Auto", "Global"). */
+    val value: String? = null,
     val onClick: () -> Unit,
 )
 
@@ -79,6 +83,7 @@ fun ContentMenuSheet(
     stage: Boolean = false,
     groupLabels: Map<Int, String> = emptyMap(),
     leading: (@Composable () -> Unit)? = null,
+    subtitle: String? = null,
 ) {
     val settings: SettingsRepository = koinInject()
     val order by remember(menu) { settings.menuOrder(menu.name.lowercase()) }
@@ -87,7 +92,13 @@ fun ContentMenuSheet(
     // Stage (M2-04): the item's picture and name on top, each group under its label (WATCH, LIBRARY…).
     if (stage) {
         MobileBottomSheet(onDismissRequest = onDismiss, title = title, modifier = modifier, stage = true) {
-            StageSheetHeader(title = title, leading = leading)
+            StageSheetHeader(title = title, subtitle = subtitle, leading = leading)
+            // A long menu (catch-up, Multiview, Move…) scrolls rather than running off the screen.
+            Column(
+                Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
+            ) {
             var previousGroup: Int? = null
             applyMenuOrder(actions, order) { it.key }.forEach { action ->
                 if (action.group != previousGroup) groupLabels[action.group]?.let { StageGroupLabel(it) }
@@ -99,8 +110,10 @@ fun ContentMenuSheet(
                         onDismiss()
                     },
                     icon = action.icon,
+                    value = action.value,
                     danger = action.destructive,
                 )
+            }
             }
         }
         return

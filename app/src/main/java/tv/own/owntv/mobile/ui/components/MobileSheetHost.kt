@@ -141,6 +141,13 @@ class SheetHostState internal constructor() {
 internal val LocalSheetHost = staticCompositionLocalOf<SheetHostState?> { null }
 
 /**
+ * Whether a sheet is up. A video surface draws above the sheet, so Live TV's preview lets its picture
+ * go while this is true.
+ */
+@Composable
+fun sheetOpen(): Boolean = LocalSheetHost.current?.entries?.isNotEmpty() == true
+
+/**
  * The layer every bottom sheet in the app is drawn on, hosted once above the whole UI.
  *
  * A sheet used to be a `ModalBottomSheet`, which is a separate window — and a separate window cannot

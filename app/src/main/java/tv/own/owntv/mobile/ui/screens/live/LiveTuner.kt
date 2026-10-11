@@ -329,6 +329,10 @@ class LiveTuner(
         }
         .stateIn(scope, SharingStarted.Eagerly, SectionCustomizations())
 
+    /** What is on now for [channels] with the profile's own EPG matches and shifts — the player's channel list. */
+    suspend fun nowProgrammes(channels: List<ChannelEntity>): Map<Long, tv.own.owntv.core.parser.XtEpgEntry> =
+        epgReader.nowProgrammesFor(channels, custom.value, settings.epgOffsetMinutes.first())
+
     private val _channel = MutableStateFlow<ChannelEntity?>(null)
 
     /** The channel on screen, with the user's own name for it. */

@@ -1,5 +1,9 @@
 package tv.own.owntv.mobile.ui.shell
 
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -124,6 +129,14 @@ data class HomeResume(val name: String, val onClick: () -> Unit)
 val LocalHomeChrome = staticCompositionLocalOf<HomeChrome?> { null }
 
 /**
+ * A place's own crumb (Live TV's "‹ **Sky Cinema** · 9 channels"): the [accent] part, the muted [rest] after a dot,
+ * and what a tap opens (the categories). Set by the place while it is on screen.
+ */
+data class PageCrumb(val accent: String, val rest: String?, val onClick: () -> Unit)
+
+val LocalPageCrumb = staticCompositionLocalOf<MutableState<PageCrumb?>> { mutableStateOf(null) }
+
+/**
  * `.bdrop`: the picture across the top, cropped at 62% / 30%, dissolving into the page from 45% up (light
  * fades earlier: 0 → 28% at 38% → 100% at 78%), with the 55% → 0 page wash over its top 30%.
  */
@@ -194,17 +207,20 @@ fun StageNavBar(
             .height(if (labels) 64.dp else 56.dp)
             .stageGlass(shape)
             .padding(horizontal = 6.dp),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         destinations.forEach { destination ->
             val on = destination == current
-            val label = stringResource(destination.labelRes)
+            val label = stringResource(destination.barLabelRes)
             val interaction = remember { MutableInteractionSource() }
-            Box(contentAlignment = Alignment.Center) {
+            // Each place takes an equal share of the bar (64 dp in the mockup's English) so a longer word —
+            // "Startseite", "Programmführer" — has the room there is before it has to shrink.
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 Column(
                     Modifier
-                        .size(64.dp, 52.dp)
+                        .fillMaxWidth()
+                        .height(52.dp)
                         .clip(RoundedCornerShape(18.dp))
                         .then(if (on) Modifier.background(accent.copy(alpha = 0.14f)) else Modifier)
                         .stageClickable(interaction, { onClick(destination) }, { onLongClick(destination) }, Role.Tab)
@@ -218,7 +234,16 @@ fun StageNavBar(
                     val tint = if (on) accent else palette.navText
                     StageIcon(destination.icon, 22.dp, tint)
                     if (labels) {
-                        Text(label, style = stageText(10.5f, 700, lineHeight = 1f), color = tint, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        // Any language, any text size: a two-word label may take a second line, and a label
+                        // still too wide shrinks (to 8 sp) before it would cut a word (M3 check, German 130%).
+                        BasicText(
+                            label,
+                            style = stageText(10.5f, 700, lineHeight = 1f).copy(color = tint, textAlign = TextAlign.Center),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 10.5.sp, stepSize = 0.25.sp),
+                            modifier = Modifier.padding(horizontal = 1.dp),
+                        )
                     }
                 }
                 // `.it.on::after`: 5 dp, 6 dp below the item, glowing.
@@ -250,6 +275,7 @@ fun StagePageHeader(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     heading: HomeHeading? = null,
+    crumb: PageCrumb? = null,
     cluster: @Composable () -> Unit,
 ) {
     val palette = LocalStagePalette.current
@@ -258,7 +284,9 @@ fun StagePageHeader(
             verticalAlignment = if (heading != null) Alignment.CenterVertically else Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Box(Modifier.weight(1f)) {
+            // The title keeps its own width (a page name is never cut); the cluster takes the rest and its
+            // playlist pill shortens. Home's scrolled heading is the exception: it shares the row.
+            Box(if (heading != null) Modifier.weight(1f) else Modifier) {
                 if (heading != null) {
                     HomeHeadingText(heading)
                 } else if (title != null) {
@@ -273,7 +301,7 @@ fun StagePageHeader(
                     )
                 }
             }
-            cluster()
+            Box(Modifier.weight(1f, fill = heading == null), contentAlignment = Alignment.TopEnd) { cluster() }
         }
         if (backLabel != null) {
             val interaction = remember { MutableInteractionSource() }
@@ -287,6 +315,22 @@ fun StagePageHeader(
             ) {
                 StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
                 Text(backLabel, style = stageText(13f, 700), color = stageAccent.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        } else if (crumb != null) {
+            val interaction = remember { MutableInteractionSource() }
+            Row(
+                Modifier
+                    .padding(top = 5.dp)
+                    .stageClickable(interaction, crumb.onClick, null),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
+                Text(
+                    crumb.accent, style = stageText(13f, 700), color = stageAccent.accent,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
+                )
+                crumb.rest?.let { Text(stringResource(R.string.content_epg_bits_separator).trimStart() + it, style = stageText(13f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
         }
     }
@@ -313,13 +357,15 @@ fun ShellCluster(
             if (pl.iconOnly) {
                 StagePill(onClick = onPlaylist, icon = MobileIcons.Layers, contentDescription = pl.label)
             } else {
+                // Owner, 2026-10-11: the mark alone (GOLD, JUNI, X) — or the layers icon for All playlists —
+                // with the chevron; the name is left to the sheet and to TalkBack. Saves the header's width
+                // for the page title at large zoom.
                 StagePill(
                     onClick = onPlaylist,
-                    text = pl.label,
                     icon = MobileIcons.Layers.takeIf { pl.mark == null },
                     mark = pl.mark,
                     trailingIcon = MobileIcons.KeyboardArrowDown.takeIf { pl.switchable },
-                    modifier = Modifier.widthIn(max = 190.dp),
+                    contentDescription = pl.label,
                 )
             }
         }

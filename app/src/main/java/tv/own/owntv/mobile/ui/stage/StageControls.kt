@@ -150,19 +150,21 @@ fun StagePill(
     val shape = RoundedCornerShape(StageRadii.Pill)
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
+    // A lone glyph is the 36 dp square; a mark or a chevron without text is a short pill.
+    val square = text == null && mark == null && trailingIcon == null
     Row(
         modifier
             .height(36.dp)
-            .then(if (text == null) Modifier.width(36.dp) else Modifier)
+            .then(if (square) Modifier.width(36.dp) else Modifier)
             .then(if (pressed) Modifier.clip(shape).background(accent.accent) else Modifier.stageGlass(shape))
             .clip(shape)
             .clickable(interaction, indication = null, role = Role.Button, onClickLabel = contentDescription, onClick = onClick)
-            .padding(horizontal = if (text == null) 0.dp else 12.dp),
+            .padding(horizontal = if (square) 0.dp else if (text == null) 10.dp else 12.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val iconTint = if (pressed) accent.onAccent else if (text == null) palette.text else accent.accent
-        icon?.let { StageIcon(it, if (text == null) 17.dp else 15.dp, iconTint) }
+        val iconTint = if (pressed) accent.onAccent else if (square) palette.text else accent.accent
+        icon?.let { StageIcon(it, if (square) 17.dp else 15.dp, iconTint) }
         mark?.let { StagePlaylistMark(it) }
         text?.let {
             Text(it, style = stageText(13f, 700), color = if (pressed) accent.onAccent else palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -391,7 +393,7 @@ fun StageRadio(selected: Boolean, modifier: Modifier = Modifier) {
 }
 
 /**
- * `.srch`: the 42 dp search field (36 [inline]); the dim placeholder, the text colour once typing, and the
+ * `.srch`: the 42 dp search field (36 / 12.5 type [inline]); the dim placeholder, the text colour once typing, and the
  * focus ring while it has the keyboard.
  */
 @Composable
@@ -406,7 +408,8 @@ fun StageSearchField(
     val palette = LocalStagePalette.current
     val accent = stageAccent
     var focused by remember { mutableStateOf(false) }
-    val style = stageText(13.5f, 500)
+    // The inline field (a tool row's) is 36 dp with 12.5 type, the page's 42 dp with 13.5.
+    val style = stageText(if (inline) 12.5f else 13.5f, 500)
     BasicTextField(
         value = value,
         onValueChange = onValueChange,

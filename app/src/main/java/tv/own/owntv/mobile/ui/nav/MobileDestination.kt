@@ -22,10 +22,12 @@ enum class MobileDestination(
     @param:StringRes val labelRes: Int,
     val icon: ImageVector,
     val sections: Set<MainSection>,
+    /** The bottom bar's word, a fifth of the screen wide; the page title keeps [labelRes]. */
+    @param:StringRes val barLabelRes: Int = labelRes,
 ) {
     HOME("home", R.string.common_nav_home, MobileIcons.Home, setOf(MainSection.HOME)),
     LIVE("live", R.string.common_nav_live_tv, MobileIcons.LiveTv, setOf(MainSection.LIVE_TV)),
-    GUIDE("guide", R.string.common_nav_guide, MobileIcons.Guide, setOf(MainSection.EPG)),
+    GUIDE("guide", R.string.common_nav_guide, MobileIcons.Guide, setOf(MainSection.EPG), R.string.common_nav_guide_short),
     MOVIES("movies", R.string.common_nav_movies, MobileIcons.Movie, setOf(MainSection.MOVIES)),
     SERIES("series", R.string.common_nav_series, MobileIcons.Series, setOf(MainSection.SERIES)),
     MORE("more", R.string.common_nav_more, MobileIcons.MoreHoriz, emptySet()),

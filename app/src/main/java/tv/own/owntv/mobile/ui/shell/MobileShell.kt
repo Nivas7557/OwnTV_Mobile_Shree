@@ -292,6 +292,7 @@ fun MobileShell(
 
     val chrome = remember { ShellChromeState() }
     val homeChrome = remember { HomeChrome() }
+    val pageCrumb = remember { mutableStateOf<PageCrumb?>(null) }
     val onHome = currentRoute == MobileDestination.HOME.route
     val navLabels by settings.phoneNavLabels.collectAsStateWithLifecycle(true)
     val hideOnScroll by settings.phoneNavHideOnScroll.collectAsStateWithLifecycle(true)
@@ -428,6 +429,7 @@ fun MobileShell(
                     backLabel = backLabel,
                     onBack = { navController.popBackStack() },
                     heading = homeChrome.heading.takeIf { onHome },
+                    crumb = pageCrumb.value.takeIf { topLevel },
                 ) {
                     ShellCluster(
                         playlist = clusterPlaylist,
@@ -537,6 +539,7 @@ fun MobileShell(
                         LocalStreamOnScreen provides streamOnScreen,
                         LocalMiniRequested provides miniRequested,
                         LocalHomeChrome provides homeChrome,
+                        LocalPageCrumb provides pageCrumb,
                     ) {
                         MobileNavHost(
                             navController = navController,
@@ -709,7 +712,13 @@ private fun NavHostController.onNavClick(
     current: MobileDestination?,
     shell: ShellViewModel,
 ) {
-    if (destination == current) shell.requestScrollToTop(destination.route) else navigateToTab(destination)
+    when {
+        destination == current -> shell.requestScrollToTop(destination.route)
+        // A More or Settings page pushed on top of this tab: back down to the tab itself. Restoring the
+        // tab's saved stack instead restored the very page on screen, so the tap did nothing.
+        current == null && popBackStack(destination.route, inclusive = false) -> Unit
+        else -> navigateToTab(destination)
+    }
 }
 
 /**

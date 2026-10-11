@@ -224,7 +224,7 @@ fun StageSheetHeader(
  * a [count] (`.n`), [tags] or a ✓ when [checked]. [selected] is the accent text; [danger] the danger
  * colour; pressed fills it with the accent (`.mi.f`), as does [filled] for the chosen item of a picker
  * (the playlist sheet draws its current playlist so). [leading] replaces the icon (a radio in a choice
- * sheet, with a 10 dp gap).
+ * sheet, with a 10 dp gap). [mark] ends a category row (`.pm` after the count).
  */
 @Composable
 fun StageMenuItem(
@@ -242,6 +242,8 @@ fun StageMenuItem(
     role: Role = Role.Button,
     leading: (@Composable () -> Unit)? = null,
     tags: (@Composable RowScope.() -> Unit)? = null,
+    mark: tv.own.owntv.core.ui.stage.PlaylistMark? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -263,7 +265,7 @@ fun StageMenuItem(
             .height(46.dp)
             .clip(shape)
             .then(if (pressed) Modifier.background(accent.accent) else Modifier)
-            .stageClickable(interaction, onClick.takeIf { enabled }, null, role)
+            .stageClickable(interaction, onClick.takeIf { enabled }, onLongClick?.takeIf { enabled }, role)
             .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(if (leading != null) 10.dp else 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -287,6 +289,7 @@ fun StageMenuItem(
             value?.let { Text(it, style = stageText(12f, 700), color = sideTint, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             count?.let { Text(it, style = stageText(12f, 600), color = sideTint, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             if (checked) StageIcon(MobileIcons.Check, 18.dp, if (pressed) accent.onAccent else accent.accent)
+            mark?.let { StagePlaylistMark(it, Modifier.padding(start = 2.dp)) }
         }
     }
 }

@@ -1,5 +1,11 @@
 package tv.own.owntv.mobile.ui.screens.live
 
+import tv.own.owntv.mobile.ui.components.MobileIcons
+import tv.own.owntv.mobile.ui.components.sheetListHeight
+import tv.own.owntv.mobile.ui.stage.LocalStagePalette
+import tv.own.owntv.mobile.ui.stage.StageMenuItem
+import tv.own.owntv.mobile.ui.stage.StageSheetHeader
+import tv.own.owntv.mobile.ui.stage.stageText
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -249,13 +255,11 @@ private fun GuidePanel(nowNext: tv.own.owntv.core.live.EpgNowNext?) {
 }
 
 /**
- * The catch-up picker: what this channel's archive still holds, newest first.
- *
- * On the TV app this is a centred dialog. Here it is a sheet, so the list of programmes rises under
- * the thumb and the picture keeps playing above it.
+ * The catch-up picker: what this channel's archive still holds, newest first, then "Go back to…" for a
+ * bare time. A Stage sheet: the picture keeps playing above it.
  */
 @Composable
-private fun CatchupSheet(
+internal fun CatchupSheet(
     channelName: String,
     load: suspend () -> List<EpgProgrammeEntity>,
     onPick: (EpgProgrammeEntity) -> Unit,
@@ -267,33 +271,33 @@ private fun CatchupSheet(
     val times = rememberTimeFormat()
     val dates = remember { DateFormat.getDateInstance(DateFormat.MEDIUM) }
     val separator = stringResource(R.string.content_epg_bits_separator)
+    val title = stringResource(R.string.content_catchup_title, channelName)
 
-    MobileBottomSheet(
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.content_catchup_title, channelName),
-    ) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+        StageSheetHeader(title = title)
         val list = programmes
         if (list != null && list.isEmpty()) {
             Text(
                 text = stringResource(R.string.content_catchup_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(MobileDimens.ScreenPaddingH),
+                style = stageText(13f, 500),
+                color = LocalStagePalette.current.muted,
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
             )
         }
-        LazyColumn(Modifier.heightIn(max = (LocalConfiguration.current.screenHeightDp / 2).dp)) {
+        LazyColumn(Modifier.heightIn(max = sheetListHeight())) {
             items(list.orEmpty(), key = { it.id }) { programme ->
-                MobileListRow(
-                    title = programme.title,
-                    subtitle = dates.format(Date(programme.startMs)) + separator +
-                        times.format(Date(programme.startMs)),
+                StageMenuItem(
+                    label = programme.title,
                     onClick = { onPick(programme); onDismiss() },
+                    icon = MobileIcons.Catchup,
+                    value = dates.format(Date(programme.startMs)) + separator + times.format(Date(programme.startMs)),
                 )
             }
             item(key = "jump-back") {
-                MobileListRow(
-                    title = stringResource(R.string.content_catchup_jump),
+                StageMenuItem(
+                    label = stringResource(R.string.content_catchup_jump),
                     onClick = onJumpBack,
+                    icon = MobileIcons.Schedule,
                 )
             }
         }

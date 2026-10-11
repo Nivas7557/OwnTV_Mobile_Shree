@@ -1,5 +1,6 @@
 package tv.own.owntv.mobile.ui.player
 
+import androidx.compose.runtime.produceState
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.mobile.ui.components.CategoryPickerSheet
 import android.content.pm.ActivityInfo
@@ -155,6 +156,7 @@ fun PlayerScreen(
     // playing", and the spinner over a deliberately paused picture reads as a stall. The television
     // has always drawn this from `buffering`; so does this now.
     val buffering by activeEngine.buffering.collectAsStateWithLifecycle()
+    val stalledSinceMs by activeEngine.stalledSinceMs.collectAsStateWithLifecycle()
     // Only the stream that never had a picture — a radio channel — reaches this screen without one.
     // The user's own sound-only choice cannot, see below.
     val audioOnlyMedia by activeEngine.audioOnlyMedia.collectAsStateWithLifecycle()
@@ -613,7 +615,27 @@ fun PlayerScreen(
         } else if (buffering && !noPicture) {
             // On the same material as every other message over the picture, rather than a bare ring.
             PlayerToast(Modifier.align(Alignment.Center)) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp))
+                    // M3-11 (the TV's PR #237): a live channel that had been playing and has stalled for
+                    // 10 s says so under the spinner; gone as soon as the picture returns.
+                    val stalledSince = stalledSinceMs
+                    if (isLive && stalledSince != null) {
+                        val showNotice by produceState(false, stalledSince) {
+                            kotlinx.coroutines.delay(RECONNECT_NOTICE_AFTER_MS - (android.os.SystemClock.elapsedRealtime() - stalledSince))
+                            value = true
+                        }
+                        if (showNotice) {
+                            Text(
+                                stringResource(R.string.player_reconnecting),
+                                style = tv.own.owntv.mobile.ui.stage.stageText(14f, 600),
+                                color = Color(0xFFE6ECE9),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.padding(top = 14.dp),
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -811,6 +833,7 @@ fun PlayerScreen(
                     onDismiss = { multiviewPickFor = null },
                     // Two steps: choosing a category opens its channels, it does not close the sheet.
                     dismissOnSelect = false,
+                    stage = true,
                 )
             } else {
                 PlayerSheetHost(
@@ -866,6 +889,7 @@ fun PlayerScreen(
             },
             onDismiss = { sheet = null },
             dismissOnSelect = false,
+            stage = true,
         )
     }
 
@@ -874,6 +898,7 @@ fun PlayerScreen(
             sheet = open,
             player = activeEngine,
             channels = if (open == PlayerSheet.CHANNELS) playerChannels else siblings,
+            channelsTitle = playerCategories.firstOrNull { it.first == playerCategory }?.second,
             brightness = brightness,
             onBrightness = { setBrightness(it) },
             onPickChannel = { tuner.switchTo(it) },
@@ -1025,3 +1050,6 @@ private class Carry {
     var volume = 0f
     var speedBefore = 1.0
 }
+
+/** How long a live stall lasts before the player says it is reconnecting (the TV's value). */
+private const val RECONNECT_NOTICE_AFTER_MS = 10_000L
