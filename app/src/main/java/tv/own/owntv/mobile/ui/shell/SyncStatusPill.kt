@@ -114,7 +114,11 @@ fun SyncStatusPill(
         if (currentTrending != null) { delay(COMPLETED_MS); currentTrending = null }
     }
 
-    val rows = buildList {
+    // Sorted once per progress change, not once per emission per row: the trackers emit at Hz
+    // rates while a sync runs, and the sort has nothing new to say between two emissions of the
+    // same maps.
+    val rows = remember(activeCatalog, activeEpg, activeTrending, activeDownload, activeRecordings, recordingsOnly) {
+        buildList {
         // Recordings first, always (D13): they are time-critical and unrecoverable, so they are never
         // the line that gets collapsed into "+N more". Then downloads, which the user also started
         // deliberately. The background syncs are the ones that can afford to be hidden.
@@ -124,6 +128,7 @@ fun SyncStatusPill(
         activeCatalog.values.sortedBy { it.sourceId }.forEach { add(SyncLine.Catalog(it)) }
         activeTrending.values.sortedBy { it.sourceId }.forEach { add(SyncLine.Trending(it)) }
         activeEpg.values.sortedBy { it.sourceId }.forEach { add(SyncLine.Epg(it)) }
+        }
     }
     val shown = rows.take(MAX_ROWS)
     val hidden = rows.size - shown.size

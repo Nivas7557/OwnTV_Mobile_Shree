@@ -44,7 +44,7 @@ class SearchViewModel(
 
     private val ctx: StateFlow<ActiveProfileSources> = activeProfileSources(settings, sourceDao)
         .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, ActiveProfileSources(-1L, emptyList()))
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActiveProfileSources(-1L, emptyList()))
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
@@ -77,8 +77,14 @@ class SearchViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Playlist names, so a row can say which provider it came from when there is more than one. */
-    val sourceNames: StateFlow<Map<Long, String>> = sourceDao.observeAll()
-        .map { list -> list.associate { it.id to it.name } }
+    val sourceNames: StateFlow<Map<Long, String>> = ctx
+        // This screen only ever shows the active profile's rows; other profiles' sources are
+        // none of its business.
+        .flatMapLatest { c ->
+            if (c.profileId < 0) flowOf(emptyMap())
+            else sourceDao.observeForProfile(c.profileId)
+                .map { list -> list.associate { it.id to it.name } }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     val favoriteChannels: StateFlow<Set<Long>> = favoriteIds(MediaType.LIVE)

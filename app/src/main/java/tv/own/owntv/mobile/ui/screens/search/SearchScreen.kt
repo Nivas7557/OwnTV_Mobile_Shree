@@ -135,6 +135,7 @@ fun SearchScreen(
                     count = results.channels.size,
                     items = results.channels,
                     key = { "c${it.channel.id}" },
+                    contentType = "channel",
                 ) { row ->
                     MobileListRow(
                         title = row.channel.name,
@@ -154,6 +155,7 @@ fun SearchScreen(
                     count = results.programmes.size,
                     items = results.programmes,
                     key = { "p${it.programme.id}-${it.channel.id}" },
+                    contentType = "programme",
                 ) { found ->
                     MobileListRow(
                         title = found.programme.title,
@@ -176,6 +178,7 @@ fun SearchScreen(
                     count = results.movies.size,
                     items = results.movies,
                     key = { "m${it.id}" },
+                    contentType = "movie",
                 ) { movie ->
                     MobileListRow(
                         title = movie.name,
@@ -193,6 +196,7 @@ fun SearchScreen(
                     count = results.series.size,
                     items = results.series,
                     key = { "s${it.id}" },
+                    contentType = "series",
                 ) { show ->
                     MobileListRow(
                         title = show.name,
@@ -231,11 +235,12 @@ private fun <T> LazyListScope.group(
     count: Int,
     items: List<T>,
     key: (T) -> Any,
+    contentType: String,
     row: @Composable (T) -> Unit,
 ) {
     if (items.isEmpty()) return
-    item(key = "hdr_$label") { GroupHeader(label, count) }
-    items(items, key = key) { row(it) }
+    item(key = "hdr_$label", contentType = "header") { GroupHeader(label, count) }
+    items(items, key = key, contentType = { contentType }) { row(it) }
 }
 
 @Composable

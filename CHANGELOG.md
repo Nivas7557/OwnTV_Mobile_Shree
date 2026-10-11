@@ -39,6 +39,8 @@
 - **Faster channel switching on providers that mix HLS and TS channels**
 - **⏺️ Recordings of some HLS channels were a few kB and would not play**
 - **🔎 Search finds "Spider-Man" from "Spider-M" and lists every match, not the first 40**
+- **📱 Cheaper home, guide, search and downloads lists** (community PR #64 by @saltimbanco)
+- **🔋 The idle downloads screen stays asleep** (community PR #64 by @saltimbanco)
 
 ## v1.0.3 — 2026-09-26
 
