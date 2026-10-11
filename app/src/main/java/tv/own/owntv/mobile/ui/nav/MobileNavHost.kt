@@ -117,7 +117,7 @@ fun MobileNavHost(
                     MobileDestination.DOWNLOADS -> DownloadsScreen(
                         onPlayerOpened = { navController.navigate(PLAYER_ROUTE) },
                     )
-                    MobileDestination.LIBRARY, MobileDestination.MOVIES, MobileDestination.SERIES ->
+                    MobileDestination.MOVIES, MobileDestination.SERIES ->
                         LibraryScreen(
                             scrollToTop = scrollToTop,
                             route = destination.route,
@@ -136,8 +136,7 @@ fun MobileNavHost(
             }
         }
         // A film or a show sits under the tab it was opened from, so the bar keeps that tab selected
-        // — the same reason the channel screen lives under Live. Three parents, because a tablet
-        // opens the same item from Movies or Series and a phone opens it from Library.
+        // — the same reason the channel screen lives under Live.
         LIBRARY_PARENTS.forEach { parent ->
             composable(
                 route = "${parent.route}/{$ARG_TAB}/{$ARG_ITEM_ID}",
@@ -183,14 +182,10 @@ fun MobileNavHost(
                     navController.navigate(channelRoute(MobileDestination.LIVE, channelId, false))
                 },
                 onOpenMovie = { id ->
-                    navController.navigate(
-                        detailRoute(MobileDestination.LIBRARY.route, LibraryTab.MOVIES, id),
-                    )
+                    navController.navigate(detailRoute(LibraryTab.MOVIES.parent.route, LibraryTab.MOVIES, id))
                 },
                 onOpenSeries = { id ->
-                    navController.navigate(
-                        detailRoute(MobileDestination.LIBRARY.route, LibraryTab.SERIES, id),
-                    )
+                    navController.navigate(detailRoute(LibraryTab.SERIES.parent.route, LibraryTab.SERIES, id))
                 },
             )
         }
@@ -219,9 +214,7 @@ fun MobileNavHost(
                             )
                         },
                         onOpenItem = { tab, id ->
-                            navController.navigate(
-                                detailRoute(MobileDestination.LIBRARY.route, tab, id),
-                            )
+                            navController.navigate(detailRoute(tab.parent.route, tab, id))
                         },
                         onOpenPlayer = { navController.navigate(PLAYER_ROUTE) },
                     )
@@ -296,18 +289,21 @@ private val CHANNEL_PARENTS = listOf(MobileDestination.LIVE, MobileDestination.H
 
 /** The tabs a film or a show can be opened from, and therefore returned to. */
 private val LIBRARY_PARENTS = listOf(
-    MobileDestination.LIBRARY,
     MobileDestination.MOVIES,
     MobileDestination.SERIES,
     MobileDestination.HOME,
 )
 
-/** Movies and Series are one screen locked to one half; Library is that screen with both tabs. */
+/** Movies and Series are one screen, each locked to its half. */
 private fun MobileDestination.fixedTab(): LibraryTab? = when (this) {
     MobileDestination.MOVIES -> LibraryTab.MOVIES
     MobileDestination.SERIES -> LibraryTab.SERIES
     else -> null
 }
+
+/** Where a film or a show opened from outside its own place lives: Movies or Series. */
+private val LibraryTab.parent: MobileDestination
+    get() = if (this == LibraryTab.MOVIES) MobileDestination.MOVIES else MobileDestination.SERIES
 
 private fun detailRoute(parentRoute: String, tab: LibraryTab, itemId: Long) =
     "$parentRoute/${tab.name}/$itemId"

@@ -17,8 +17,6 @@ import org.koin.androidx.compose.koinViewModel
 import tv.own.owntv.core.menu.applyMenuOrder
 import tv.own.owntv.core.menu.catalogue
 import tv.own.owntv.core.model.ContentMenu
-import tv.own.owntv.core.nav.MainSection
-import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileListRow
@@ -40,9 +38,7 @@ fun SettingsLayoutPage(
     modifier: Modifier = Modifier,
     vm: SettingsViewModel = koinViewModel(),
 ) {
-    val navMode = vm.settings.navMenuMode.pref(SettingsRepository.NavMenuMode.STATIC)
-    val navHidden = vm.settings.navMenuHidden.pref(emptySet())
-    var navModeSheet by remember { mutableStateOf(false) }
+    var navigationSheet by remember { mutableStateOf(false) }
 
     var menuSheet by remember { mutableStateOf<ContentMenu?>(null) }
 
@@ -59,30 +55,13 @@ fun SettingsLayoutPage(
     SettingsPage(modifier) {
         settingsLeafRows(SettingsGroup.LAYOUT, onOpenLeaf)
 
-        // --- Navigation bar ---
-        settingsSection(R.string.settings_nav_bar_customization)
-        settingsNote(R.string.settings_sidebar_description_root)
+        // --- Navigation: the bottom bar and the sheets, in one sheet (M1-03) ---
         settingsGroup(key = "nav") {
             SettingRow(
-                title = stringResource(R.string.settings_nav_bar_customization),
-                value = stringResource(navMode.labelRes()),
-                onClick = { navModeSheet = true },
+                title = stringResource(R.string.settings_navigation),
+                showChevron = true,
+                onClick = { navigationSheet = true },
             )
-            if (navMode == SettingsRepository.NavMenuMode.STATIC) {
-                // Home is never offered: hiding it would leave a playlist with no channels and no
-                // films with nothing at all in the bar.
-                MainSection.browseOrder.filter { it != MainSection.HOME }.forEach { section ->
-                    SettingRow(
-                        title = stringResource(section.labelRes),
-                        checked = section.name !in navHidden,
-                        onCheckedChange = { show ->
-                            val next =
-                                if (show) navHidden - section.name else navHidden + section.name
-                            vm.edit { setNavMenuHidden(next) }
-                        },
-                    )
-                }
-            }
         }
 
         // --- Browsing & lists ---
@@ -136,16 +115,8 @@ fun SettingsLayoutPage(
         }
     }
 
-    if (navModeSheet) {
-        SettingsChoiceSheet(
-            title = stringResource(R.string.settings_nav_bar_customization),
-            choices = SettingsRepository.NavMenuMode.entries.map {
-                SettingsChoice(it, stringResource(it.labelRes()), stringResource(it.descriptionRes()))
-            },
-            selected = navMode,
-            onSelect = { mode -> vm.edit { setNavMenuMode(mode) } },
-            onDismiss = { navModeSheet = false },
-        )
+    if (navigationSheet) {
+        NavigationSheet(vm = vm, onDismiss = { navigationSheet = false })
     }
 
     menuSheet?.let { menu ->
@@ -220,15 +191,6 @@ private fun MenuOrderSheet(vm: SettingsViewModel, menu: ContentMenu, onDismiss: 
 private fun List<tv.own.owntv.core.menu.MenuActionRef>.movedKeys(index: Int, delta: Int): List<String> =
     map { it.key }.toMutableList().apply { add(index + delta, removeAt(index)) }
 
-private fun SettingsRepository.NavMenuMode.labelRes() = when (this) {
-    SettingsRepository.NavMenuMode.DYNAMIC -> R.string.settings_dynamic
-    SettingsRepository.NavMenuMode.STATIC -> R.string.settings_static
-}
-
-private fun SettingsRepository.NavMenuMode.descriptionRes() = when (this) {
-    SettingsRepository.NavMenuMode.DYNAMIC -> R.string.settings_nav_dynamic_description
-    SettingsRepository.NavMenuMode.STATIC -> R.string.settings_nav_static_description
-}
 
 private fun ContentMenu.titleRes() = when (this) {
     ContentMenu.LIVE -> R.string.common_nav_live_tv

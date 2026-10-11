@@ -137,7 +137,7 @@ private fun UserDataScreen(
                     if (tab == UserDataTab.MOVIES) LibraryTab.MOVIES else LibraryTab.SERIES
                 LibraryScreen(
                     scrollToTop = noScrollToTop,
-                    route = MobileDestination.LIBRARY.route,
+                    route = if (tab == UserDataTab.MOVIES) MobileDestination.MOVIES.route else MobileDestination.SERIES.route,
                     fixedTab = libraryTab,
                     lockedKey = key,
                     onOpenItem = onOpenItem,
