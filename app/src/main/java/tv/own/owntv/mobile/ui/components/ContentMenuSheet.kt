@@ -30,6 +30,9 @@ import org.koin.compose.koinInject
 import tv.own.owntv.core.menu.applyMenuOrder
 import tv.own.owntv.core.model.ContentMenu
 import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.mobile.ui.stage.StageGroupLabel
+import tv.own.owntv.mobile.ui.stage.StageMenuItem
+import tv.own.owntv.mobile.ui.stage.StageSheetHeader
 import tv.own.owntv.mobile.ui.theme.MobileDimens
 import tv.own.owntv.mobile.ui.theme.MobileSheetRowsShape
 
@@ -73,10 +76,35 @@ fun ContentMenuSheet(
     actions: List<SheetAction>,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    stage: Boolean = false,
+    groupLabels: Map<Int, String> = emptyMap(),
+    leading: (@Composable () -> Unit)? = null,
 ) {
     val settings: SettingsRepository = koinInject()
     val order by remember(menu) { settings.menuOrder(menu.name.lowercase()) }
         .collectAsStateWithLifecycle(emptyList())
+
+    // Stage (M2-04): the item's picture and name on top, each group under its label (WATCH, LIBRARY…).
+    if (stage) {
+        MobileBottomSheet(onDismissRequest = onDismiss, title = title, modifier = modifier, stage = true) {
+            StageSheetHeader(title = title, leading = leading)
+            var previousGroup: Int? = null
+            applyMenuOrder(actions, order) { it.key }.forEach { action ->
+                if (action.group != previousGroup) groupLabels[action.group]?.let { StageGroupLabel(it) }
+                previousGroup = action.group
+                StageMenuItem(
+                    label = action.label,
+                    onClick = {
+                        action.onClick()
+                        onDismiss()
+                    },
+                    icon = action.icon,
+                    danger = action.destructive,
+                )
+            }
+        }
+        return
+    }
 
     MobileBottomSheet(onDismissRequest = onDismiss, title = title, modifier = modifier) {
         SheetRows {

@@ -236,8 +236,9 @@ private fun BoxScope.SheetLayer(entry: SheetEntry) {
     // the frame it appeared.
     LaunchedEffect(Unit) {
         snapshotFlow { state.anchors.size }.first { it > 0 }
-        // A short sheet has no HALF anchor at all, and lands fully open instead.
-        val landing = if (state.anchors.positionOf(SheetAnchor.HALF).isNaN()) {
+        // A short sheet has no HALF anchor at all, and lands fully open instead. A Stage sheet always
+        // opens in full, as the mockup draws every one; HALF stays a rest on the way down.
+        val landing = if (entry.stage || state.anchors.positionOf(SheetAnchor.HALF).isNaN()) {
             SheetAnchor.EXPANDED
         } else {
             SheetAnchor.HALF

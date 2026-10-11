@@ -158,19 +158,14 @@
 1	log	app/src/main/java/tv/own/owntv/mobile/ui/screens/guide/GuideViewModel.kt	guide_stats programmes=$programmes guideChannels=$guideChannels
 1	log	app/src/main/java/tv/own/owntv/mobile/ui/screens/guide/GuideViewModel.kt	sources=${ids.size} cachedRows=${synchronized(rowCache) { rowCache.size }}
 1	log	app/src/main/java/tv/own/owntv/mobile/ui/screens/guide/GuideViewModel.kt	totalMs=${android.os.SystemClock.elapsedRealtime() - startedAt}
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeScreen.kt	c${channel.id}
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeScreen.kt	continue
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeScreen.kt	e${episode.id}
 1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeScreen.kt	home
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeScreen.kt	m${movie.id}
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeScreen.kt	weather
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	#${activeIndex + 1}
-2	protocol	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	EN
-2	url	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	w1280
-2	url	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	w500
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	·
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	•
-1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	✓ ${stringResource(R.string.home_trending_provider_match)}
+1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeText.kt	·
+3	url	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/HomeViewModel.kt	w1280
+1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	,
+1	protocol	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	EN
+1	url	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	w1280
+1	url	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	w500
+6	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	·
 1	preference-key	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/DetailScreen.kt	delete_subtitles
 1	preference-key	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/DetailScreen.kt	download
 1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/DetailScreen.kt	episode

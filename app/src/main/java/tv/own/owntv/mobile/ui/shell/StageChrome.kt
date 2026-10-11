@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,15 +19,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import tv.own.owntv.mobile.ui.stage.StageEyebrow
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.res.stringResource
@@ -87,6 +98,76 @@ class ShellChromeState {
             if (hideBottomOnScroll) bottomOffset = (bottomOffset - dy).coerceIn(0f, bottomHeight)
             return Offset(0f, consumed)
         }
+    }
+}
+
+/**
+ * What Home hands the shell (M2). Its backdrop belongs to the page, not to the list, so it is drawn behind
+ * the header and the status bar (`.bdrop`); once the hero has scrolled away the header carries its eyebrow
+ * and title instead (M2-02); and the Resume pill sits in the cluster while the hero is in view.
+ */
+@Stable
+class HomeChrome {
+    var backdropUrl by mutableStateOf<String?>(null)
+    var backdropHeight by mutableStateOf(470.dp)
+
+    /** 1 = the full picture … 0 = gone; read in the draw phase only. */
+    var backdropAlpha by mutableFloatStateOf(1f)
+    var heading by mutableStateOf<HomeHeading?>(null)
+    var resume by mutableStateOf<HomeResume?>(null)
+}
+
+data class HomeHeading(val eyebrow: String, val title: String)
+
+data class HomeResume(val name: String, val onClick: () -> Unit)
+
+val LocalHomeChrome = staticCompositionLocalOf<HomeChrome?> { null }
+
+/**
+ * `.bdrop`: the picture across the top, cropped at 62% / 30%, dissolving into the page from 45% up (light
+ * fades earlier: 0 → 28% at 38% → 100% at 78%), with the 55% → 0 page wash over its top 30%.
+ */
+@Composable
+fun HomeBackdrop(chrome: HomeChrome) {
+    val url = chrome.backdropUrl ?: return
+    val palette = LocalStagePalette.current
+    val mask = if (palette.isLight) {
+        Brush.verticalGradient(0f to Color.Black, 0.22f to Color.Black, 0.62f to Color.Black.copy(alpha = 0.28f), 1f to Color.Transparent)
+    } else {
+        Brush.verticalGradient(0f to Color.Black, 0.55f to Color.Black, 1f to Color.Transparent)
+    }
+    val wash = Brush.verticalGradient(0f to palette.wash.copy(alpha = 0.55f), 0.3f to palette.wash.copy(alpha = 0f))
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(chrome.backdropHeight)
+            .graphicsLayer {
+                alpha = chrome.backdropAlpha
+                compositingStrategy = CompositingStrategy.Offscreen
+            }
+            .drawWithContent {
+                drawContent()
+                drawRect(mask, blendMode = BlendMode.DstIn)
+                drawRect(wash)
+            },
+    ) {
+        AsyncImage(url, contentDescription = null, contentScale = ContentScale.Crop, alignment = BiasAlignment(0.24f, -0.4f), modifier = Modifier.fillMaxSize())
+    }
+}
+
+/** Home's heading in the header (M2-02): the eyebrow, then the title in 22 / 800. */
+@Composable
+private fun HomeHeadingText(heading: HomeHeading) {
+    Column {
+        StageEyebrow(heading.eyebrow)
+        Text(
+            heading.title,
+            style = stageText(22f, 800, lineHeight = 1.2f),
+            color = LocalStagePalette.current.text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 2.dp),
+        )
     }
 }
 
@@ -159,7 +240,8 @@ fun StageNavBar(
 /**
  * The page header (`.hdr`): the page's own title (28 / 800) with the top-right [cluster] beside it, and
  * under it the crumb — "‹ where you came from" on a pushed page, which goes back when tapped (F24: the
- * title names the page, the crumb says where from). Home has no title; a detail page has only the crumb.
+ * title names the page, the crumb says where from). Home has no title, only its [heading] once scrolled;
+ * a detail page has only the crumb.
  */
 @Composable
 fun StagePageHeader(
@@ -167,13 +249,19 @@ fun StagePageHeader(
     backLabel: String?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    heading: HomeHeading? = null,
     cluster: @Composable () -> Unit,
 ) {
     val palette = LocalStagePalette.current
     Column(modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
-        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            verticalAlignment = if (heading != null) Alignment.CenterVertically else Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Box(Modifier.weight(1f)) {
-                if (title != null) {
+                if (heading != null) {
+                    HomeHeadingText(heading)
+                } else if (title != null) {
                     Text(
                         title,
                         style = stageText(28f, 800, (-0.6f / 28f).em, lineHeight = 1.05f),

@@ -76,16 +76,12 @@ object MobileIcons {
     val Layers: ImageVector by lazy { stage(StageGlyph.LAYERS) }
     /** The TV Guide place (the mockup's `guide`). */
     val Guide: ImageVector by lazy { stage(StageGlyph.EPG) }
+    /** Home's trending eyebrow (the mockup's `trend`). */
+    val Trend: ImageVector by lazy { stage(StageGlyph.TREND) }
     /** The Series place (the mockup's `series`). */
     val Series: ImageVector by lazy { stage(StageGlyph.SERIES) }
     /** Four tiles (the mockup's `more`): Show counts. */
     val Tiles: ImageVector by lazy { stage(StageGlyph.TILES) }
-    val Cloud: ImageVector by lazy {
-        glyph() {
-            dot(8.6f, 14.4f, 4.2f); dot(12.6f, 12.2f, 5.2f); dot(16.8f, 15f, 3.9f)
-            bar(8.6f, 14.4f, 16.8f, 18.6f)
-        }
-    }
 
     // ---- Actions ------------------------------------------------------------------------------
 
@@ -229,6 +225,8 @@ object MobileIcons {
     // ---- Player -------------------------------------------------------------------------------
 
     val PlayArrow: ImageVector by lazy { stage(StageGlyph.PLAY, filled = true) }
+    /** The outlined play of a sheet's menu items (the mockup's `mi('play')`). */
+    val PlayOutline: ImageVector by lazy { stage(StageGlyph.PLAY) }
     val PlayCircle: ImageVector by lazy { stage(StageGlyph.PLAY_CIRCLE) }
     val Pause: ImageVector by lazy { stage(StageGlyph.PAUSE) }
     val FastForward: ImageVector by lazy { stage(StageGlyph.FORWARD) }
@@ -315,33 +313,7 @@ object MobileIcons {
             fill { moveTo(12f, 7.4f); arcTo(4.6f, 4.6f, 0f, false, true, 12f, 16.6f); close() }
         }
     }
-    val DarkMode: ImageVector by lazy { stage(StageGlyph.MOON) }
     val Bedtime: ImageVector by lazy { stage(StageGlyph.MOON) }
-    val AcUnit: ImageVector by lazy {
-        glyph() {
-            line(12f, 2.5f, 12f, 21.5f); line(4f, 7f, 20f, 17f); line(20f, 7f, 4f, 17f)
-            line(9.2f, 5.2f, 12f, 8f, 14.8f, 5.2f)
-            line(9.2f, 18.8f, 12f, 16f, 14.8f, 18.8f)
-        }
-    }
-    val WaterDrop: ImageVector by lazy {
-        glyph() {
-            fill {
-                moveTo(12f, 2.8f); lineTo(17.6f, 11.4f)
-                arcTo(6.7f, 6.7f, 0f, true, true, 6.4f, 11.4f); close()
-            }
-        }
-    }
-    val Grain: ImageVector by lazy {
-        glyph() {
-            dot(6f, 6f, 1.5f); dot(12f, 6f, 1.5f); dot(18f, 6f, 1.5f)
-            dot(9f, 12f, 1.5f); dot(15f, 12f, 1.5f)
-            dot(6f, 18f, 1.5f); dot(12f, 18f, 1.5f); dot(18f, 18f, 1.5f)
-        }
-    }
-    val Bolt: ImageVector by lazy {
-        glyph() { solid(13.5f, 2f, 6f, 13.5f, 11f, 13.5f, 10.5f, 22f, 18f, 10.5f, 13f, 10.5f) }
-    }
     /** A globe: the language picker. Meridians drawn as polylines — the grid has no ellipse. */
     val Translate: ImageVector by lazy { stage(StageGlyph.LANGUAGE) }
     val AutoAwesome: ImageVector by lazy { stage(StageGlyph.SPARKLE) }

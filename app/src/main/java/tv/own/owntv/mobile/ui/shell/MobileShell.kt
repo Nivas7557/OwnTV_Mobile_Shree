@@ -35,6 +35,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import tv.own.owntv.mobile.ui.components.MobileIcons
+import tv.own.owntv.mobile.ui.stage.StagePill
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -288,6 +291,8 @@ fun MobileShell(
     var playlistSheet by remember { mutableStateOf(false) }
 
     val chrome = remember { ShellChromeState() }
+    val homeChrome = remember { HomeChrome() }
+    val onHome = currentRoute == MobileDestination.HOME.route
     val navLabels by settings.phoneNavLabels.collectAsStateWithLifecycle(true)
     val hideOnScroll by settings.phoneNavHideOnScroll.collectAsStateWithLifecycle(true)
     chrome.hideBottomOnScroll = hideOnScroll && !useRail
@@ -413,6 +418,7 @@ fun MobileShell(
             )
             .nestedScroll(chrome.connection),
     ) {
+        if (onHome && !fullscreen) HomeBackdrop(homeChrome)
         ShellLayout(
             chrome = chrome,
             fullscreen = fullscreen,
@@ -421,6 +427,7 @@ fun MobileShell(
                     title = titleRes?.let { stringResource(it) },
                     backLabel = backLabel,
                     onBack = { navController.popBackStack() },
+                    heading = homeChrome.heading.takeIf { onHome },
                 ) {
                     ShellCluster(
                         playlist = clusterPlaylist,
@@ -429,9 +436,21 @@ fun MobileShell(
                         onPlaylist = { if (playlists.size > 1) playlistSheet = true },
                         onSearch = { navController.navigate(SEARCH_ROUTE) { launchSingleTop = true } },
                         onAvatar = { navController.navigate(MobileDestination.MORE.route) { launchSingleTop = true } },
-                        // It appears only when there is a receiver to send to; which way round it is
-                        // drawn follows the app's own theme, not the phone's night mode.
-                        extra = { CastRouteButton(light = onSurfaceLight) },
+                        extra = {
+                            // Home's Resume pill, while its hero is in view (the scrolled heading has
+                            // no room beside it).
+                            homeChrome.resume?.takeIf { onHome && homeChrome.heading == null }?.let { resume ->
+                                StagePill(
+                                    onClick = resume.onClick,
+                                    text = resume.name,
+                                    icon = MobileIcons.PlayArrow,
+                                    modifier = Modifier.widthIn(max = 150.dp),
+                                )
+                            }
+                            // It appears only when there is a receiver to send to; which way round it is
+                            // drawn follows the app's own theme, not the phone's night mode.
+                            CastRouteButton(light = onSurfaceLight)
+                        },
                     )
                 }
             },
@@ -517,6 +536,7 @@ fun MobileShell(
                     CompositionLocalProvider(
                         LocalStreamOnScreen provides streamOnScreen,
                         LocalMiniRequested provides miniRequested,
+                        LocalHomeChrome provides homeChrome,
                     ) {
                         MobileNavHost(
                             navController = navController,

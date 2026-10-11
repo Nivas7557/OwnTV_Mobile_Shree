@@ -67,7 +67,8 @@ enum class StageButtonStyle { PRIMARY, SECONDARY, DANGER }
 
 /**
  * `.btn`: 44 dp (34 [small]), the ink fill; PRIMARY is the accent with its glow, DANGER the danger text.
- * No [text] makes the round icon button (`.btn.round`). Pressed fills a secondary button with the accent.
+ * No [text] makes the round icon button (`.btn.round`) — unless there is a muted [trailing] count after the
+ * icon (Home's "versions 3", 14 dp sides). Pressed fills a secondary button with the accent.
  */
 @Composable
 fun StageButton(
@@ -78,6 +79,7 @@ fun StageButton(
     style: StageButtonStyle = StageButtonStyle.SECONDARY,
     small: Boolean = false,
     enabled: Boolean = true,
+    trailing: String? = null,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -104,17 +106,26 @@ fun StageButton(
                 } else Modifier,
             )
             .height(if (small) 34.dp else 44.dp)
-            .then(if (text == null) Modifier.width(if (small) 34.dp else 44.dp) else Modifier)
+            .then(if (text == null && trailing == null) Modifier.width(if (small) 34.dp else 44.dp) else Modifier)
             .clip(shape)
             .background(if (filled) accent.accent else palette.ink.copy(alpha = 0.08f))
             .clickable(interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(horizontal = if (text == null) 0.dp else if (small) 12.dp else 18.dp),
+            .padding(
+                horizontal = when {
+                    text != null -> if (small) 12.dp else 18.dp
+                    trailing != null -> 14.dp
+                    else -> 0.dp
+                },
+            ),
         horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         icon?.let { StageIcon(it, 16.dp, fg) }
         text?.let {
             Text(it, style = stageText(if (small) 12.5f else 14f, 700), color = fg, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        trailing?.let {
+            Text(it, style = stageText(if (small) 12.5f else 14f, 700), color = if (filled) fg else palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -496,3 +507,13 @@ fun StageSpecChips(specs: List<String>, modifier: Modifier = Modifier) {
 @Composable
 fun StageLabel(text: String, modifier: Modifier = Modifier, color: Color = LocalStagePalette.current.dim) =
     Text(text.uppercase(), style = stageLabel(), color = color, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = modifier)
+
+/** `.eyebrow`: the trend glyph and the rank line, 12.5 / 700 in the accent. */
+@Composable
+fun StageEyebrow(text: String, modifier: Modifier = Modifier) {
+    val accent = stageAccent.accent
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+        StageIcon(MobileIcons.Trend, 12.5.dp, accent)
+        Text(text, style = stageText(12.5f, 700), color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
