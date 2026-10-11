@@ -132,7 +132,7 @@ val LocalHomeChrome = staticCompositionLocalOf<HomeChrome?> { null }
  * A place's own crumb (Live TV's "‹ **Sky Cinema** · 9 channels"): the [accent] part, the muted [rest] after a dot,
  * and what a tap opens (the categories). Set by the place while it is on screen.
  */
-data class PageCrumb(val accent: String, val rest: String?, val onClick: () -> Unit)
+data class PageCrumb(val accent: String, val rest: String?, val chevron: Boolean = true, val onClick: () -> Unit)
 
 val LocalPageCrumb = staticCompositionLocalOf<MutableState<PageCrumb?>> { mutableStateOf(null) }
 
@@ -284,24 +284,29 @@ fun StagePageHeader(
             verticalAlignment = if (heading != null) Alignment.CenterVertically else Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // The title keeps its own width (a page name is never cut); the cluster takes the rest and its
-            // playlist pill shortens. Home's scrolled heading is the exception: it shares the row.
-            Box(if (heading != null) Modifier.weight(1f) else Modifier) {
+            // The cluster keeps its room (its playlist pill is only the mark) so the avatar is always there; a
+            // title too long for the rest ("Programmübersicht" at a large font) shrinks rather than being cut.
+            // Home's scrolled heading shares the row.
+            Box(Modifier.weight(1f)) {
                 if (heading != null) {
                     HomeHeadingText(heading)
                 } else if (title != null) {
-                    Text(
+                    BasicText(
                         title,
-                        style = stageText(28f, 800, (-0.6f / 28f).em, lineHeight = 1.05f),
-                        color = palette.text,
+                        style = stageText(28f, 800, (-0.6f / 28f).em, lineHeight = 1.05f).copy(color = palette.text),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        autoSize = TextAutoSize.StepBased(minFontSize = 13.sp, maxFontSize = 28.sp, stepSize = 0.5.sp),
                         // The cluster is 36 dp tall; a one-line title sits on its centre line.
                         modifier = Modifier.padding(top = 2.dp),
                     )
                 }
             }
-            Box(Modifier.weight(1f, fill = heading == null), contentAlignment = Alignment.TopEnd) { cluster() }
+            if (heading != null) {
+                Box(Modifier.weight(1f, fill = false), contentAlignment = Alignment.TopEnd) { cluster() }
+            } else {
+                cluster()
+            }
         }
         if (backLabel != null) {
             val interaction = remember { MutableInteractionSource() }
@@ -325,7 +330,8 @@ fun StagePageHeader(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
+                // The TV Guide's crumb has none (M4-01): it is a place, not a way back.
+                if (crumb.chevron) StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
                 Text(
                     crumb.accent, style = stageText(13f, 700), color = stageAccent.accent,
                     maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),

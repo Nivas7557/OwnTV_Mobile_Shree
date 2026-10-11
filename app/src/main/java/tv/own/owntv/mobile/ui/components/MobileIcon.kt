@@ -78,6 +78,8 @@ object MobileIcons {
     val Guide: ImageVector by lazy { stage(StageGlyph.EPG) }
     /** The order tool (`sort`). */
     val Sort: ImageVector by lazy { stage(StageGlyph.SORT) }
+    val Bell: ImageVector by lazy { stage(StageGlyph.BELL) }
+    val Now: ImageVector by lazy { stage(StageGlyph.NOW) }
     /** Record (`rec`), Multiview (`mv`) and Move (`move`) in the channel menu. */
     val Record: ImageVector by lazy { stage(StageGlyph.REC) }
     val Warning: ImageVector by lazy { stage(StageGlyph.WARNING) }

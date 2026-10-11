@@ -96,9 +96,10 @@ internal fun LivePreview(
                 .background(Color.Black)
                 .clickable(onClickLabel = fullscreen, onClick = onFullscreen),
         ) {
-            // A video surface sits above the sheet's scrim and glass, so it showed sharp through any sheet.
-            // Under a sheet the picture is let go (the sound plays on) and comes back when it closes.
-            if (!sheetOpen()) VideoStage(player = tuner.player, modifier = Modifier.fillMaxSize())
+            // The surface is punched through the window, so a sheet's glass showed it sharp. Under a sheet it
+            // is covered with black rather than taken away: a new surface waits 2–5 s for the next keyframe.
+            VideoStage(player = tuner.player, modifier = Modifier.fillMaxSize())
+            if (sheetOpen()) Box(Modifier.fillMaxSize().background(Color.Black))
             // `.shade`: black 72% at the bottom, clear by 45% up.
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.55f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.72f))))
             if (dark) Box(Modifier.fillMaxSize().drawBehind { drawInnerRing(Color.White.copy(alpha = 0.08f), 1.dp.toPx(), StageRadii.Video.toPx()) })

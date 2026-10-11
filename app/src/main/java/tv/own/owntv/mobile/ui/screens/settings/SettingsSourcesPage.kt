@@ -42,6 +42,8 @@ fun SettingsSourcesPage(
     var epgOffsetSheet by remember { mutableStateOf(false) }
     var guideDaysSheet by remember { mutableStateOf(false) }
     var catchupSheet by remember { mutableStateOf(false) }
+    var reminderModeSheet by remember { mutableStateOf(false) }
+    var reminderLeadSheet by remember { mutableStateOf(false) }
     // The per-playlist catch-up zone: the playlist list, then the zone of the one picked.
     var catchupSourcesSheet by remember { mutableStateOf(false) }
     var catchupSource by remember { mutableStateOf<SourceEntity?>(null) }
@@ -65,6 +67,22 @@ fun SettingsSourcesPage(
                 title = stringResource(R.string.settings_epg_guide_days),
                 value = pluralStringResource(R.plurals.settings_epg_guide_days_value, guideDays, guideDays),
                 onClick = { guideDaysSheet = true },
+            )
+
+            // Programme reminders (the TV Guide's Remind me): what happens when one is due, and how early.
+            SettingRow(
+                title = stringResource(R.string.settings_reminders),
+                subtitle = stringResource(R.string.settings_reminders_description),
+                value = stringResource(reminderModeLabel(vm.settings.reminderMode.pref(SettingsRepository.ReminderMode.ASK))),
+                onClick = { reminderModeSheet = true },
+            )
+            SettingRow(
+                title = stringResource(R.string.settings_reminder_lead),
+                subtitle = stringResource(R.string.settings_reminder_lead_description),
+                value = tv.own.owntv.mobile.ui.screens.guide.reminderLeadText(
+                    vm.settings.reminderLeadMinutes.pref(tv.own.owntv.core.reminder.ReminderSchedule.DEFAULT_LEAD_MINUTES),
+                ),
+                onClick = { reminderLeadSheet = true },
             )
 
             val tz = vm.settings.catchupTimezone.pref(SettingsRepository.CatchupTimezone.DEVICE)
@@ -125,6 +143,27 @@ fun SettingsSourcesPage(
             },
             // Back goes back one level, to the playlist list, like the other per-playlist pickers.
             onDismiss = { catchupSource = null },
+        )
+    }
+
+    if (reminderModeSheet) {
+        SettingsChoiceSheet(
+            title = stringResource(R.string.settings_reminders),
+            choices = SettingsRepository.ReminderMode.entries.map { SettingsChoice(it, stringResource(reminderModeLabel(it))) },
+            selected = vm.settings.reminderMode.pref(SettingsRepository.ReminderMode.ASK),
+            onSelect = { mode -> vm.edit { setReminderMode(mode) } },
+            onDismiss = { reminderModeSheet = false },
+        )
+    }
+    if (reminderLeadSheet) {
+        SettingsChoiceSheet(
+            title = stringResource(R.string.settings_reminder_lead),
+            choices = tv.own.owntv.core.reminder.ReminderSchedule.LEAD_CHOICES.map {
+                SettingsChoice(it, tv.own.owntv.mobile.ui.screens.guide.reminderLeadText(it))
+            },
+            selected = vm.settings.reminderLeadMinutes.pref(tv.own.owntv.core.reminder.ReminderSchedule.DEFAULT_LEAD_MINUTES),
+            onSelect = { minutes -> vm.edit { setReminderLeadMinutes(minutes) } },
+            onDismiss = { reminderLeadSheet = false },
         )
     }
 
@@ -244,4 +283,10 @@ internal fun utcOffsetLabel(minutes: Int): String {
     val sign = if (minutes < 0) "-" else "+"
     val abs = kotlin.math.abs(minutes)
     return "UTC$sign%02d:%02d".format(java.util.Locale.ROOT, abs / 60, abs % 60)
+}
+
+private fun reminderModeLabel(mode: SettingsRepository.ReminderMode): Int = when (mode) {
+    SettingsRepository.ReminderMode.ASK -> R.string.settings_reminder_ask
+    SettingsRepository.ReminderMode.SWITCH -> R.string.settings_reminder_switch
+    SettingsRepository.ReminderMode.NOTIFY -> R.string.settings_reminder_notify
 }

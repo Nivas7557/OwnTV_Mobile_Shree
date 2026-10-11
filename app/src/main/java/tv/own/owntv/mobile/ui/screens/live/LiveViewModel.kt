@@ -104,7 +104,7 @@ class LiveViewModel(
     private val externalPlayerLauncher: ExternalPlayerLauncher,
     private val streamUrlResolver: StreamUrlResolver,
     private val syncScheduler: CatalogSyncScheduler,
-    startupSelection: StartupLiveSelection,
+    private val startupSelection: StartupLiveSelection,
     epgDao: EpgDao,
     /** The app-wide reader the Guide uses too (T18) — one now/next cache, not two. */
     private val epgReader: LiveEpgReader,
@@ -216,6 +216,15 @@ class LiveViewModel(
     /** Settings › Layout › Show counts. */
     val sheetCounts: StateFlow<Boolean> = settings.sheetCounts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
+    /** List or the guide grid (M3-06) — core's "Live TV opens in", remembered from the Guide view tool. */
+    val liveView: StateFlow<SettingsRepository.LiveView> = settings.liveView
+        .stateIn(viewModelScope, SharingStarted.Eagerly, SettingsRepository.LiveView.LIST)
+
+    fun toggleLiveView() {
+        val next = if (liveView.value == SettingsRepository.LiveView.GUIDE) SettingsRepository.LiveView.LIST else SettingsRepository.LiveView.GUIDE
+        viewModelScope.launch { settings.setLiveView(next) }
+    }
 
     /** What restoring [key]'s category to the playlist default would undo (empty when nothing). */
     suspend fun categoryRestorePlan(key: LiveKey): CategoryRestorePlan {
@@ -443,13 +452,23 @@ class LiveViewModel(
         viewModelScope.launch {
             if (settings.rememberCategoryLive.first()) {
                 parseLiveKey(settings.lastLiveCategory.first())?.let {
-                    if (lockedKey == null) _selected.value = it
+                    if (lockedKey == null && !startupApplied) _selected.value = it
                 }
             }
-            // "Start on: Favorites" outranks the remembered folder — it is what the user asked this
-            // launch to open on, and it applies to this launch only. A locked instance must not eat
-            // it: the request belongs to the Live TV tab.
-            if (lockedKey == null && startupSelection.consumeFavorites()) _selected.value = LiveKey.Favorites
+        }
+    }
+
+    private var startupApplied = false
+
+    /**
+     * "Start on: Favorites" outranks the remembered folder — it is what the user asked this launch to
+     * open on, and it applies to this launch only. Called by the Live TV tab itself: a locked list, or the
+     * TV Guide borrowing this list of categories, must not eat it.
+     */
+    fun applyStartupSelection() {
+        if (lockedKey == null && startupSelection.consumeFavorites()) {
+            startupApplied = true
+            _selected.value = LiveKey.Favorites
         }
     }
 

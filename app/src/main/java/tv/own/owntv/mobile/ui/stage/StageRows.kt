@@ -106,6 +106,8 @@ fun StageSettingRow(
     onLongClick: (() -> Unit)? = null,
     current: Boolean = false,
     role: Role? = Role.Button,
+    /** 60 on a settings page; a sheet's switch rows are 48 (the Guide's SHOW). */
+    minHeight: Dp = 60.dp,
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
     val palette = LocalStagePalette.current
@@ -114,7 +116,7 @@ fun StageSettingRow(
         onClick = onClick,
         onLongClick = onLongClick,
         current = current,
-        minHeight = 60.dp,
+        minHeight = minHeight,
         gap = 12.dp,
         role = role,
     ) {

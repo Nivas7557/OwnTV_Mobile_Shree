@@ -102,9 +102,7 @@ fun MobileNavHost(
                     )
                     MobileDestination.GUIDE -> GuideScreen(
                         scrollToTop = scrollToTop,
-                        onOpenChannel = { channelId ->
-                            navController.navigate(channelRoute(MobileDestination.LIVE, channelId, false))
-                        },
+                        onOpenPlayer = { navController.navigate(PLAYER_ROUTE) },
                         onAddEpg = { navController.navigate(SettingsLeaf.EPG_SOURCES.route) },
                     )
                     MobileDestination.LIVE -> LiveScreen(

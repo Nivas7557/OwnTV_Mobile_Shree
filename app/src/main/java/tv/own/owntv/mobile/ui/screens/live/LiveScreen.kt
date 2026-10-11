@@ -71,6 +71,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import tv.own.owntv.mobile.ui.screens.guide.LiveGuideGrid
+import tv.own.owntv.mobile.ui.screens.guide.LiveGuideTools
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.live.LiveKey
@@ -124,6 +126,8 @@ fun LiveScreen(
             onDispose { vm.unlock() }
         }
     }
+
+    if (lockedKey == null) LaunchedEffect(Unit) { vm.applyStartupSelection() }
 
     val categories by vm.categories.collectAsStateWithLifecycle()
     val selected by vm.selected.collectAsStateWithLifecycle()
@@ -185,7 +189,11 @@ fun LiveScreen(
     // The header's crumb (M3-01): "‹ Sky Cinema · 9 channels", a tap opens the categories. A locked
     // list (Favourites, History) is one folder already and its page names it.
     val categoryLabel = categories.firstOrNull { it.key == selected }?.label().orEmpty()
-    val countText = pluralStringResource(R.plurals.content_live_channel_count, count, count)
+    val liveView by vm.liveView.collectAsStateWithLifecycle()
+    // M3-06: "Live TV opens in: Guide" draws the guide grid in place of the list (not in a locked list).
+    val guideView = lockedKey == null && liveView == SettingsRepository.LiveView.GUIDE
+    val countText = if (guideView) stringResource(R.string.content_live_guide_view)
+    else pluralStringResource(R.plurals.content_live_channel_count, count, count)
     val crumbHolder = LocalPageCrumb.current
     if (lockedKey == null) {
         SideEffect { crumbHolder.value = PageCrumb(categoryLabel, countText) { categoryPicker = true } }
@@ -211,6 +219,9 @@ fun LiveScreen(
     // Changing category scrolls back to the top: the position of the old list means nothing in the new one.
     LaunchedEffect(selected) { listState.scrollToItem(0) }
 
+    // The guide grid of Guide view reads through the TV Guide's own view model (its rows, its order).
+    val guideVm: tv.own.owntv.mobile.ui.screens.guide.GuideViewModel = koinViewModel()
+
     val listPane = @Composable {
     Column(Modifier.fillMaxSize()) {
         val current = playing
@@ -223,8 +234,14 @@ fun LiveScreen(
                 onFullscreen = openFullscreen,
                 modifier = Modifier.padding(top = PREVIEW_TOP),
             )
+        } else if (guideView) {
+            LiveGuideTools(
+                guide = guideVm,
+                onGuideView = vm::toggleLiveView,
+                modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 12.dp),
+            )
         } else if (lockedKey == null) {
-            // `.tools`: the search field takes the room, then the order tool (Provider / A–Z).
+            // `.tools`: the search field takes the room, then the order tool (Provider / A–Z), then Guide view.
             Row(
                 Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -243,6 +260,11 @@ fun LiveScreen(
                     label = stringResource(
                         if (sort == SettingsRepository.SortMode.ALPHA) R.string.settings_sort_alpha else R.string.content_epg_sort_provider,
                     ),
+                )
+                StageTool(
+                    onClick = vm::toggleLiveView,
+                    icon = MobileIcons.Guide,
+                    contentDescription = stringResource(R.string.content_live_guide_view),
                 )
             }
         }
@@ -265,7 +287,14 @@ fun LiveScreen(
             onRefresh = vm::refresh,
             modifier = Modifier.fillMaxSize(),
         ) {
-            if (channels.itemCount == 0) {
+            if (guideView) {
+                LiveGuideGrid(
+                    guide = guideVm,
+                    category = selected,
+                    onTune = { channel -> tuner.tune(channel.id) },
+                    onOpenPlayer = openFullscreen,
+                )
+            } else if (channels.itemCount == 0) {
                 EmptyChannels(query)
             } else {
                 LazyColumn(

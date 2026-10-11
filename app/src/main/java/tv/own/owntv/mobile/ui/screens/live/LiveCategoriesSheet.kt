@@ -57,6 +57,9 @@ internal fun LiveCategoriesSheet(
     onSelect: (LiveKey) -> Unit,
     onHold: (LiveCategory) -> Unit,
     onDismiss: () -> Unit,
+    /** The TV Guide's "Guide category · Same list as Live TV" (M4-03); Live TV's own by default. */
+    title: String = stringResource(R.string.content_category_browser_title),
+    extra: String = stringResource(R.string.common_nav_live_tv),
 ) {
     var query by remember { mutableStateOf("") }
     val fixed = listOf(LiveKey.Favorites, LiveKey.History, LiveKey.Catchup, LiveKey.All)
@@ -69,7 +72,6 @@ internal fun LiveCategoriesSheet(
     val q = query.trim()
     val shownFixed = fixed.filter { q.isEmpty() || labels.getValue(it).contains(q, ignoreCase = true) }
     val shownGroups = groups.filter { q.isEmpty() || parsed.getValue(it).name.contains(q, ignoreCase = true) }
-    val title = stringResource(R.string.content_category_browser_title)
     fun pick(key: LiveKey) {
         onSelect(key)
         onDismiss()
@@ -77,7 +79,7 @@ internal fun LiveCategoriesSheet(
     fun countOf(key: LiveKey) = counts[key]?.takeIf { showCounts }?.let(::formatCount)
 
     MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
-        StageSheetHeader(title = title, extra = stringResource(R.string.common_nav_live_tv))
+        StageSheetHeader(title = title, extra = extra)
         StageSearchField(
             value = query,
             onValueChange = { query = it },

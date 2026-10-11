@@ -39,6 +39,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -185,6 +187,9 @@ fun StageTool(
     value: String? = null,
     icon: ImageVector? = null,
     on: Boolean = false,
+    /** After the text: the ⌄ of a tool that opens choices ("Today ⌄"). */
+    trailingIcon: ImageVector? = null,
+    contentDescription: String? = null,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -209,13 +214,15 @@ fun StageTool(
                 } else Modifier,
             )
             .clickable(interaction, indication = null, role = Role.Button, onClick = onClick)
+            .then(if (contentDescription != null) Modifier.semantics { this.contentDescription = contentDescription } else Modifier)
             .padding(horizontal = 11.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         icon?.let { StageIcon(it, 14.dp, fg) }
         label?.let { Text(it, style = stageText(12.5f, 700), color = fg, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-        value?.let { Text(it, style = stageText(12.5f, 700), color = strong, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        value?.let { Text(it, style = stageText(12.5f, 700), color = strong, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false)) }
+        trailingIcon?.let { StageIcon(it, 14.dp, fg) }
     }
 }
 

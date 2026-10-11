@@ -13,6 +13,13 @@ import tv.own.owntv.mobile.ui.screens.home.formatCount
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.StageIcon
 import tv.own.owntv.mobile.ui.stage.StageRadii
+import tv.own.owntv.mobile.ui.stage.StageMenuItem
+import tv.own.owntv.mobile.ui.stage.StageSearchField
+import tv.own.owntv.mobile.ui.stage.StageSettingRow
+import tv.own.owntv.mobile.ui.stage.StageSheetHeader
+import tv.own.owntv.mobile.ui.stage.StageStepper
+import tv.own.owntv.mobile.ui.stage.stageAccent
+import tv.own.owntv.mobile.ui.stage.stageText
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,12 +28,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,7 +47,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.debounce
@@ -55,15 +59,12 @@ import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.ContentMenuSheet
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileButton
-import tv.own.owntv.mobile.ui.components.MobileButtonStyle
-import tv.own.owntv.mobile.ui.components.MobileListRow
 import tv.own.owntv.mobile.ui.components.MobileTextField
 import tv.own.owntv.mobile.ui.components.MoveToCategorySheet
 import tv.own.owntv.mobile.ui.components.NewCategoryDialog
 import tv.own.owntv.mobile.ui.components.ReorderSheet
 import tv.own.owntv.mobile.ui.components.SheetAction
 import tv.own.owntv.mobile.ui.components.sheetListHeight
-import tv.own.owntv.mobile.ui.theme.MobileDimens
 import tv.own.owntv.mobile.ui.theme.glassDialogWindow
 
 /** Which follow-up the sheet handed off to. Only ever one at a time. */
@@ -335,63 +336,56 @@ internal fun EpgMatchSheet(
             .collect { results = search(it) }
     }
 
-    MobileBottomSheet(
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.content_match_epg),
-    ) {
-        Text(
-            text = if (currentMatch != null) {
+    val palette = LocalStagePalette.current
+    val title = stringResource(R.string.content_match_epg)
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+        StageSheetHeader(
+            title = title,
+            subtitle = if (currentMatch != null) {
                 stringResource(R.string.content_epg_match_prompt_current, channelName, currentMatch)
             } else {
                 stringResource(R.string.content_epg_match_prompt, channelName)
             },
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = MobileDimens.ScreenPaddingH),
         )
-        MobileTextField(
+        StageSearchField(
             value = query,
             onValueChange = { query = it },
-            label = stringResource(R.string.content_search_guide_channels),
-            imeAction = ImeAction.Search,
+            placeholder = stringResource(R.string.content_search_guide_channels),
             onSearch = { epgKeyboard?.hide() },
-            modifier = Modifier.padding(
-                horizontal = MobileDimens.ScreenPaddingH,
-                vertical = MobileDimens.GapSmall,
-            ),
+            modifier = Modifier.padding(start = 6.dp, end = 6.dp, bottom = 8.dp),
         )
         val list = results
         when {
-            list == null -> Box(
-                Modifier.fillMaxWidth().padding(MobileDimens.GapLarge),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
+            list == null -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = stageAccent.accent)
+            }
             list.isEmpty() -> Text(
                 text = if (query.isBlank()) {
                     stringResource(R.string.content_no_epg_data)
                 } else {
                     stringResource(R.string.content_no_guide_channels, query)
                 },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(MobileDimens.ScreenPaddingH),
+                style = stageText(13f, 500),
+                color = palette.muted,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
             )
             else -> LazyColumn(Modifier.heightIn(max = sheetListHeight())) {
                 items(list, key = { it.epgChannelId }) { epg ->
-                    MobileListRow(
+                    StageSettingRow(
                         title = epg.displayName ?: epg.epgChannelId,
                         subtitle = epg.epgChannelId,
+                        minHeight = 52.dp,
+                        current = epg.epgChannelId.equals(currentMatch, ignoreCase = true),
                         onClick = { onPick(epg.epgChannelId); onDismiss() },
                     )
                 }
             }
         }
         if (currentMatch != null) {
-            MobileButton(
-                text = stringResource(R.string.content_clear_match),
+            StageMenuItem(
+                stringResource(R.string.content_clear_match),
                 onClick = { onPick(null); onDismiss() },
-                style = MobileButtonStyle.TEXT,
-                modifier = Modifier.padding(horizontal = MobileDimens.ScreenPaddingH),
+                icon = MobileIcons.Close,
             )
         }
     }
@@ -411,69 +405,38 @@ internal fun EpgOffsetDialog(
     onSet: (Int?) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val palette = LocalStagePalette.current
     var minutes by remember { mutableStateOf(currentMinutes ?: globalMinutes) }
-    AlertDialog(
-        modifier = Modifier.glassDialogWindow(),
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.content_epg_time_offset)) },
-        text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = stringResource(R.string.content_epg_offset_channel_description, channelName),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Row(
-                    modifier = Modifier.padding(vertical = MobileDimens.GapMedium),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(MobileDimens.GapSmall),
-                ) {
-                    MobileButton(
-                        text = stringResource(R.string.content_epg_shift_minutes, MINUS_SIGN, "30"),
-                        onClick = { minutes = (minutes - STEP_MINUTES).coerceAtLeast(MIN_MINUTES) },
-                        style = MobileButtonStyle.SECONDARY,
-                    )
-                    Text(
-                        text = epgShiftLabel(minutes),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.width(SHIFT_LABEL_WIDTH),
-                    )
-                    MobileButton(
-                        text = stringResource(R.string.content_epg_shift_minutes, PLUS_SIGN, "30"),
-                        onClick = { minutes = (minutes + STEP_MINUTES).coerceAtMost(MAX_MINUTES) },
-                        style = MobileButtonStyle.SECONDARY,
-                    )
-                }
-                Text(
-                    text = stringResource(
-                        if (currentMinutes == null) {
-                            R.string.content_epg_offset_following_global
-                        } else {
-                            R.string.content_epg_offset_channel_only
-                        },
-                        epgShiftLabel(globalMinutes),
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (currentMinutes != null) {
-                    TextButton(onClick = { onSet(null); onDismiss() }) {
-                        Text(stringResource(R.string.content_epg_offset_use_global))
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onSet(minutes); onDismiss() }) {
-                Text(stringResource(R.string.common_done))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-        },
-    )
+    val title = stringResource(R.string.content_epg_time_offset)
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+        StageSheetHeader(
+            title = title,
+            subtitle = stringResource(R.string.content_epg_offset_channel_description, channelName),
+        )
+        StageSettingRow(
+            title = remember(channelName) { ProviderTags.parse(channelName).name },
+            subtitle = stringResource(
+                if (currentMinutes == null) R.string.content_epg_offset_following_global else R.string.content_epg_offset_channel_only,
+                epgShiftLabel(globalMinutes),
+            ),
+            icon = MobileIcons.Schedule,
+            role = null,
+        ) {
+            StageStepper(
+                value = epgShiftLabel(minutes),
+                onMinus = { minutes = (minutes - STEP_MINUTES).coerceAtLeast(MIN_MINUTES) },
+                onPlus = { minutes = (minutes + STEP_MINUTES).coerceAtMost(MAX_MINUTES) },
+                minusEnabled = minutes > MIN_MINUTES,
+                plusEnabled = minutes < MAX_MINUTES,
+            )
+        }
+        Box(Modifier.size(1.dp, 6.dp))
+        StageMenuItem(stringResource(R.string.common_done), onClick = { onSet(minutes); onDismiss() }, icon = MobileIcons.Check)
+        if (currentMinutes != null) {
+            StageMenuItem(stringResource(R.string.content_epg_offset_use_global), onClick = { onSet(null); onDismiss() }, icon = MobileIcons.Refresh)
+        }
+        StageMenuItem(stringResource(R.string.common_cancel), onClick = onDismiss, icon = MobileIcons.Close)
+    }
 }
 
 /** "+2h", "−30m", or "Off". The digits go through the locale's own number format. */
@@ -504,4 +467,3 @@ private const val STEP_MINUTES = 30
 private const val MIN_MINUTES = -12 * 60
 private const val MAX_MINUTES = 14 * 60
 private const val SEARCH_DEBOUNCE_MS = 250L
-private val SHIFT_LABEL_WIDTH = 96.dp

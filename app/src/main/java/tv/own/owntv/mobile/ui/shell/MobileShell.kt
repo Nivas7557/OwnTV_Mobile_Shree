@@ -75,6 +75,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
+import kotlinx.coroutines.launch
 import tv.own.owntv.core.metadata.MetadataBudget
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.theme.GlassSurface
@@ -434,7 +435,8 @@ fun MobileShell(
                     ShellCluster(
                         playlist = clusterPlaylist,
                         profile = activeProfile,
-                        showSearch = currentRoute != SEARCH_ROUTE_PATTERN,
+                        // The TV Guide has Search among its own tools (M4-01), so the cluster leaves it out.
+                        showSearch = currentRoute != SEARCH_ROUTE_PATTERN && currentRoute != MobileDestination.GUIDE.route,
                         onPlaylist = { if (playlists.size > 1) playlistSheet = true },
                         onSearch = { navController.navigate(SEARCH_ROUTE) { launchSingleTop = true } },
                         onAvatar = { navController.navigate(MobileDestination.MORE.route) { launchSingleTop = true } },
@@ -609,6 +611,35 @@ fun MobileShell(
             names = playlists.map { it.displayName() },
             onSelect = shellViewModel::selectPlaylist,
             onDismiss = { playlistSheet = false },
+        )
+    }
+
+    // Programme reminders (G6): when one comes up, ask to switch, or switch — over whatever is on screen,
+    // the player included. Notify only is a notification (ReminderNotifier), so nothing is drawn here.
+    val reminders: tv.own.owntv.core.reminder.ReminderManager = koinInject()
+    val dueReminders by reminders.due.collectAsStateWithLifecycle()
+    val reminderMode by settings.reminderMode.collectAsStateWithLifecycle(SettingsRepository.ReminderMode.ASK)
+    val dueReminder = dueReminders.firstOrNull { it.profileId == activeId }
+    val reminderScope = androidx.compose.runtime.rememberCoroutineScope()
+    fun answer(r: tv.own.owntv.core.database.entity.ReminderEntity, watch: Boolean) {
+        reminderScope.launch {
+            reminders.dismiss(r.id)
+            tv.own.owntv.mobile.reminder.ReminderNotifier.cancel(context, r.id)
+        }
+        if (watch) {
+            tuner.tune(r.channelId)
+            navController.navigate(PLAYER_ROUTE) { launchSingleTop = true }
+        }
+    }
+    LaunchedEffect(dueReminder?.id, reminderMode) {
+        val r = dueReminder ?: return@LaunchedEffect
+        if (reminderMode == SettingsRepository.ReminderMode.SWITCH) answer(r, watch = true)
+    }
+    if (dueReminder != null && reminderMode == SettingsRepository.ReminderMode.ASK) {
+        tv.own.owntv.mobile.reminder.ReminderPrompt(
+            reminder = dueReminder,
+            onWatch = { answer(dueReminder, watch = true) },
+            onDismiss = { answer(dueReminder, watch = false) },
         )
     }
 }
