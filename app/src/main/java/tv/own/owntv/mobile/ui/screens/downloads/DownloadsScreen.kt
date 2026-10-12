@@ -40,6 +40,7 @@ import tv.own.owntv.mobile.ui.components.ExportDocument
 import tv.own.owntv.core.storage.MediaTarget
 import tv.own.owntv.core.storage.StorageAccess
 import tv.own.owntv.mobile.R
+import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.mobile.ui.components.FilterChipRow
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileListRow
@@ -63,10 +64,12 @@ fun DownloadsScreen(
     vm: DownloadsViewModel = koinViewModel(),
 ) {
     val downloads by vm.downloads.collectAsStateWithLifecycle()
+    val missing by vm.missingFiles.collectAsStateWithLifecycle()
     val root by vm.downloadRoot.collectAsStateWithLifecycle()
     val playing by vm.playing.collectAsStateWithLifecycle()
 
     val wifiOnly by vm.wifiOnly.collectAsStateWithLifecycle()
+    val watchChoice by vm.downloadWatchChoice.collectAsStateWithLifecycle()
     val chosenFolder by vm.chosenFolder.collectAsStateWithLifecycle()
     val folderLost by vm.folderLost.collectAsStateWithLifecycle()
 
@@ -147,8 +150,9 @@ fun DownloadsScreen(
                     items(items, key = { it.id }, contentType = { it.status }) { download ->
                         DownloadRow(
                             download = download,
+                            gone = download.filePath in missing,
                             onClick = {
-                                if (download.status == DownloadStatus.COMPLETED) vm.play(download)
+                                if (download.status == DownloadStatus.COMPLETED && download.filePath !in missing) vm.play(download)
                                 else menuFor = download
                             },
                             onLongClick = { menuFor = download },
@@ -162,6 +166,7 @@ fun DownloadsScreen(
     menuFor?.let { download ->
         DownloadMenu(
             download = download,
+            gone = download.filePath in missing,
             vm = vm,
             onSaveCopy = {
                 savingCopyOf = download
@@ -176,6 +181,7 @@ fun DownloadsScreen(
             volumes = vm.volumes,
             current = root,
             wifiOnly = wifiOnly,
+            watchChoice = watchChoice,
             chosenFolder = chosenFolder,
             folderLost = folderLost,
             onPick = vm::setDownloadRoot,
@@ -184,6 +190,7 @@ fun DownloadsScreen(
                 chooseFolder.launch(root.takeIf { MediaTarget.isDocument(it) }?.let(Uri::parse))
             },
             onWifiOnly = vm::setWifiOnly,
+            onWatchChoice = vm::setDownloadWatchChoice,
             onDismiss = { optionsSheet = false },
         )
     }
@@ -343,7 +350,7 @@ private fun StorageHeader(
 }
 
 @Composable
-private fun DownloadRow(download: DownloadEntity, onClick: () -> Unit, onLongClick: () -> Unit) {
+private fun DownloadRow(download: DownloadEntity, onClick: () -> Unit, onLongClick: () -> Unit, gone: Boolean = false) {
     val unknown = stringResource(R.string.content_downloads_unknown_size)
     val fraction = if (download.totalBytes > 0) {
         (download.downloadedBytes.toFloat() / download.totalBytes).coerceIn(0f, 1f)
@@ -360,7 +367,7 @@ private fun DownloadRow(download: DownloadEntity, onClick: () -> Unit, onLongCli
     Column {
         MobileListRow(
             title = download.title,
-            subtitle = listOfNotNull(statusLine(download, unknown), location).joinToString("\n"),
+            subtitle = listOfNotNull(if (gone) stringResource(R.string.content_downloads_file_missing) else statusLine(download, unknown), location).joinToString("\n"),
             subtitleMaxLines = 2,
             leading = {
                 Icon(
@@ -370,7 +377,7 @@ private fun DownloadRow(download: DownloadEntity, onClick: () -> Unit, onLongCli
                 )
             },
             trailing = {
-                if (download.status == DownloadStatus.COMPLETED) {
+                if (download.status == DownloadStatus.COMPLETED && !gone) {
                     Icon(
                         imageVector = MobileIcons.PlayArrow,
                         contentDescription = stringResource(R.string.content_downloads_play),
@@ -392,16 +399,28 @@ private fun DownloadRow(download: DownloadEntity, onClick: () -> Unit, onLongCli
     }
 }
 
-/** The second line of a row: where it got to, or why it stopped. */
+/** The second line of a row: where it got to, or why it stopped (core's wording, the same on the TV). */
 @Composable
-private fun statusLine(download: DownloadEntity, unknown: String): String = when (download.status) {
+private fun statusLine(download: DownloadEntity, unknown: String): String {
+    val reason = tv.own.owntv.core.download.DownloadReasons.displayTextOf(download, androidx.compose.ui.platform.LocalContext.current.resources)
+    return when (download.status) {
     DownloadStatus.COMPLETED -> stringResource(
         R.string.content_downloads_completed,
         megabytes(download.totalBytes, unknown),
     )
-    DownloadStatus.FAILED -> stringResource(R.string.content_downloads_failure_message)
-    DownloadStatus.QUEUED -> stringResource(R.string.content_downloads_queued)
-    else -> if (download.totalBytes > 0) {
+    // A row from before reasons were recorded keeps the old general sentence.
+    DownloadStatus.FAILED -> reason?.let {
+        stringResource(R.string.content_downloads_failed_group) + stringResource(R.string.content_epg_bits_separator) + it
+    } ?: stringResource(R.string.content_downloads_failure_message)
+    DownloadStatus.QUEUED -> reason ?: stringResource(R.string.content_downloads_queued)
+    DownloadStatus.PAUSED -> reason ?: progressLine(download, unknown)
+    else -> progressLine(download, unknown)
+    }
+}
+
+@Composable
+private fun progressLine(download: DownloadEntity, unknown: String): String =
+    if (download.totalBytes > 0) {
         stringResource(
             R.string.content_downloads_progress,
             ((download.downloadedBytes.toFloat() / download.totalBytes).coerceIn(0f, 1f) * 100).toInt(),
@@ -411,18 +430,19 @@ private fun statusLine(download: DownloadEntity, unknown: String): String = when
     } else {
         stringResource(R.string.content_downloads_progress_unknown, megabytes(download.downloadedBytes, unknown))
     }
-}
 
 @Composable
 private fun DownloadMenu(
     download: DownloadEntity,
+    /** Its file is no longer on the drive: nothing to play or export. */
+    gone: Boolean,
     vm: DownloadsViewModel,
     onSaveCopy: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     MobileBottomSheet(onDismissRequest = onDismiss, title = download.title) {
         when (download.status) {
-            DownloadStatus.COMPLETED -> {
+            DownloadStatus.COMPLETED -> if (!gone) {
                 MenuRow(R.string.content_downloads_play, MobileIcons.PlayArrow) {
                     vm.play(download); onDismiss()
                 }
@@ -485,6 +505,7 @@ private fun DownloadOptionsSheet(
     volumes: List<StorageAccess.StorageRoot>,
     current: String,
     wifiOnly: Boolean,
+    watchChoice: SettingsRepository.DownloadWatchChoice,
     /** The folder picked through the system picker, ready to read, or null when none is. */
     chosenFolder: String?,
     /** True when that folder can no longer be written to — revoked permission, or storage removed. */
@@ -492,6 +513,7 @@ private fun DownloadOptionsSheet(
     onPick: (String) -> Unit,
     onChooseFolder: () -> Unit,
     onWifiOnly: (Boolean) -> Unit,
+    onWatchChoice: (SettingsRepository.DownloadWatchChoice) -> Unit,
     onDismiss: () -> Unit,
 ) {
     MobileBottomSheet(
@@ -596,6 +618,22 @@ private fun DownloadOptionsSheet(
             subtitle = stringResource(R.string.settings_downloads_wifi_only_description),
             checked = wifiOnly,
             onCheckedChange = onWifiOnly,
+        )
+        // What playing does to a download on a one-stream playlist; a tap steps through the three answers.
+        SettingRow(
+            title = stringResource(R.string.content_download_watch_setting),
+            subtitle = stringResource(R.string.content_download_watch_setting_description),
+            value = stringResource(
+                when (watchChoice) {
+                    SettingsRepository.DownloadWatchChoice.ASK -> R.string.content_download_watch_ask
+                    SettingsRepository.DownloadWatchChoice.PAUSE -> R.string.content_download_watch_pause
+                    SettingsRepository.DownloadWatchChoice.KEEP -> R.string.content_download_watch_keep
+                },
+            ),
+            onClick = {
+                val all = SettingsRepository.DownloadWatchChoice.entries
+                onWatchChoice(all[(watchChoice.ordinal + 1) % all.size])
+            },
         )
     }
 }

@@ -182,7 +182,8 @@ the current tab returns its list to the top. Predictive back is on.
   draw twelve.
 - **Search** — one debounced field over channels, films and shows, grouped with counts, with recent
   terms and three curated chips. Results page as the list is scrolled rather than stopping at the
-  shared reader's first forty of each kind. An **On TV** group lists stored-guide programmes whose
+  shared reader's first forty of each kind. Once typing, filter chips (Live TV / TV Shows / Movies /
+  Series, several at once) narrow the list. A **TV Shows** group lists stored-guide programmes whose
   title matches, on now or in the next 12 hours; a tap opens the channel.
 - **⋯ More** — Downloads, Recordings, Favourites, History, Backup, Local sync, Profiles, the error
   log, About and Settings.
@@ -223,6 +224,9 @@ Mobile-specific shapes:
   `MediaRoot` in core. Chosen over `MANAGE_EXTERNAL_STORAGE` because a media player will not be
   granted it on Google Play. **Export** moves a finished file anywhere, asking for a *persistable*
   grant so the row still points at something playable next week.
+- **Faster downloads** — core adds connections while each helps, within the playlist's limit, writing
+  in order; a failure states its reason, a missing file says so, and on a one-stream playlist playback
+  pauses the download and asks whether to watch or keep downloading.
 - **Wi-Fi-only downloads** and a **data saver** that refuses to start a stream on mobile data.
 - **Backup & restore** — core's `.own` container, optionally encrypted, through the phone's own file
   picker, with a PIN-gated profile checklist.

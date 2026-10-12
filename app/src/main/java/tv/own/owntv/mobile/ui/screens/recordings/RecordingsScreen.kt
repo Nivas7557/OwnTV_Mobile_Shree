@@ -64,6 +64,7 @@ fun RecordingsScreen(
     vm: RecordingsViewModel = koinViewModel(),
 ) {
     val rows by vm.rows.collectAsStateWithLifecycle()
+    val missing by vm.missingFiles.collectAsStateWithLifecycle()
     val storage by vm.storage.collectAsStateWithLifecycle()
     val playing by vm.playing.collectAsStateWithLifecycle()
 
@@ -130,8 +131,9 @@ fun RecordingsScreen(
                         items(items, key = { it.id }) { recording ->
                             RecordingRow(
                                 recording = recording,
+                                gone = recording.status == RecordingStatus.COMPLETED && recording.filePath in missing,
                                 onClick = {
-                                    if (recording.status == RecordingStatus.COMPLETED) vm.play(recording)
+                                    if (recording.status == RecordingStatus.COMPLETED && recording.filePath !in missing) vm.play(recording)
                                     else menuFor = recording
                                 },
                                 onLongClick = { menuFor = recording },
@@ -142,8 +144,9 @@ fun RecordingsScreen(
                     items(shown, key = { it.id }) { recording ->
                         RecordingRow(
                             recording = recording,
+                            gone = recording.status == RecordingStatus.COMPLETED && recording.filePath in missing,
                             onClick = {
-                                if (recording.status == RecordingStatus.COMPLETED) vm.play(recording)
+                                if (recording.status == RecordingStatus.COMPLETED && recording.filePath !in missing) vm.play(recording)
                                 else menuFor = recording
                             },
                             onLongClick = { menuFor = recording },
@@ -157,6 +160,7 @@ fun RecordingsScreen(
     menuFor?.let { recording ->
         RecordingMenu(
             recording = recording,
+            gone = recording.filePath in missing,
             vm = vm,
             onSaveCopy = {
                 savingCopyOf = recording
@@ -239,11 +243,11 @@ private fun StorageHeader(storage: RecordingStorageInfo, timersAreExact: Boolean
 }
 
 @Composable
-private fun RecordingRow(recording: RecordingEntity, onClick: () -> Unit, onLongClick: () -> Unit) {
+private fun RecordingRow(recording: RecordingEntity, onClick: () -> Unit, onLongClick: () -> Unit, gone: Boolean = false) {
     MobileListRow(
         title = recording.title,
         // Three lines' worth in two: the channel it came from, then where it got to or why it did not.
-        subtitle = listOf(recording.channelName, statusLine(recording)).joinToString("\n"),
+        subtitle = listOf(recording.channelName, if (gone) stringResource(R.string.content_downloads_file_missing) else statusLine(recording)).joinToString("\n"),
         subtitleMaxLines = 2,
         leading = {
             Icon(
@@ -295,13 +299,15 @@ private fun statusLine(recording: RecordingEntity): String {
 @Composable
 private fun RecordingMenu(
     recording: RecordingEntity,
+    /** Its file is no longer on the drive: nothing to play or export. */
+    gone: Boolean,
     vm: RecordingsViewModel,
     onSaveCopy: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     MobileBottomSheet(onDismissRequest = onDismiss, title = recording.title) {
         when (recording.status) {
-            RecordingStatus.COMPLETED -> MenuRow(R.string.content_downloads_play, MobileIcons.PlayArrow) {
+            RecordingStatus.COMPLETED -> if (!gone) MenuRow(R.string.content_downloads_play, MobileIcons.PlayArrow) {
                 vm.play(recording); onDismiss()
             }
             RecordingStatus.RECORDING -> MenuRow(R.string.recording_stop, MobileIcons.Pause) {
@@ -318,7 +324,7 @@ private fun RecordingMenu(
         // Nothing to delete while it is only scheduled: there is no file yet, and Cancel is what
         // "do not do this" means.
         // Only a finished recording has a file worth copying anywhere.
-        if (recording.status == RecordingStatus.COMPLETED) {
+        if (recording.status == RecordingStatus.COMPLETED && !gone) {
             MenuRow(R.string.settings_export, MobileIcons.Save) { onSaveCopy(); onDismiss() }
         }
         // Where the file actually is, spelled out in full and copied on a tap — the download menu's

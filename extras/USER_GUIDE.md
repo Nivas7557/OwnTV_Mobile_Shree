@@ -300,10 +300,12 @@ connection** so you can prove a key or a self-hosted server works.
 
 ### 🔎 Search
 **Where:** the magnifying glass in the top bar
-One field over channels, films and shows, grouped with a count for each. Recent searches are kept,
+One field over channels, films and shows, grouped with a count for each. Once you type, filter
+chips — **Live TV / TV Shows / Movies / Series** — narrow the results; tap to turn one on or off,
+several at once, none for everything. Recent searches are kept,
 and three chips offer **Continue watching**, **Unwatched favourites** and **Channels**.
 Long-press a result to favourite, download or hide it.
-**On TV** lists programmes from the stored guide whose title matches, on now or within the next 12
+**TV Shows** lists programmes from the stored guide whose title matches, on now or within the next 12
 hours, with the channel and time; tap one to open that channel.
 Every match is listed, up to 500 of each kind, so a word your provider carries hundreds of — "CNN",
 say — doesn't need a narrower search to reach the rest. Words match from their start, and a dash
@@ -320,7 +322,12 @@ Long-press a history row to remove it; **Clear** wipes it by type.
 **Where:** ⋯ More → **Downloads**
 Three tabs — **Live TV** (your recordings), **Movies**, **Series** — with a free-space bar, a
 measured transfer rate, and pause · resume · retry · delete per item. Downloads keep running when you
-leave the app.
+leave the app. A download adds connections, up to eight, while each makes it faster, never more than
+your playlist allows. A failed one says why (account busy, connection lost, not enough space, …), and
+a finished one whose file is gone says **File missing**.
+On a playlist that allows one stream, pressing Play during a download pauses it and asks **Pause
+download and watch** or **Keep downloading**, with **Don't ask again**; change the answer later under
+**Watching while downloading** in the download options.
 
 ### 📂 Choose where they are saved
 **Where:** Settings → Content → Downloads → **Download folder**
@@ -481,6 +488,7 @@ Settings is a list of groups, each opening its own page. There's a **search box*
 | **Reset saved live TV player choices** · **Forget learned stream fixes** | Playback → Video player → Player | Undo per-channel player choices; forget what the player learned about a provider |
 | **Dolby and DTS passthrough** · **Night mode** · **Volume leveling** | Playback → Video player → Sound | Send Dolby/DTS undecoded (on) or decode in the app; turn loud scenes down; even out loudness between channels. Night mode and leveling work on both engines |
 | **Maximum video quality** · **Maximum quality on mobile data** | Playback → Video player → Picture | The highest picture played when a stream offers several; the mobile-data limit follows a Wi-Fi ⇄ mobile switch while playing |
+| **Software decoding above 1080p** | Playback → Video player → Picture | Off. Lets 4K play in software when hardware decoding is off or fails; only for a fast phone |
 | **Tunneled playback** | Playback → Video player → Picture | Experimental, off. Only on phones that support it; turns itself off after a failure |
 | **Preferred audio / subtitle language** | Playback → Video player → Languages & subtitles | Per profile, 50 languages. **Original language** (audio) plays a film or series in the language it was made in, when the stream has it |
 | **Subtitle appearance** | Playback → Subtitle appearance | Size, **font**, colour, position, background |

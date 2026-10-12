@@ -57,6 +57,12 @@ val QUICK_TOGGLES: List<QuickToggle> = listOf(
         default = true,
     ),
     QuickToggle(
+        "vp_sw_above_1080p",
+        R.string.settings_software_decode_above_1080p,
+        { it.softwareDecodeAbove1080p },
+        { setSoftwareDecodeAbove1080p(it) },
+    ),
+    QuickToggle(
         "vp_hdr",
         R.string.settings_quick_hdr,
         { it.hdrEnabled },

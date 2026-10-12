@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.content.SearchIntent
+import tv.own.owntv.core.content.SearchKind
 import tv.own.owntv.core.content.SearchReader
 import tv.own.owntv.core.content.SearchResults
 import tv.own.owntv.core.database.dao.SourceDao
@@ -105,6 +106,14 @@ class SearchViewModel(
     fun setIntent(i: SearchIntent?) {
         _intent.value = i
         if (i != null) _query.value = ""
+    }
+
+    /** The filter chips switched on while searching; none = everything. Kept across new search text. */
+    private val _kinds = MutableStateFlow<Set<SearchKind>>(emptySet())
+    val kinds: StateFlow<Set<SearchKind>> = _kinds.asStateFlow()
+
+    fun toggleKind(k: SearchKind) {
+        _kinds.value = if (k in _kinds.value) _kinds.value - k else _kinds.value + k
     }
 
     /** Remembered only when a result is actually opened — a term nobody used is not a search. */

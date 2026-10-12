@@ -113,8 +113,10 @@ fun PlayerScreen(
     actions: ContentActions = koinInject(),
     subtitles: SubtitleController = koinInject(),
     cast: CastController = koinInject(),
+    downloadWatchGuard: tv.own.owntv.core.download.DownloadWatchGuard = koinInject(),
 ) {
     val player = tuner.player
+    val downloadWatchPrompt by downloadWatchGuard.prompt.collectAsStateWithLifecycle()
 
     // L2 - live now has two engines. `liveOnExo` says which one holds the picture, so the stage knows
     // whose surface to draw and the HUD's engine button knows which way it flips.
@@ -300,6 +302,47 @@ fun PlayerScreen(
             },
             dismissButton = {
                 TextButton(onClick = tuner::dismissTimeshiftResume) { Text(stringResource(R.string.player_go_live)) }
+            },
+        )
+    }
+
+    // A one-stream playlist a download was using: core has paused the download and asks what next.
+    // Dismissing is watching — the picture is already on and the download stays paused.
+    downloadWatchPrompt?.let { p ->
+        var rememberAnswer by remember(p) { mutableStateOf(false) }
+        AlertDialog(
+            modifier = Modifier.glassDialogWindow(),
+            onDismissRequest = { downloadWatchGuard.answer(watch = true, remember = rememberAnswer) },
+            title = { Text(stringResource(R.string.content_download_watch_title)) },
+            text = {
+                androidx.compose.foundation.layout.Column {
+                    Text(stringResource(R.string.content_download_watch_body, p.playlistName))
+                    androidx.compose.foundation.layout.Row(
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        androidx.compose.material3.Checkbox(checked = rememberAnswer, onCheckedChange = { rememberAnswer = it })
+                        Text(stringResource(R.string.content_download_watch_remember))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { downloadWatchGuard.answer(watch = true, remember = rememberAnswer) }) {
+                    Text(stringResource(R.string.content_download_watch_watch))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        downloadWatchGuard.answer(watch = false, remember = rememberAnswer)
+                        // Stopped, not left playing in the mini player: the download needs the stream.
+                        tuner.stop()
+                        vodTuner.stop()
+                        onExit()
+                    },
+                ) {
+                    Text(stringResource(R.string.content_download_watch_keep))
+                }
             },
         )
     }

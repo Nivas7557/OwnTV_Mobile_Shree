@@ -1,5 +1,6 @@
 package tv.own.owntv.mobile.ui.screens.downloads
 
+import tv.own.owntv.core.storage.missingFiles
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -123,6 +124,13 @@ class DownloadsViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Paths of finished items whose file is gone (drive formatted, swapped or unplugged). */
+    val missingFiles: StateFlow<Set<String>> = downloads
+        .map { list -> list// A paused or failed one has a partial file that can go missing too (a formatted stick).
+        .filter { it.status == tv.own.owntv.core.model.DownloadStatus.COMPLETED || (it.status in RESUMABLE && it.downloadedBytes > 0) }.map { it.filePath } }
+        .missingFiles(context)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
     /**
      * Free and total space on whichever volume the downloads are being written to.
      *
@@ -230,6 +238,14 @@ class DownloadsViewModel(
      * choices this screen has, and a user who opens them is asking one question: where these go and
      * what they cost.
      */
+    /** What playing does to a running download on a one-stream playlist (the options sheet's row). */
+    val downloadWatchChoice: StateFlow<SettingsRepository.DownloadWatchChoice> = settings.downloadWatchChoice
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.DownloadWatchChoice.ASK)
+
+    fun setDownloadWatchChoice(choice: SettingsRepository.DownloadWatchChoice) {
+        viewModelScope.launch { settings.setDownloadWatchChoice(choice) }
+    }
+
     val wifiOnly: StateFlow<Boolean> = settings.downloadsWifiOnly
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
@@ -307,3 +323,6 @@ class DownloadsViewModel(
         const val IDLE_SAMPLE_MS = 5_000L
     }
 }
+
+/** Stopped downloads that keep a partial file on the drive. */
+private val RESUMABLE = setOf(tv.own.owntv.core.model.DownloadStatus.PAUSED, tv.own.owntv.core.model.DownloadStatus.FAILED)

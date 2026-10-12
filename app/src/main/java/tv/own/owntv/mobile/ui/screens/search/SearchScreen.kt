@@ -1,6 +1,7 @@
 package tv.own.owntv.mobile.ui.screens.search
 
 import tv.own.owntv.mobile.ui.components.MobileIcons
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -37,6 +39,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import tv.own.owntv.core.content.SearchIntent
+import tv.own.owntv.core.content.SearchKind
+import tv.own.owntv.core.content.SearchResults
 import tv.own.owntv.core.database.entity.MovieEntity
 import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.model.MediaType
@@ -71,6 +75,7 @@ fun SearchScreen(
     val query by vm.query.collectAsStateWithLifecycle()
     val intent by vm.intent.collectAsStateWithLifecycle()
     val typed by vm.results.collectAsStateWithLifecycle()
+    val kinds by vm.kinds.collectAsStateWithLifecycle()
     val curated by vm.curated.collectAsStateWithLifecycle()
     val recents by vm.recentSearches.collectAsStateWithLifecycle()
     val sources by vm.sourceNames.collectAsStateWithLifecycle()
@@ -79,7 +84,7 @@ fun SearchScreen(
     val favoriteSeries by vm.favoriteSeries.collectAsStateWithLifecycle()
 
     val searching = query.trim().length >= MIN_QUERY
-    val results = if (searching) typed else curated
+    val results = if (searching) typed.only(kinds) else curated
     // One playlist needs no attribution; several do, and that is the case the line is there for.
     val showProvider = sources.size > 1
     val listState = rememberLazyListState()
@@ -104,7 +109,7 @@ fun SearchScreen(
         delay(150)
         runCatching { keyboard?.show() }
     }
-    LaunchedEffect(query, intent) { listState.scrollToItem(0) }
+    LaunchedEffect(query, intent, kinds) { listState.scrollToItem(0) }
 
     Column(modifier.fillMaxSize().imePadding()) {
         MobileTextField(
@@ -117,7 +122,9 @@ fun SearchScreen(
                 .padding(horizontal = MobileDimens.ScreenPaddingH, vertical = MobileDimens.GapSmall)
                 .focusRequester(focus),
         )
-        IntentChips(selected = intent, enabled = !searching, onSelect = vm::setIntent)
+        // The same row: the curated lists before a search, the filter once two characters are typed.
+        if (searching) KindChips(counts = typed, selected = kinds, onToggle = vm::toggleKind)
+        else IntentChips(selected = intent, onSelect = vm::setIntent)
 
         when {
             !searching && intent == null -> RecentSearches(
@@ -268,11 +275,11 @@ private fun GroupHeader(label: String, count: Int) {
 /**
  * The three curated lists, offered while the field is empty.
  *
- * They go quiet the moment a query is typed rather than disappearing, so the strip does not make the
- * results jump up the screen the instant the second character lands.
+ * Once a query is typed the filter chips take this row over, so the strip never makes the results
+ * jump up the screen the instant the second character lands.
  */
 @Composable
-private fun IntentChips(selected: SearchIntent?, enabled: Boolean, onSelect: (SearchIntent?) -> Unit) {
+private fun IntentChips(selected: SearchIntent?, onSelect: (SearchIntent?) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -282,13 +289,51 @@ private fun IntentChips(selected: SearchIntent?, enabled: Boolean, onSelect: (Se
         SearchIntent.entries.forEach { entry ->
             FilterChip(
                 selected = entry == selected,
-                enabled = enabled,
                 onClick = { onSelect(if (entry == selected) null else entry) },
                 label = { Text(entry.label()) },
             )
         }
     }
 }
+
+/** The search filter: each chip on or off on its own, several at once, none on meaning everything. */
+@Composable
+private fun KindChips(counts: SearchResults, selected: Set<SearchKind>, onToggle: (SearchKind) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = MobileDimens.ScreenPaddingH),
+        horizontalArrangement = Arrangement.spacedBy(MobileDimens.GapSmall),
+    ) {
+        SearchKind.entries.forEach { kind ->
+            FilterChip(
+                selected = kind in selected,
+                onClick = { onToggle(kind) },
+                label = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(MobileDimens.GapSmall)) {
+                        Text(kind.label())
+                        // The group headings' own count format, so the chip and its heading agree.
+                        Text(
+                            stringResource(R.string.content_downloads_count, counts.count(kind)),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchKind.label(): String = stringResource(
+    when (this) {
+        SearchKind.LIVE -> R.string.common_nav_live_tv
+        SearchKind.TV_SHOWS -> R.string.search_on_tv
+        SearchKind.MOVIES -> R.string.common_nav_movies
+        SearchKind.SERIES -> R.string.common_nav_series
+    },
+)
 
 @Composable
 private fun RecentSearches(recents: List<String>, onPick: (String) -> Unit, onClear: () -> Unit) {

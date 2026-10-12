@@ -132,6 +132,7 @@ fun rememberSettingsSearchEntries(): List<SettingsSearchEntry> {
         // Switches drawn from the Quick registry rather than with a title of their own, which is how
         // they slipped past the coverage test.
         SettingsRowEntry(SettingsGroup.PLAYBACK, SettingsLeaf.VP_PICTURE, R.string.settings_hardware_decoding, R.string.settings_search_keywords_video),
+        SettingsRowEntry(SettingsGroup.PLAYBACK, SettingsLeaf.VP_PICTURE, R.string.settings_software_decode_above_1080p, R.string.settings_search_keywords_video),
         SettingsRowEntry(SettingsGroup.PLAYBACK, SettingsLeaf.VP_LIVE, R.string.settings_channel_numbers, R.string.settings_search_keywords_channel_numbers),
         SettingsRowEntry(SettingsGroup.PLAYBACK, SettingsLeaf.VP_DIAGNOSTICS, R.string.settings_measured_stats, R.string.settings_search_keywords_video),
         SettingsRowEntry(SettingsGroup.PLAYBACK, SettingsLeaf.VP_RESUME, R.string.settings_autoplay_next, R.string.settings_search_keywords_autoplay),

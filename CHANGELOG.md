@@ -21,6 +21,12 @@
 - **⏰ Schedule recording… on a channel: pick the day, start and end**
 - **⏹️ Stop recording from the channel's menu**
 - **🔐 ClearKey channels whose playlist carries the key itself play**
+- **🔎 Search filter buttons: Live TV, TV Shows, Movies, Series**
+- **🎞️ Software decoding above 1080p (Video player switch)**
+- **⚡ Faster downloads over several connections**
+- **💬 A failed download says why**
+- **📺 Watch or keep downloading on a one-stream playlist**
+- **🗂️ Downloads and recordings whose file is gone say "File missing"**
 
 ### Fixes
 - **😴 The screen no longer turns off when a film stops to buffer**
@@ -50,6 +56,7 @@
 - **🔁 A show's episode list retries once when the provider drops the connection**
 - **▶️ Play on a new show starts at Season 1 Episode 1; Specials come after the last season**
 - **🔤 M3U episodes named "Season 1 Episode 5" or "S2019E05" are recognised**
+- **💾 Big downloads to a FAT32 USB stick fail with a clear reason**
 
 ## v1.0.3 — 2026-09-26
 

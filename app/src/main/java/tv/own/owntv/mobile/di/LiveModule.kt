@@ -47,6 +47,7 @@ val liveModule = module {
             forceMpvStore = get(),
             player = get(),
             watchSession = get(),
+            downloadWatchGuard = get(),
         )
     }
     viewModelOf(::LiveViewModel)

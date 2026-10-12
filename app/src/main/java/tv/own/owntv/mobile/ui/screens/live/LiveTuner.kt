@@ -104,6 +104,8 @@ class LiveTuner(
     val player: OwnTVPlayer,
     /** Lets core's background catalogue drain know a playlist is in use. */
     private val watchSession: tv.own.owntv.core.live.WatchSession,
+    /** Keeps the preview off a one-stream playlist while a download is using it. */
+    private val downloadWatchGuard: tv.own.owntv.core.download.DownloadWatchGuard,
 ) : CastHandoff {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -245,6 +247,7 @@ class LiveTuner(
             resolver = streamUrlResolver,
             forceMpvStore = forceMpvStore,
             engineStarted = { publishToSystem() },
+            downloadHolds = downloadWatchGuard::holdsOnlyStream,
         ),
     )
 

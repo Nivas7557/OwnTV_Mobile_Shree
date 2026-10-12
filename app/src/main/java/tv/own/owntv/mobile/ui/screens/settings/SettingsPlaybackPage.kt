@@ -257,6 +257,12 @@ fun SettingsVideoPlayerPage(
 
                     QuickSwitchRow(
                         vm = vm,
+                        toggle = quickToggle("vp_sw_above_1080p"),
+                        subtitle = stringResource(R.string.settings_software_decode_above_1080p_description_mobile),
+                    )
+
+                    QuickSwitchRow(
+                        vm = vm,
                         toggle = quickToggle("vp_hdr"),
                         subtitle = stringResource(R.string.settings_hdr_description_mobile),
                     )
