@@ -308,9 +308,13 @@ open class MainActivity : FragmentActivity() {
         // Asked of whichever engine holds the stream, and re-asked when that changes. Read from mpv
         // alone, this stayed false for the whole of a live channel — so the screen dimmed and locked
         // in the middle of a match, exactly as it would while reading a page.
+        // Buffering counts as playing: the screen timeout runs from the last touch, so letting go for a
+        // one-second rebuffer deep into a film turned the screen off at once.
         tuner.activeEngine.flatMapLatest { playing ->
-            combine(playing.isPlaying, playing.audioOnly, playing.audioOnlyMedia) { on, off, radio ->
-                on && !off && !radio
+            combine(
+                playing.isPlaying, playing.buffering, playing.error, playing.audioOnly, playing.audioOnlyMedia,
+            ) { on, loading, failed, off, radio ->
+                (on || loading) && failed == null && !off && !radio
             }
         }.distinctUntilChanged().collect { keep ->
             if (keep) {

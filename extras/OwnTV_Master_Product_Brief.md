@@ -80,7 +80,8 @@ The same two engines as the television, behind the same `PlaybackEngine` interfa
   `ExoPlayer+HLS → ExoPlayer+TS → mpv+HLS → mpv+TS` or the same led by mpv. Both engines are watched:
   `LiveExoWatchdog` for one, a 35-second open watcher for the other. **Give up after** bounds the
   whole tune, and a provider back-off does not count against it.
-- **Protected (DRM) channels** play on ExoPlayer, which outranks every other preference. They
+- **Protected (DRM) channels** — Widevine and ClearKey, from a licence server or ClearKey keys written
+  inline in the playlist — play on ExoPlayer, which outranks every other preference. They
   **cannot be recorded** — the CDM decrypts only into a secure decoder for immediate display, so a
   recording is refused before it starts rather than left as a file that will not play.
 - **Container is decided from evidence**, not from the file extension: the playlist's declared

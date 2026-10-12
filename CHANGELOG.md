@@ -20,8 +20,10 @@
 - **🔎 Search finds TV programmes by title (On TV)**
 - **⏰ Schedule recording… on a channel: pick the day, start and end**
 - **⏹️ Stop recording from the channel's menu**
+- **🔐 ClearKey channels whose playlist carries the key itself play**
 
 ### Fixes
+- **😴 The screen no longer turns off when a film stops to buffer**
 - **Custom categories in the player's channel list and the Multiview picker**
 - **🎞️ Catch-up plays on the hardware decoder and freezes on its first frame less often**
 - **📡 A catch-up of a programme still on air switches to live instead of freezing**
