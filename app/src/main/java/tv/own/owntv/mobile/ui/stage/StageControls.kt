@@ -130,8 +130,15 @@ fun StageButton(
         text?.let {
             Text(it, style = stageText(if (small) 12.5f else 14f, 700), color = fg, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
+        // On a filled button the trailing part is the text colour at 75 %, 600 (the series page's "· 12 min left").
         trailing?.let {
-            Text(it, style = stageText(if (small) 12.5f else 14f, 700), color = if (filled) fg else palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                it,
+                style = stageText(if (small) 12.5f else 14f, if (filled) 600 else 700),
+                color = if (filled) fg.copy(alpha = 0.75f) else palette.muted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

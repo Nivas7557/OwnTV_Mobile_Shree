@@ -94,7 +94,7 @@ internal fun MoviePage(
     modifier: Modifier = Modifier,
 ) {
     val movie by vm.movie.collectAsStateWithLifecycle()
-    val page by vm.moviePage.collectAsStateWithLifecycle()
+    val page by vm.titlePage.collectAsStateWithLifecycle()
     val favorite by vm.isFavorite.collectAsStateWithLifecycle()
     val progress by vm.progress.collectAsStateWithLifecycle()
     val itemDownloads by vm.itemDownloads.collectAsStateWithLifecycle()
@@ -279,12 +279,15 @@ internal fun MoviePage(
     }
 }
 
-/** The meta line (`metaLine`): the parts with faint dots between, then ★ and the rating in gold, then the tags. */
+/**
+ * The meta line (`metaLine`): the parts with faint dots between, then ★ and the rating in gold, then the tags.
+ * 13 on the movie page, 12.5 on the series page.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MovieMeta(parts: List<String>, rating: String?, tags: List<String>) {
+internal fun MovieMeta(parts: List<String>, rating: String?, tags: List<String>, size: Float = 13f) {
     val muted = LocalStagePalette.current.muted
-    val style = stageText(13f, 600)
+    val style = stageText(size, 600)
     val dot = stringResource(R.string.content_epg_bits_separator).trim()
     @Composable
     fun Dot() = Text(dot, style = style, color = muted.copy(alpha = 0.5f))
@@ -300,7 +303,7 @@ private fun MovieMeta(parts: List<String>, rating: String?, tags: List<String>) 
         rating?.let {
             if (parts.isNotEmpty()) Dot()
             Row(horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.CenterVertically) {
-                StageIcon(MobileIcons.Star, 13.dp, RatingGold)
+                StageIcon(MobileIcons.Star, size.dp, RatingGold)
                 Text(it, style = style, color = RatingGold)
             }
         }

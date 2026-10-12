@@ -142,7 +142,15 @@ val LocalTitleChrome = staticCompositionLocalOf<HomeChrome?> { null }
  * A place's own crumb (Live TV's "‹ **Sky Cinema** · 9 channels"): the [accent] part, the muted [rest] after a dot,
  * and what a tap opens (the categories). Set by the place while it is on screen.
  */
-data class PageCrumb(val accent: String, val rest: String?, val chevron: Boolean = true, val owner: Any? = null, val onClick: () -> Unit)
+data class PageCrumb(
+    val accent: String,
+    val rest: String?,
+    val chevron: Boolean = true,
+    val owner: Any? = null,
+    /** A line the page styles itself, drawn instead of accent · rest (Downloads: "USB drive · **57.6 GB free** of 57.7 GB"). */
+    val styled: androidx.compose.ui.text.AnnotatedString? = null,
+    val onClick: () -> Unit,
+)
 
 /**
  * Lend the shell [crumb] while this place is on screen. Leaving clears it only if it is still this place's: during
@@ -368,6 +376,10 @@ fun StagePageHeader(
             ) {
                 // The TV Guide's crumb has none (M4-01): it is a place, not a way back.
                 if (crumb.chevron) StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
+                crumb.styled?.let {
+                    Text(it, style = stageText(13f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    return@Row
+                }
                 Text(
                     crumb.accent, style = stageText(13f, 700), color = stageAccent.accent,
                     maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),

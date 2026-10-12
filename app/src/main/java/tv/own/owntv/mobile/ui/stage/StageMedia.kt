@@ -33,8 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import tv.own.owntv.core.ui.stage.PlaylistMark
@@ -196,18 +199,21 @@ fun StageCastRow(cast: List<CastMember>, modifier: Modifier = Modifier, contentP
 }
 
 /**
- * `.still`: a 16:9 picture (12 dp corners) — Keep watching, episodes — with an optional watch progress and
- * anything the caller lays [over] it. Light gives it a soft shadow; dark has none.
+ * `.still`: a 16:9 picture (12 dp corners, [radius] where a row draws it smaller) — Keep watching, episodes —
+ * with an optional watch progress and anything the caller lays [over] it. [dimmed] is a watched episode
+ * (`saturate(.55) brightness(.72)`). Light gives it a soft shadow; dark has none.
  */
 @Composable
 fun StageStill(
     imageUrl: String?,
     modifier: Modifier = Modifier,
     progress: Float? = null,
+    radius: Dp = StageRadii.Still,
+    dimmed: Boolean = false,
     over: @Composable BoxScope.() -> Unit = {},
 ) {
     val palette = LocalStagePalette.current
-    val shape = RoundedCornerShape(StageRadii.Still)
+    val shape = RoundedCornerShape(radius)
     Box(
         modifier
             .fillMaxWidth()
@@ -216,8 +222,22 @@ fun StageStill(
             .clip(shape)
             .background(palette.cardSolid),
     ) {
-        AsyncImage(imageUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        AsyncImage(
+            imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            colorFilter = if (dimmed) WatchedFilter else null,
+            modifier = Modifier.fillMaxSize(),
+        )
         progress?.let { WatchProgress(it) }
         over()
     }
 }
+
+/** A watched episode's still: saturation 55 %, then brightness 72 %. */
+private val WatchedFilter = ColorFilter.colorMatrix(
+    ColorMatrix().apply {
+        setToSaturation(0.55f)
+        timesAssign(ColorMatrix().apply { setToScale(0.72f, 0.72f, 0.72f, 1f) })
+    },
+)

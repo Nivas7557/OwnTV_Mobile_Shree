@@ -37,6 +37,7 @@ import tv.own.owntv.mobile.ui.screens.settings.SettingsLeafPage
 import tv.own.owntv.mobile.ui.screens.settings.SettingsScreen
 import tv.own.owntv.mobile.ui.setup.SetupFlow
 import tv.own.owntv.mobile.ui.shell.LocalMiniRequested
+import tv.own.owntv.mobile.ui.shell.navigateToTab
 import tv.own.owntv.mobile.ui.theme.LocalMobileMotion
 
 /**
@@ -114,6 +115,7 @@ fun MobileNavHost(
                     )
                     MobileDestination.DOWNLOADS -> DownloadsScreen(
                         onPlayerOpened = { navController.navigate(PLAYER_ROUTE) },
+                        onOpenGuide = { navController.navigateToTab(MobileDestination.GUIDE) },
                     )
                     MobileDestination.MOVIES, MobileDestination.SERIES ->
                         LibraryScreen(

@@ -362,10 +362,12 @@ fun MobileShell(
         MobileDestination.rail.any { it.route == currentRoute }
     val titleRes = if (currentRoute == MobileDestination.HOME.route) null else pageTitleRes(currentRoute)
     val previousRoute = navController.previousBackStackEntry?.destination?.route
-    val backLabel = if (topLevel || previousRoute == null) null else stringResource(anyTitleRes(previousRoute))
+    // Downloads says where its files are instead of where it came from (M7-01): its crumb is the storage line.
+    val ownCrumb = topLevel || currentRoute == MobileDestination.DOWNLOADS.route
+    val backLabel = if (ownCrumb || previousRoute == null) null else stringResource(anyTitleRes(previousRoute))
 
-    // The playlist pill belongs to the browse places: in full on Live TV, Guide, Movies and Series, as
-    // the layers icon on Home (its hero needs the width). Settings and More pages leave it out.
+    // The playlist pill belongs to the browse places: in full on Live TV, Guide, Movies, Series and Downloads
+    // (M7-01), as the layers icon on Home (its hero needs the width). Settings and More pages leave it out.
     val activePlaylist = playlists.firstOrNull { it.id == activePlaylistId }
     val activeIndex = playlists.indexOf(activePlaylist)
     val clusterPlaylist = if (playlists.isEmpty()) null else when {
@@ -379,6 +381,7 @@ fun MobileShell(
         currentRoute in listOf(
             MobileDestination.LIVE.route, MobileDestination.GUIDE.route,
             MobileDestination.MOVIES.route, MobileDestination.SERIES.route,
+            MobileDestination.DOWNLOADS.route,
         ) -> ClusterPlaylist(
             label = when {
                 playlists.size == 1 -> playlists.first().displayName()
@@ -437,7 +440,7 @@ fun MobileShell(
                     backLabel = backLabel,
                     onBack = { navController.popBackStack() },
                     heading = homeChrome.heading.takeIf { onHome },
-                    crumb = pageCrumb.value.takeIf { topLevel },
+                    crumb = pageCrumb.value.takeIf { ownCrumb },
                     backPill = onTitlePage,
                 ) {
                     ShellCluster(

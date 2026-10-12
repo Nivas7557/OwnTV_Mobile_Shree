@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -215,7 +216,8 @@ fun LibraryScreen(
 
     Column(Modifier.fillMaxSize()) {
         if (lockedKey == null) {
-            // `.tools`: the search field takes the room, then the order, the categories and Grid | List.
+            // `.tools`: the search field takes the room, then the order and Grid | List at the right. No categories
+            // tool (owner, 12 Oct): the crumb under the title opens the same sheet.
             Row(
                 Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -228,20 +230,14 @@ fun LibraryScreen(
                     inline = true,
                     modifier = Modifier.weight(1f),
                 )
-                // The search and the order share what is left, the order up to two thirds: a long order
-                // ("Hinzugefügt am" at a large font) shortens rather than squeezing the field to its icon.
+                // The order and Grid | List sit at the right edge and the search takes all the rest; a long order
+                // ("Hinzugefügt am" at a large font) shortens at 150 dp rather than squeezing the field to its icon.
                 StageTool(
                     onClick = { sortOpen = true },
                     icon = MobileIcons.Sort,
                     value = stringResource(sort.labelRes()),
                     on = sortOpen,
-                    modifier = Modifier.weight(2f, fill = false),
-                )
-                StageTool(
-                    onClick = { categoriesOpen = true },
-                    icon = MobileIcons.Layers,
-                    on = categoriesOpen,
-                    contentDescription = stringResource(R.string.content_category_browser_title),
+                    modifier = Modifier.widthIn(max = 150.dp),
                 )
                 val views = SettingsRepository.VodViewMode.entries
                 StageSegmented(
