@@ -8,8 +8,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,13 +26,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -100,12 +96,13 @@ import tv.own.owntv.mobile.ui.screens.live.LiveViewModel
 import tv.own.owntv.mobile.ui.screens.live.epgShiftLabel
 import tv.own.owntv.mobile.ui.screens.live.label
 import tv.own.owntv.mobile.ui.shell.LocalMiniRequested
-import tv.own.owntv.mobile.ui.shell.LocalPageCrumb
+import tv.own.owntv.mobile.ui.shell.ProvidePageCrumb
 import tv.own.owntv.mobile.ui.shell.LocalStreamOnScreen
 import tv.own.owntv.mobile.ui.shell.PageCrumb
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.StageButton
 import tv.own.owntv.mobile.ui.stage.StageButtonStyle
+import tv.own.owntv.mobile.ui.stage.StageChoiceRow
 import tv.own.owntv.mobile.ui.stage.StageGroupLabel
 import tv.own.owntv.mobile.ui.stage.StageIcon
 import tv.own.owntv.mobile.ui.stage.StageLiveBadge
@@ -116,6 +113,7 @@ import tv.own.owntv.mobile.ui.stage.StageRow
 import tv.own.owntv.mobile.ui.stage.StageSearchField
 import tv.own.owntv.mobile.ui.stage.StageSettingRow
 import tv.own.owntv.mobile.ui.stage.StageSheetHeader
+import tv.own.owntv.mobile.ui.stage.StageSizeBar
 import tv.own.owntv.mobile.ui.stage.StageSwitch
 import tv.own.owntv.mobile.ui.stage.StageTool
 import tv.own.owntv.mobile.ui.stage.drawInnerRing
@@ -188,9 +186,7 @@ fun GuideScreen(
     val categoryLabel = categories.firstOrNull { it.key == selected }?.label().orEmpty()
     val dayLabel = dayLabel(day)
     val crumbRest = if (mode == SettingsRepository.GuideView.ON_NOW) stringResource(R.string.home_row_on_now) else dayLabel
-    val crumbHolder = LocalPageCrumb.current
-    SideEffect { crumbHolder.value = PageCrumb(categoryLabel, crumbRest, chevron = false) { categoriesOpen = true } }
-    DisposableEffect(Unit) { onDispose { crumbHolder.value = null } }
+    ProvidePageCrumb { owner -> PageCrumb(categoryLabel, crumbRest, chevron = false, owner = owner) { categoriesOpen = true } }
 
     // The preview plays what was picked here, so leaving the guide stops it — except into full screen or
     // the player's mini-player, as Live TV's preview.
@@ -1081,10 +1077,24 @@ private fun GuideOrderSheet(
                 onClick = { onShowPreview(!showPreview) },
             ) { StageSwitch(showPreview) }
             StageGroupLabel(stringResource(R.string.content_menu_group_view).uppercase(locale))
-            ViewChoices(mode, onMode)
+            val views = listOf(SettingsRepository.GuideView.GRID, SettingsRepository.GuideView.ON_NOW, SettingsRepository.GuideView.TIMELINE)
+            StageChoiceRow(
+                options = listOf(
+                    stringResource(R.string.settings_view_grid),
+                    stringResource(R.string.home_row_on_now),
+                    stringResource(R.string.content_epg_view_timeline),
+                ),
+                selected = views.indexOf(mode),
+                onSelect = { onMode(views[it]) },
+            )
             if (mode == SettingsRepository.GuideView.GRID) {
                 StageGroupLabel(stringResource(R.string.settings_size).uppercase(locale))
-                SizeBar(densityPct, onDensity, Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                // 70 % at the left, 130 % at the right.
+                StageSizeBar(
+                    fraction = (densityPct - MIN_DENSITY).toFloat() / (MAX_DENSITY - MIN_DENSITY),
+                    onChange = { onDensity((MIN_DENSITY + it * (MAX_DENSITY - MIN_DENSITY)).toInt()) },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
             }
             StageGroupLabel(stringResource(R.string.content_menu_group_guide_data).uppercase(locale))
             StageMenuItem(
@@ -1095,50 +1105,6 @@ private fun GuideOrderSheet(
                 value = guideChannels?.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.sync_count_channels, it, formatCount(it)) },
             )
         }
-    }
-}
-
-/** `.row2`: Grid · On now · Timeline as three equal 40 dp buttons; the chosen one in the accent with its ring. */
-@Composable
-private fun ViewChoices(mode: SettingsRepository.GuideView, onMode: (SettingsRepository.GuideView) -> Unit) {
-    val palette = LocalStagePalette.current
-    val accent = stageAccent.accent
-    Row(Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        listOf(
-            SettingsRepository.GuideView.GRID to R.string.settings_view_grid,
-            SettingsRepository.GuideView.ON_NOW to R.string.home_row_on_now,
-            SettingsRepository.GuideView.TIMELINE to R.string.content_epg_view_timeline,
-        ).forEach { (entry, label) ->
-            val on = entry == mode
-            Box(
-                Modifier
-                    .weight(1f)
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (on) accent.copy(alpha = 0.18f) else palette.controlFill)
-                    .then(if (on) Modifier.drawBehind { drawInnerRing(accent.copy(alpha = 0.6f), 1.2.dp.toPx(), 12.dp.toPx()) } else Modifier)
-                    .clickable(role = androidx.compose.ui.semantics.Role.RadioButton) { onMode(entry) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(stringResource(label), style = stageText(13f, 700), color = if (on) accent else palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
-    }
-}
-
-/** SIZE: the 4 dp `.prog` bar as a slider — 70 % at the left, 130 % at the right; tap or drag. */
-@Composable
-private fun SizeBar(pct: Int, onChange: (Int) -> Unit, modifier: Modifier = Modifier) {
-    fun pctAt(x: Float, width: Int) = (MIN_DENSITY + (x / width).coerceIn(0f, 1f) * (MAX_DENSITY - MIN_DENSITY)).toInt()
-    Box(
-        modifier
-            .fillMaxWidth()
-            .height(24.dp)
-            .pointerInput(Unit) { detectTapGestures { onChange(pctAt(it.x, size.width)) } }
-            .pointerInput(Unit) { detectHorizontalDragGestures { change, _ -> onChange(pctAt(change.position.x, size.width)) } },
-        contentAlignment = Alignment.Center,
-    ) {
-        StageProgress((pct - MIN_DENSITY).toFloat() / (MAX_DENSITY - MIN_DENSITY), Modifier.fillMaxWidth())
     }
 }
 

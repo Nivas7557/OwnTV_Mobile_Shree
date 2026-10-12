@@ -85,6 +85,7 @@ import tv.own.owntv.mobile.ui.nav.MobileNavHost
 import tv.own.owntv.mobile.playback.PipController
 import tv.own.owntv.mobile.ui.nav.PLAYER_ROUTE
 import tv.own.owntv.mobile.ui.nav.isChannelRoute
+import tv.own.owntv.mobile.ui.nav.isTitleRoute
 import tv.own.owntv.mobile.ui.nav.liveChannelRoute
 import tv.own.owntv.mobile.ui.nav.SEARCH_ROUTE
 import tv.own.owntv.mobile.ui.nav.SEARCH_ROUTE_PATTERN
@@ -293,8 +294,10 @@ fun MobileShell(
 
     val chrome = remember { ShellChromeState() }
     val homeChrome = remember { HomeChrome() }
+    val titleChrome = remember { HomeChrome() }
     val pageCrumb = remember { mutableStateOf<PageCrumb?>(null) }
     val onHome = currentRoute == MobileDestination.HOME.route
+    val onTitlePage = isTitleRoute(currentRoute)
     val navLabels by settings.phoneNavLabels.collectAsStateWithLifecycle(true)
     val hideOnScroll by settings.phoneNavHideOnScroll.collectAsStateWithLifecycle(true)
     chrome.hideBottomOnScroll = hideOnScroll && !useRail
@@ -365,15 +368,18 @@ fun MobileShell(
     // the layers icon on Home (its hero needs the width). Settings and More pages leave it out.
     val activePlaylist = playlists.firstOrNull { it.id == activePlaylistId }
     val activeIndex = playlists.indexOf(activePlaylist)
-    val clusterPlaylist = if (playlists.isEmpty()) null else when (currentRoute) {
-        MobileDestination.HOME.route -> ClusterPlaylist(
+    val clusterPlaylist = if (playlists.isEmpty()) null else when {
+        // A title page has Home's layers pill (M5-06).
+        currentRoute == MobileDestination.HOME.route || onTitlePage -> ClusterPlaylist(
             label = stringResource(tv.own.owntv.mobile.R.string.content_playlist_picker_title),
             mark = null,
             switchable = playlists.size > 1,
             iconOnly = true,
         )
-        MobileDestination.LIVE.route, MobileDestination.GUIDE.route,
-        MobileDestination.MOVIES.route, MobileDestination.SERIES.route -> ClusterPlaylist(
+        currentRoute in listOf(
+            MobileDestination.LIVE.route, MobileDestination.GUIDE.route,
+            MobileDestination.MOVIES.route, MobileDestination.SERIES.route,
+        ) -> ClusterPlaylist(
             label = when {
                 playlists.size == 1 -> playlists.first().displayName()
                 activePlaylist != null -> activePlaylist.displayName()
@@ -421,6 +427,7 @@ fun MobileShell(
             .nestedScroll(chrome.connection),
     ) {
         if (onHome && !fullscreen) HomeBackdrop(homeChrome)
+        if (onTitlePage && !fullscreen) HomeBackdrop(titleChrome)
         ShellLayout(
             chrome = chrome,
             fullscreen = fullscreen,
@@ -431,12 +438,14 @@ fun MobileShell(
                     onBack = { navController.popBackStack() },
                     heading = homeChrome.heading.takeIf { onHome },
                     crumb = pageCrumb.value.takeIf { topLevel },
+                    backPill = onTitlePage,
                 ) {
                     ShellCluster(
                         playlist = clusterPlaylist,
                         profile = activeProfile,
-                        // The TV Guide has Search among its own tools (M4-01), so the cluster leaves it out.
-                        showSearch = currentRoute != SEARCH_ROUTE_PATTERN && currentRoute != MobileDestination.GUIDE.route,
+                        // The TV Guide has Search among its own tools (M4-01), so the cluster leaves it out; a
+                        // title page has none either (M5-06).
+                        showSearch = currentRoute != SEARCH_ROUTE_PATTERN && currentRoute != MobileDestination.GUIDE.route && !onTitlePage,
                         onPlaylist = { if (playlists.size > 1) playlistSheet = true },
                         onSearch = { navController.navigate(SEARCH_ROUTE) { launchSingleTop = true } },
                         onAvatar = { navController.navigate(MobileDestination.MORE.route) { launchSingleTop = true } },
@@ -541,6 +550,7 @@ fun MobileShell(
                         LocalStreamOnScreen provides streamOnScreen,
                         LocalMiniRequested provides miniRequested,
                         LocalHomeChrome provides homeChrome,
+                        LocalTitleChrome provides titleChrome,
                         LocalPageCrumb provides pageCrumb,
                     ) {
                         MobileNavHost(
@@ -744,6 +754,10 @@ private fun NavHostController.onNavClick(
     shell: ShellViewModel,
 ) {
     when {
+        // A film or a channel opened under this tab: back to the tab's own list first (only the list
+        // itself scrolls to the top).
+        destination == current && currentDestination?.route != destination.route ->
+            popBackStack(destination.route, inclusive = false)
         destination == current -> shell.requestScrollToTop(destination.route)
         // A More or Settings page pushed on top of this tab: back down to the tab itself. Restoring the
         // tab's saved stack instead restored the very page on screen, so the tap did nothing.

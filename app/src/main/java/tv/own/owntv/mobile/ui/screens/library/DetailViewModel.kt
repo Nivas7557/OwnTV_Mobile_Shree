@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.content.AdultCategoryClassifier
+import tv.own.owntv.core.customize.CustomizationStore
+import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.FavoriteDao
 import tv.own.owntv.core.database.dao.LinkedSubtitle
@@ -32,6 +34,7 @@ import tv.own.owntv.core.database.entity.MovieEntity
 import tv.own.owntv.core.database.entity.PlaybackProgressEntity
 import tv.own.owntv.core.database.entity.SeriesEntity
 import tv.own.owntv.core.download.DownloadManager
+import tv.own.owntv.core.live.ProviderTags
 import tv.own.owntv.core.metadata.MetadataMode
 import tv.own.owntv.core.metadata.MetadataRepository
 import tv.own.owntv.core.model.DownloadStatus
@@ -66,6 +69,7 @@ class DetailViewModel(
     private val seriesSortOrderDao: SeriesSortOrderDao,
     private val metadata: MetadataRepository,
     private val subtitleController: SubtitleController,
+    private val customize: CustomizationStore,
 ) : ViewModel() {
 
     private data class Target(val tab: LibraryTab, val id: Long)
@@ -87,6 +91,45 @@ class DetailViewModel(
 
     private val _show = MutableStateFlow<SeriesEntity?>(null)
     val show: StateFlow<SeriesEntity?> = _show
+
+    /**
+     * What the movie page (M5-06) shows beyond the catalogue row: TMDB's record (title art, genres, cast,
+     * trailer, its plot and rating), whether TMDB wins a field, the film's category by its parsed name, and
+     * a few more titles from that category.
+     */
+    data class MoviePage(
+        val meta: MetadataCacheEntity? = null,
+        val tmdbWins: Boolean = false,
+        val categoryName: String? = null,
+        val more: List<MovieEntity> = emptyList(),
+    )
+
+    private val _moviePage = MutableStateFlow(MoviePage())
+    val moviePage: StateFlow<MoviePage> = _moviePage
+
+    /** The page arrives in two steps: the category and its titles at once, TMDB when it answers. */
+    private suspend fun loadMoviePage(film: MovieEntity) {
+        val mode = settings.metadataMode.first()
+        val category = film.categoryId?.let { categoryDao.getById(it) }
+        val pid = profileId.value
+        val more = if (category == null || pid < 0) {
+            emptyList()
+        } else {
+            val hidden = customize.observe(pid, MediaType.MOVIE).first().hiddenItems
+            movieDao.snapshotByCategoryManual(category.id, pid, CustomizeKeys.category(category), MORE_IN_CATEGORY * 3)
+                .filter { it.id != film.id && CustomizeKeys.movie(it) !in hidden }
+                .take(MORE_IN_CATEGORY)
+        }
+        _moviePage.value = MoviePage(
+            tmdbWins = mode.tmdbWins,
+            categoryName = category?.let { ProviderTags.parse(it.name).name },
+            more = more,
+        )
+        if (mode.enrich) {
+            val meta = runCatching { metadata.resolveMovie(film) }.getOrNull()
+            if (target.value == Target(LibraryTab.MOVIES, film.id)) _moviePage.value = _moviePage.value.copy(meta = meta)
+        }
+    }
 
     val episodes: StateFlow<List<EpisodeEntity>> = target
         .flatMapLatest { t ->
@@ -224,10 +267,13 @@ class DetailViewModel(
         _season.value = null
         _movie.value = null
         _show.value = null
+        _moviePage.value = MoviePage()
         viewModelScope.launch {
             profileId.value = currentProfileId() ?: -1L
             if (tab == LibraryTab.MOVIES) {
-                _movie.value = movieDao.getById(id)
+                val film = movieDao.getById(id)
+                _movie.value = film
+                if (film != null) loadMoviePage(film)
                 return@launch
             }
             _loading.value = true
@@ -422,6 +468,9 @@ class DetailViewModel(
         return if (preferred >= 0) profileDao.resolveExistingProfileId(preferred) else null
     }
 }
+
+/** "More in Disney+ Kids Movies": one row of four (M5-06). */
+private const val MORE_IN_CATEGORY = 4
 
 private fun LibraryTab.mediaType() =
     if (this == LibraryTab.MOVIES) MediaType.MOVIE else MediaType.SERIES

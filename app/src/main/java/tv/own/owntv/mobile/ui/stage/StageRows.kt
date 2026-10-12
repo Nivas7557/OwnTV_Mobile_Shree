@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -265,6 +267,8 @@ fun StageMenuItem(
         modifier
             .fillMaxWidth()
             .height(46.dp)
+            // Not available here (no trailer, not in history): the whole row at 45%, as the mockup dims it.
+            .then(if (enabled) Modifier else Modifier.alpha(0.45f))
             .clip(shape)
             .then(if (pressed) Modifier.background(accent.accent) else Modifier)
             .stageClickable(interaction, onClick.takeIf { enabled }, onLongClick?.takeIf { enabled }, role)
@@ -279,19 +283,22 @@ fun StageMenuItem(
         Text(
             label,
             style = stageText(14.5f, 600),
-            color = if (enabled) fg else palette.dim,
+            color = fg,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            // Takes the free width, so whatever follows sits at the end (`margin-left: auto`).
-            modifier = Modifier.weight(1f),
+            // Takes the free width, so whatever follows sits at the end (`margin-left: auto`). With a [value]
+            // (a hint like "The order your playlist uses") the label is measured first and the hint shortens.
+            modifier = if (value != null) Modifier else Modifier.weight(1f),
         )
+        if (value != null) Spacer(Modifier.weight(1f))
         // 6 dp between the trailing parts (`.mi .tag + .n`).
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             tags?.let { Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically, content = it) }
             value?.let { Text(it, style = stageText(12f, 700), color = sideTint, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             count?.let { Text(it, style = stageText(12f, 600), color = sideTint, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             if (checked) StageIcon(MobileIcons.Check, 18.dp, if (pressed) accent.onAccent else accent.accent)
-            mark?.let { StagePlaylistMark(it, Modifier.padding(start = 2.dp)) }
+            // On a filled row the playlist's own colour would vanish into the accent: it takes the row's text colour.
+            mark?.let { StagePlaylistMark(it, Modifier.padding(start = 2.dp), tint = if (pressed) accent.onAccent else null) }
         }
     }
 }

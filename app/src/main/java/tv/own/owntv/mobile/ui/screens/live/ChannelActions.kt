@@ -24,16 +24,13 @@ import tv.own.owntv.mobile.ui.components.MobileIcons
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,13 +56,11 @@ import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.ContentMenuSheet
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileButton
-import tv.own.owntv.mobile.ui.components.MobileTextField
 import tv.own.owntv.mobile.ui.components.MoveToCategorySheet
 import tv.own.owntv.mobile.ui.components.NewCategoryDialog
 import tv.own.owntv.mobile.ui.components.ReorderSheet
 import tv.own.owntv.mobile.ui.components.SheetAction
 import tv.own.owntv.mobile.ui.components.sheetListHeight
-import tv.own.owntv.mobile.ui.theme.glassDialogWindow
 
 /** Which follow-up the sheet handed off to. Only ever one at a time. */
 private enum class ChannelDialog { RENAME, MATCH_EPG, EPG_OFFSET, MOVE, MOVE_TO_CATEGORY, NEW_CATEGORY, SCHEDULE_RECORDING }
@@ -277,33 +272,24 @@ private fun RenameChannelDialog(
     onDismiss: () -> Unit,
 ) {
     var text by remember { mutableStateOf(channel.name) }
-    AlertDialog(
-        modifier = Modifier.glassDialogWindow(),
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.content_rename_channel)) },
-        text = {
-            MobileTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = stringResource(R.string.content_rename_channel),
-                imeAction = ImeAction.Done,
-                onImeDone = { onSet(text.trim().takeIf { it.isNotEmpty() }); onDismiss() },
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onSet(text.trim().takeIf { it.isNotEmpty() }); onDismiss() }) {
-                Text(stringResource(R.string.common_save))
-            }
-        },
-        dismissButton = {
-            Row {
-                TextButton(onClick = { onSet(null); onDismiss() }) {
-                    Text(stringResource(R.string.common_reset))
-                }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
-            }
-        },
-    )
+    val title = stringResource(R.string.content_rename_channel)
+    val save = { onSet(text.trim().takeIf { it.isNotEmpty() }); onDismiss() }
+    // Stage sheet: the name field, Save, Reset (the provider's name back), Cancel.
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+        StageSheetHeader(title = title, subtitle = remember(channel.name) { ProviderTags.parse(channel.name).name })
+        StageSearchField(
+            value = text,
+            onValueChange = { text = it },
+            placeholder = title,
+            icon = null,
+            imeAction = ImeAction.Done,
+            onSearch = save,
+            modifier = Modifier.padding(start = 6.dp, end = 6.dp, bottom = 8.dp),
+        )
+        StageMenuItem(stringResource(R.string.common_save), onClick = save, icon = MobileIcons.Check, filled = true)
+        StageMenuItem(stringResource(R.string.common_reset), onClick = { onSet(null); onDismiss() }, icon = MobileIcons.Refresh)
+        StageMenuItem(stringResource(R.string.common_cancel), onClick = onDismiss, icon = MobileIcons.Close)
+    }
 }
 
 /**

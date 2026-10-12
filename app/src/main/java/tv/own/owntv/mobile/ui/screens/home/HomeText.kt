@@ -1,6 +1,9 @@
 package tv.own.owntv.mobile.ui.screens.home
 
+import androidx.annotation.PluralsRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import java.text.NumberFormat
@@ -52,6 +55,19 @@ fun keepWatchingLine(item: HeroItem, nowMs: Long): String? {
         is HeroItem.LiveHero -> lastWatchedText(item.lastEngagementAt, nowMs)
     }
 }
+
+/**
+ * A count plural with its number grouped ("244,930 titles", "244.930 Titel"). Core's count plurals take `%d`,
+ * which Android writes without separators; the number is put into the plural's own text instead.
+ */
+@Composable
+fun groupedCountText(@PluralsRes id: Int, count: Int): String {
+    LocalConfiguration.current // a language change re-reads the text
+    return LocalContext.current.resources.getQuantityString(id, count).replace(COUNT_PLACEHOLDER, formatCount(count))
+}
+
+/** The one argument of a count plural, as core writes it. */
+private const val COUNT_PLACEHOLDER = "%1\$d"
 
 /** A count in the locale's digits ("3", "٣"). */
 fun formatCount(n: Int): String = NumberFormat.getIntegerInstance().format(n)

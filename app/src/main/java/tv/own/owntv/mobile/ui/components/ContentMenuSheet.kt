@@ -59,6 +59,8 @@ data class SheetAction(
     val group: Int = 0,
     /** A Stage menu item's value at the end ("7 days", "Auto", "Global"). */
     val value: String? = null,
+    /** Shown but not available here (no trailer, not in history) — the TV's dimmed item. Stage only. */
+    val enabled: Boolean = true,
     val onClick: () -> Unit,
 )
 
@@ -112,6 +114,7 @@ fun ContentMenuSheet(
                     icon = action.icon,
                     value = action.value,
                     danger = action.destructive,
+                    enabled = action.enabled,
                 )
             }
             }

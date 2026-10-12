@@ -3,6 +3,8 @@ package tv.own.owntv.mobile.ui.stage
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -37,11 +39,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -226,7 +230,10 @@ fun StageTool(
     }
 }
 
-/** `.seg`: options on a 3 dp-padded ink track; the chosen one a lighter chip (white with a shadow in light). */
+/**
+ * `.seg`: options on a 3 dp-padded ink track; the chosen one a lighter chip (white with a shadow in light).
+ * [iconOnly] draws only the [icons] (Movies' Grid | List) and gives each its option as the spoken label.
+ */
 @Composable
 fun StageSegmented(
     options: List<String>,
@@ -234,6 +241,7 @@ fun StageSegmented(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     icons: List<ImageVector?> = emptyList(),
+    iconOnly: Boolean = false,
 ) {
     val palette = LocalStagePalette.current
     Row(
@@ -258,15 +266,56 @@ fun StageSegmented(
                     )
                     .clip(chip)
                     .clickable(role = Role.Tab, onClick = { onSelect(i) })
+                    .then(if (iconOnly) Modifier.semantics { contentDescription = label } else Modifier)
                     .padding(horizontal = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val fg = if (on) palette.text else palette.muted
                 icons.getOrNull(i)?.let { StageIcon(it, 14.dp, fg) }
-                Text(label, style = stageText(12f, 700), color = fg, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (!iconOnly) Text(label, style = stageText(12f, 700), color = fg, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
+    }
+}
+
+/** `.row2`: a sheet's choices as equal 40 dp buttons; the chosen one in the accent with its ring (Grid · List). */
+@Composable
+fun StageChoiceRow(options: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val palette = LocalStagePalette.current
+    val accent = stageAccent.accent
+    Row(modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        options.forEachIndexed { i, label ->
+            val on = i == selected
+            Box(
+                Modifier
+                    .weight(1f)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (on) accent.copy(alpha = 0.18f) else palette.controlFill)
+                    .then(if (on) Modifier.drawBehind { drawInnerRing(accent.copy(alpha = 0.6f), 1.2.dp.toPx(), 12.dp.toPx()) } else Modifier)
+                    .clickable(role = Role.RadioButton) { onSelect(i) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(label, style = stageText(13f, 700), color = if (on) accent else palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
+/** A size setting drawn as the 4 dp `.prog` bar: [fraction] 0 at the left … 1 at the right; tap or drag. */
+@Composable
+fun StageSizeBar(fraction: Float, onChange: (Float) -> Unit, modifier: Modifier = Modifier) {
+    fun at(x: Float, width: Int) = (x / width).coerceIn(0f, 1f)
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(24.dp)
+            .pointerInput(Unit) { detectTapGestures { onChange(at(it.x, size.width)) } }
+            .pointerInput(Unit) { detectHorizontalDragGestures { change, _ -> onChange(at(change.position.x, size.width)) } },
+        contentAlignment = Alignment.Center,
+    ) {
+        StageProgress(fraction, Modifier.fillMaxWidth())
     }
 }
 
@@ -306,9 +355,9 @@ fun StageRecommended(modifier: Modifier = Modifier) {
 
 /** `.pm`: which playlist a row comes from, outlined in its colour; darkened in light to read on white. */
 @Composable
-fun StagePlaylistMark(mark: PlaylistMark, modifier: Modifier = Modifier) {
+fun StagePlaylistMark(mark: PlaylistMark, modifier: Modifier = Modifier, tint: Color? = null) {
     val base = Color(mark.argb)
-    val color = if (LocalStagePalette.current.isLight) Color(base.red * 0.72f, base.green * 0.72f, base.blue * 0.72f) else base
+    val color = tint ?: if (LocalStagePalette.current.isLight) Color(base.red * 0.72f, base.green * 0.72f, base.blue * 0.72f) else base
     Box(
         modifier
             .height(17.dp)
@@ -411,6 +460,11 @@ fun StageSearchField(
     modifier: Modifier = Modifier,
     inline: Boolean = false,
     onSearch: (() -> Unit)? = null,
+    /** Null makes it the plain Stage text field of a name prompt (Rename, New category, Set TMDB name). */
+    icon: ImageVector? = MobileIcons.Search,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    /** [onSearch] runs on this key as well — Done on a name prompt. */
+    imeAction: ImeAction = ImeAction.Search,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -423,8 +477,11 @@ fun StageSearchField(
         singleLine = true,
         textStyle = style.copy(color = palette.text),
         cursorBrush = SolidColor(accent.accent),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { onSearch?.invoke() }),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+            onSearch = { onSearch?.invoke() },
+            onDone = { onSearch?.invoke() },
+        ),
         modifier = modifier.onFocusChanged { focused = it.isFocused },
         decorationBox = { field ->
             Row(
@@ -442,7 +499,7 @@ fun StageSearchField(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                StageIcon(MobileIcons.Search, 16.dp, if (focused) palette.text else palette.dim)
+                icon?.let { StageIcon(it, 16.dp, if (focused) palette.text else palette.dim) }
                 Box(Modifier.weight(1f)) {
                     if (value.isEmpty()) Text(placeholder, style = style, color = palette.dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     field()

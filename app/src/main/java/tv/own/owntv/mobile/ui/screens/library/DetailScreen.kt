@@ -84,9 +84,19 @@ fun DetailScreen(
     itemId: Long,
     onPlay: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Another title opened from this one ("More in …"). */
+    onOpenItem: (LibraryTab, Long) -> Unit = { _, _ -> },
+    /** The versions button: a search for the title. */
+    onOpenSearch: (String) -> Unit = {},
     vm: DetailViewModel = koinViewModel(),
 ) {
     LaunchedEffect(tab, itemId) { vm.open(tab, itemId) }
+
+    // A film is the Stage movie page (M5-06); a show keeps this page until the series page (M6).
+    if (tab == LibraryTab.MOVIES) {
+        MoviePage(vm = vm, onPlay = onPlay, onOpenItem = onOpenItem, onOpenSearch = onOpenSearch, modifier = modifier)
+        return
+    }
 
     val movie by vm.movie.collectAsStateWithLifecycle()
     val show by vm.show.collectAsStateWithLifecycle()

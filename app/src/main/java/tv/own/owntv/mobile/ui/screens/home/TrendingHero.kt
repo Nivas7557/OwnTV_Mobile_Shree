@@ -1,7 +1,6 @@
 package tv.own.owntv.mobile.ui.screens.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -24,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -53,7 +51,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -75,6 +72,7 @@ import tv.own.owntv.mobile.ui.screens.library.playTrailer
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.StageButton
 import tv.own.owntv.mobile.ui.stage.StageButtonStyle
+import tv.own.owntv.mobile.ui.stage.StageCastRow
 import tv.own.owntv.mobile.ui.stage.StageEyebrow
 import tv.own.owntv.mobile.ui.stage.StageGroupLabel
 import tv.own.owntv.mobile.ui.stage.StageMenuItem
@@ -262,14 +260,16 @@ fun TrendingHero(
                         icon = MobileIcons.PlayCircle,
                     )
                 }
-                val versionsLabel = stringResource(R.string.home_trending_all_versions)
-                StageButton(
-                    onClick = onVersions,
-                    modifier = Modifier.semantics { contentDescription = versionsLabel },
-                    icon = MobileIcons.Layers,
-                    trailing = versionsCount,
-                )
             }
+            // Versions keeps its own width like ⓘ and ♥: when the estimate above is short, only Trailer's word
+            // shortens — the count was the one squeezed to "…" (M5 check).
+            val versionsLabel = stringResource(R.string.home_trending_all_versions)
+            StageButton(
+                onClick = onVersions,
+                modifier = Modifier.semantics { contentDescription = versionsLabel },
+                icon = MobileIcons.Layers,
+                trailing = versionsCount,
+            )
             val infoLabel = stringResource(R.string.home_trending_more_details)
             StageButton(onClick = onInfo, modifier = Modifier.semantics { contentDescription = infoLabel }, icon = MobileIcons.Info)
             val favouriteLabel = stringResource(if (favourite) R.string.content_remove_favourite else R.string.content_add_favourite)
@@ -533,35 +533,7 @@ fun TrendingInfoSheet(
                 Text(it, style = stageText(12.5f, 500, lineHeight = 1.5f), color = palette.body, modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 12.dp))
             }
             if (cast.isNotEmpty()) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp),
-                    modifier = Modifier.padding(bottom = 14.dp),
-                ) {
-                    itemsIndexed(cast) { _, member ->
-                        Column(Modifier.width(56.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            AsyncImage(
-                                MetadataImages.profile(member.profilePath),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(46.dp)
-                                    .clip(CircleShape)
-                                    .background(palette.cardSolid)
-                                    .border(1.5.dp, palette.ink.copy(alpha = 0.14f), CircleShape),
-                            )
-                            Text(
-                                member.name,
-                                style = stageText(10.5f, 600, lineHeight = 1.2f),
-                                color = palette.muted,
-                                textAlign = TextAlign.Center,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(top = 5.dp),
-                            )
-                        }
-                    }
-                }
+                StageCastRow(cast, contentPadding = PaddingValues(horizontal = 8.dp), modifier = Modifier.padding(bottom = 14.dp))
             }
             StageGroupLabel(stringResource(R.string.home_trending_why_label))
             Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

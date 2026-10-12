@@ -150,6 +150,9 @@ fun MobileNavHost(
                         tab = LibraryTab.valueOf(tab),
                         itemId = itemId,
                         onPlay = { navController.navigate(PLAYER_ROUTE) },
+                        // "More in …" opens the next title under the same place.
+                        onOpenItem = { nextTab, id -> navController.navigate(detailRoute(parent.route, nextTab, id)) },
+                        onOpenSearch = { query -> navController.navigate(searchRoute(query)) },
                     )
                 }
             }
@@ -305,6 +308,9 @@ private val LibraryTab.parent: MobileDestination
 
 private fun detailRoute(parentRoute: String, tab: LibraryTab, itemId: Long) =
     "$parentRoute/${tab.name}/$itemId"
+
+/** A film's or a show's own page — the shell gives it the title-page header (M5-06). */
+fun isTitleRoute(route: String?): Boolean = route?.endsWith("/{$ARG_TAB}/{$ARG_ITEM_ID}") == true
 
 private const val ARG_TAB = "tab"
 private const val ARG_ITEM_ID = "itemId"

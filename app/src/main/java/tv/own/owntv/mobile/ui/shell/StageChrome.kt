@@ -116,6 +116,9 @@ class HomeChrome {
     var backdropUrl by mutableStateOf<String?>(null)
     var backdropHeight by mutableStateOf(470.dp)
 
+    /** Where the picture is cropped (`object-position`): Home 62% / 30%, a movie page 70% / 30%. */
+    var backdropAlignment by mutableStateOf(BiasAlignment(0.24f, -0.4f))
+
     /** 1 = the full picture … 0 = gone; read in the draw phase only. */
     var backdropAlpha by mutableFloatStateOf(1f)
     var heading by mutableStateOf<HomeHeading?>(null)
@@ -129,10 +132,30 @@ data class HomeResume(val name: String, val onClick: () -> Unit)
 val LocalHomeChrome = staticCompositionLocalOf<HomeChrome?> { null }
 
 /**
+ * A title page (a film, a show — M5-06, M6-01) lends the shell its backdrop the same way Home does. Its own
+ * holder, not Home's: on the way back the two pages are briefly both alive, and one clearing the other's
+ * picture would leave Home without its own.
+ */
+val LocalTitleChrome = staticCompositionLocalOf<HomeChrome?> { null }
+
+/**
  * A place's own crumb (Live TV's "‹ **Sky Cinema** · 9 channels"): the [accent] part, the muted [rest] after a dot,
  * and what a tap opens (the categories). Set by the place while it is on screen.
  */
-data class PageCrumb(val accent: String, val rest: String?, val chevron: Boolean = true, val onClick: () -> Unit)
+data class PageCrumb(val accent: String, val rest: String?, val chevron: Boolean = true, val owner: Any? = null, val onClick: () -> Unit)
+
+/**
+ * Lend the shell [crumb] while this place is on screen. Leaving clears it only if it is still this place's: during
+ * a tab switch the next place sets its own crumb before this one is disposed, and clearing that left Live TV
+ * without a crumb after Movies (M5 check).
+ */
+@Composable
+fun ProvidePageCrumb(crumb: (owner: Any) -> PageCrumb) {
+    val holder = LocalPageCrumb.current
+    val owner = remember { Any() }
+    androidx.compose.runtime.SideEffect { holder.value = crumb(owner) }
+    androidx.compose.runtime.DisposableEffect(Unit) { onDispose { if (holder.value?.owner === owner) holder.value = null } }
+}
 
 val LocalPageCrumb = staticCompositionLocalOf<MutableState<PageCrumb?>> { mutableStateOf(null) }
 
@@ -164,7 +187,7 @@ fun HomeBackdrop(chrome: HomeChrome) {
                 drawRect(wash)
             },
     ) {
-        AsyncImage(url, contentDescription = null, contentScale = ContentScale.Crop, alignment = BiasAlignment(0.24f, -0.4f), modifier = Modifier.fillMaxSize())
+        AsyncImage(url, contentDescription = null, contentScale = ContentScale.Crop, alignment = chrome.backdropAlignment, modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -266,7 +289,8 @@ fun StageNavBar(
  * The page header (`.hdr`): the page's own title (28 / 800) with the top-right [cluster] beside it, and
  * under it the crumb — "‹ where you came from" on a pushed page, which goes back when tapped (F24: the
  * title names the page, the crumb says where from). Home has no title, only its [heading] once scrolled;
- * a detail page has only the crumb.
+ * a detail page has only the crumb. A title page ([backPill]: a film, a show) has neither — the glass ‹
+ * pill, then the cluster, over its own backdrop; the page names itself below (M5-06).
  */
 @Composable
 fun StagePageHeader(
@@ -276,9 +300,21 @@ fun StagePageHeader(
     modifier: Modifier = Modifier,
     heading: HomeHeading? = null,
     crumb: PageCrumb? = null,
+    backPill: Boolean = false,
     cluster: @Composable () -> Unit,
 ) {
     val palette = LocalStagePalette.current
+    if (backPill) {
+        Row(
+            modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StagePill(onClick = onBack, icon = MobileIcons.ArrowBack, contentDescription = backLabel)
+            Box(Modifier.weight(1f))
+            cluster()
+        }
+        return
+    }
     Column(modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
         Row(
             verticalAlignment = if (heading != null) Alignment.CenterVertically else Alignment.Top,

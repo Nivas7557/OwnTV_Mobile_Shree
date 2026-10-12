@@ -11,9 +11,7 @@ import tv.own.owntv.core.customize.CategoryRestorePlan
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextOverflow
 import tv.own.owntv.core.live.ProviderTags
 import tv.own.owntv.core.parser.XtEpgEntry
@@ -22,7 +20,7 @@ import tv.own.owntv.core.ui.stage.PlaylistMark
 import tv.own.owntv.mobile.ui.components.rememberClockTick
 import tv.own.owntv.mobile.ui.screens.home.formatCount
 import tv.own.owntv.mobile.ui.screens.home.timeLeftText
-import tv.own.owntv.mobile.ui.shell.LocalPageCrumb
+import tv.own.owntv.mobile.ui.shell.ProvidePageCrumb
 import tv.own.owntv.mobile.ui.shell.PageCrumb
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.StageIcon
@@ -77,6 +75,7 @@ import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.mobile.R
+import tv.own.owntv.mobile.ui.screens.home.groupedCountText
 import tv.own.owntv.mobile.ui.components.ChannelLogoImage
 import tv.own.owntv.mobile.ui.components.TwoPane
 import tv.own.owntv.mobile.ui.nav.isExpandedWidth
@@ -193,11 +192,9 @@ fun LiveScreen(
     // M3-06: "Live TV opens in: Guide" draws the guide grid in place of the list (not in a locked list).
     val guideView = lockedKey == null && liveView == SettingsRepository.LiveView.GUIDE
     val countText = if (guideView) stringResource(R.string.content_live_guide_view)
-    else pluralStringResource(R.plurals.content_live_channel_count, count, count)
-    val crumbHolder = LocalPageCrumb.current
+    else groupedCountText(R.plurals.content_live_channel_count, count)
     if (lockedKey == null) {
-        SideEffect { crumbHolder.value = PageCrumb(categoryLabel, countText) { categoryPicker = true } }
-        DisposableEffect(Unit) { onDispose { crumbHolder.value = null } }
+        ProvidePageCrumb { owner -> PageCrumb(categoryLabel, countText, owner = owner) { categoryPicker = true } }
     }
 
     // The guide is read for what is actually on screen. Watching the visible range rather than each

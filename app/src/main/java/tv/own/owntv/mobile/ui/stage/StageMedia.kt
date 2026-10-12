@@ -1,6 +1,16 @@
 package tv.own.owntv.mobile.ui.stage
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.BiasAlignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.Layout
+import tv.own.owntv.core.metadata.CastMember
+import tv.own.owntv.core.metadata.MetadataImages
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -92,13 +102,30 @@ fun StagePoster(
                 .background(palette.cardSolid),
         ) {
             AsyncImage(imageUrl, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            rating?.let { StageRatingChip(it, Modifier.align(Alignment.TopStart).padding(5.dp)) }
-            when {
-                watched -> Box(
-                    Modifier.align(Alignment.TopEnd).padding(5.dp).size(22.dp).background(accent.accent, CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) { StageIcon(MobileIcons.Check, 13.dp, accent.onAccent) }
-                mark != null -> StagePlaylistMark(mark, Modifier.align(Alignment.TopEnd).padding(5.dp))
+            // The rating chip top left, ✓ or the playlist mark top right — the right one left out when the two
+            // would touch (four posters a row, a large font), never drawn over the rating.
+            Layout(
+                content = {
+                    rating?.let { StageRatingChip(it) }
+                    when {
+                        watched -> Box(
+                            Modifier.size(22.dp).background(accent.accent, CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) { StageIcon(MobileIcons.Check, 13.dp, accent.onAccent) }
+                        mark != null -> StagePlaylistMark(mark)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().padding(5.dp),
+            ) { measurables, constraints ->
+                val loose = constraints.copy(minWidth = 0, minHeight = 0)
+                val placeables = measurables.map { it.measure(loose) }
+                val left = placeables.getOrNull(0).takeIf { rating != null }
+                val right = (if (rating != null) placeables.getOrNull(1) else placeables.getOrNull(0))
+                    ?.takeIf { (left?.width ?: 0) + it.width + 4.dp.roundToPx() <= constraints.maxWidth }
+                layout(constraints.maxWidth, maxOf(left?.height ?: 0, right?.height ?: 0)) {
+                    left?.place(0, 0)
+                    right?.place(constraints.maxWidth - right.width, 0)
+                }
             }
             progress?.let { WatchProgress(it) }
         }
@@ -130,6 +157,41 @@ fun StageRatingChip(rating: String, modifier: Modifier = Modifier) {
     ) {
         StageIcon(MobileIcons.Star, 10.dp, Color(0xFFFFCC4D))
         Text(rating, style = stageText(10.5f, 800, lineHeight = 1f), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/**
+ * The cast (`cast()` of the mockup): a row of 56 dp columns 12 apart — the TMDB photo in a 46 dp circle with a
+ * 1.5 dp ink rim, the name under it (10.5 / 600 muted, two lines). Home's ⓘ sheet and the movie page.
+ */
+@Composable
+fun StageCastRow(cast: List<CastMember>, modifier: Modifier = Modifier, contentPadding: PaddingValues = PaddingValues()) {
+    val palette = LocalStagePalette.current
+    LazyRow(modifier, horizontalArrangement = Arrangement.spacedBy(12.dp), contentPadding = contentPadding) {
+        items(cast) { member ->
+            Column(Modifier.width(56.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                AsyncImage(
+                    MetadataImages.profile(member.profilePath),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    alignment = BiasAlignment(0f, -0.6f),
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                        .background(palette.cardSolid)
+                        .border(1.5.dp, palette.ink.copy(alpha = 0.14f), CircleShape),
+                )
+                Text(
+                    member.name,
+                    style = stageText(10.5f, 600, lineHeight = 1.2f),
+                    color = palette.muted,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 5.dp),
+                )
+            }
+        }
     }
 }
 
