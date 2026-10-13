@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,8 +69,8 @@ fun UpdateSheet(onDismiss: () -> Unit, checkOnOpen: Boolean = false) {
                         Spacer(Modifier.width(MobileDimens.GapSmall))
                         Text(
                             text = stringResource(R.string.update_checking),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = tv.own.owntv.mobile.ui.stage.stageText(13.5f, 500),
+                            color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.dim,
                         )
                     }
                 }
@@ -79,8 +78,8 @@ fun UpdateSheet(onDismiss: () -> Unit, checkOnOpen: Boolean = false) {
                 UpdateManager.State.UpToDate -> {
                     Text(
                         text = stringResource(R.string.update_latest, manager.currentVersion),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = tv.own.owntv.mobile.ui.stage.stageText(13.5f, 500),
+                        color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.dim,
                     )
                     Spacer(Modifier.height(MobileDimens.GapMedium))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -98,21 +97,21 @@ fun UpdateSheet(onDismiss: () -> Unit, checkOnOpen: Boolean = false) {
                             s.info.version,
                             manager.currentVersion,
                         ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style = tv.own.owntv.mobile.ui.stage.stageText(13.5f, 500),
+                        color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.text,
                     )
                     if (s.info.notes.isNotBlank()) {
                         Spacer(Modifier.height(MobileDimens.GapSmall))
                         Text(
                             text = stringResource(R.string.update_whats_new),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            style = tv.own.owntv.mobile.ui.stage.stageText(14f, 700),
+                            color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.text,
                         )
                         Spacer(Modifier.height(MobileDimens.GapSmall))
                         Text(
                             text = renderReleaseNotes(s.info.notes),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = tv.own.owntv.mobile.ui.stage.stageText(12f, 500),
+                            color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.dim,
                             // Capped and scrolled so Update / Later stay on screen, as on the
                             // television — a sheet that grows past its buttons is a sheet with no
                             // way to act on it.
@@ -148,23 +147,23 @@ fun UpdateSheet(onDismiss: () -> Unit, checkOnOpen: Boolean = false) {
                         Spacer(Modifier.width(MobileDimens.GapSmall))
                         Text(
                             text = stringResource(R.string.update_downloading, s.percent),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = tv.own.owntv.mobile.ui.stage.stageText(13.5f, 500),
+                            color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.dim,
                         )
                     }
                     Spacer(Modifier.height(MobileDimens.GapSmall))
                     Text(
                         text = stringResource(R.string.update_installer),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = tv.own.owntv.mobile.ui.stage.stageText(12f, 500),
+                        color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.dim,
                     )
                 }
 
                 is UpdateManager.State.Failed -> {
                     Text(
                         text = updateFailureText(s.failure),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = tv.own.owntv.mobile.ui.stage.stageText(13.5f, 500),
+                        color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.dim,
                     )
                     Spacer(Modifier.height(MobileDimens.GapMedium))
                     Row(

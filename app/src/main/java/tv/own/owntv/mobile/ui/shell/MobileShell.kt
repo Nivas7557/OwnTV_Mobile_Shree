@@ -427,7 +427,7 @@ fun MobileShell(
         else -> null
     }
     val activeProfile = loadedProfiles.firstOrNull { it.id == activeId }
-    // The Stage palette, not Material's scheme: the latter stayed dark in Light, so the icon came out pale on pale.
+    // The Stage palette decides the theme everywhere else in the shell, so the cast icon follows it too.
     val onSurfaceLight = !LocalStagePalette.current.isLight
 
     // The status and gesture bars' icons follow the app's own theme, not the phone's night mode (which

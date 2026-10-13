@@ -1,21 +1,14 @@
 package tv.own.owntv.mobile.ui.screens.settings
 
 import tv.own.owntv.mobile.ui.components.MobileIcons
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,7 +19,10 @@ import tv.own.owntv.mobile.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import tv.own.owntv.mobile.ui.stage.StageTool
-import tv.own.owntv.mobile.ui.components.MobileListRow
+import tv.own.owntv.mobile.ui.stage.StageButton
+import tv.own.owntv.mobile.ui.stage.StageButtonStyle
+import tv.own.owntv.mobile.ui.stage.StageSettingRow
+import androidx.compose.foundation.layout.Column
 import tv.own.owntv.mobile.ui.screens.settings.customize.ConfirmDialog
 
 /**
@@ -59,21 +55,8 @@ fun DeleteSubtitlesPage(
 
     SettingsPage(modifier) {
         settingsGroup(key = "header") {
-            Row(
-                Modifier.fillMaxWidth().padding(end = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = MobileIcons.ArrowBack,
-                        contentDescription = stringResource(R.string.settings_close),
-                    )
-                }
-                Text(
-                    stringResource(R.string.settings_delete_subtitles),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
+            // An in-page step of OpenSubtitles, so it carries its own way back.
+            StageSettingRow(title = stringResource(R.string.settings_delete_subtitles), icon = MobileIcons.ArrowBack, onClick = onBack)
         }
         settingsNote(R.string.player_subtitles_delete_description)
         settingsGroup(key = "sections") {
@@ -92,31 +75,34 @@ fun DeleteSubtitlesPage(
             settingsNote(R.string.settings_no_downloaded_subtitles)
         }
         items(items, key = { it.cacheId }) { item ->
-            MobileListRow(
+            StageSettingRow(
                 title = item.contentTitle,
                 subtitle = listOfNotNull(item.languageName ?: item.language, item.releaseName)
                     .joinToString(stringResource(R.string.content_metadata_separator))
                     .ifBlank { null },
-                trailing = {
-                    TextButton(onClick = { deletingOne = item }) {
-                        Text(stringResource(R.string.common_delete))
-                    }
-                },
-            )
+                onClick = { deletingOne = item },
+            ) {
+                StageButton(onClick = { deletingOne = item }, text = stringResource(R.string.common_delete), style = StageButtonStyle.DANGER, small = true)
+            }
         }
 
         settingsGroup(key = "delete-section") {
-            TextButton(
-                onClick = { deletingSection = section },
-                enabled = items.isNotEmpty(),
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) { Text(stringResource(section.deleteAllRes())) }
-
-            TextButton(
-                onClick = { deletingAll = true },
-                enabled = movieCount + seriesCount > 0,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) { Text(stringResource(R.string.settings_delete_all)) }
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                StageButton(
+                    onClick = { deletingSection = section },
+                    text = stringResource(section.deleteAllRes()),
+                    style = StageButtonStyle.DANGER,
+                    enabled = items.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                StageButton(
+                    onClick = { deletingAll = true },
+                    text = stringResource(R.string.settings_delete_all),
+                    style = StageButtonStyle.DANGER,
+                    enabled = movieCount + seriesCount > 0,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 

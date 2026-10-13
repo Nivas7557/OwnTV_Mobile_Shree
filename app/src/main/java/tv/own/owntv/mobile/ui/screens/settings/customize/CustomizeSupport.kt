@@ -29,14 +29,12 @@ import tv.own.owntv.mobile.ui.screens.settings.SheetText
 import tv.own.owntv.mobile.ui.screens.settings.StageChoiceSheet
 import tv.own.owntv.mobile.ui.screens.settings.StageConfirmSheet
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
-import tv.own.owntv.mobile.ui.stage.StageIcon
 import tv.own.owntv.mobile.ui.stage.StageMenuItem
 import tv.own.owntv.mobile.ui.stage.StageRadio
 import tv.own.owntv.mobile.ui.stage.StageSearchField
 import tv.own.owntv.mobile.ui.stage.StageSettingRow
 import tv.own.owntv.mobile.ui.stage.StageSheetHeader
 import tv.own.owntv.mobile.ui.stage.StageSwitch
-import tv.own.owntv.mobile.ui.stage.stageAccent
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /**
@@ -168,9 +166,3 @@ fun MoveToCategoryDialog(
         StageMenuItem(stringResource(R.string.common_cancel), onClick = onDismiss, icon = MobileIcons.Close)
     }
 }
-
-/** The tick a chosen filter/sort option carries in a bottom sheet. */
-fun selectedTick(selected: Boolean): (@Composable () -> Unit)? =
-    if (!selected) null else {
-        { StageIcon(MobileIcons.Check, 18.dp, stageAccent.accent) }
-    }

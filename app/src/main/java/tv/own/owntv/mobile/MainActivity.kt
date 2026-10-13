@@ -148,6 +148,7 @@ open class MainActivity : FragmentActivity() {
             autoRefresh.check(includeStartup = true)
         }
         setContent {
+            tv.own.owntv.mobile.ui.LocalizedContent(localeStore) {
             MobileTheme {
                 // The wallpaper and its blurred copy sit outside the shell, so the frost every glass
                 // panel samples is one image for the whole app rather than one per panel.
@@ -161,6 +162,7 @@ open class MainActivity : FragmentActivity() {
                         MobileShell(windowWidthDp = LocalConfiguration.current.screenWidthDp)
                     }
                 }
+            }
             }
         }
     }
@@ -272,6 +274,8 @@ open class MainActivity : FragmentActivity() {
             return
         }
         if (pip.inPip.value) return
+        // A preview is a glance, not watching: leaving the app ends it rather than playing on unseen.
+        if (tuner.previewing.value) return tuner.stop()
         if (!tuner.hasStream) return
         val playing = engine
         if (!backgroundPlayback) {

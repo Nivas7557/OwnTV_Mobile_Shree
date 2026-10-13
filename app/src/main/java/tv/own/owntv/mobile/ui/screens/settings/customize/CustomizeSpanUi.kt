@@ -2,15 +2,12 @@ package tv.own.owntv.mobile.ui.screens.settings.customize
 
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -34,13 +31,7 @@ import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 /** The tick that marks a row as part of the span being selected. */
 internal fun spanTick(selected: Boolean): (@Composable () -> Unit)? =
     if (!selected) null else {
-        {
-            Icon(
-                imageVector = MobileIcons.Check,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
+        { tv.own.owntv.mobile.ui.stage.StageIcon(MobileIcons.Check, 18.dp, tv.own.owntv.mobile.ui.stage.stageAccent.accent) }
     }
 
 /**
@@ -62,7 +53,7 @@ internal fun SpanBar(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(tv.own.owntv.mobile.ui.stage.stageAccent.accent.copy(alpha = 0.16f))
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -79,8 +70,8 @@ internal fun SpanBar(
                     selectedCount,
                 )
             },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            style = tv.own.owntv.mobile.ui.stage.stageText(13f, 600),
+            color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.text,
             modifier = Modifier.weight(1f),
         )
         if (mode == SpanSelector.Mode.MOVE && hasEnd) {
@@ -89,15 +80,13 @@ internal fun SpanBar(
             MoveArrow(MobileIcons.KeyboardArrowDown, R.string.settings_row_menu_move_down) { onMove(MoveKind.DOWN) }
             MoveArrow(MobileIcons.KeyboardDoubleArrowDown, R.string.settings_customize_move_bottom) { onMove(MoveKind.BOTTOM) }
         }
-        TextButton(onClick = onCancel) { Text(stringResource(R.string.common_cancel)) }
+        tv.own.owntv.mobile.ui.stage.StageButton(onClick = onCancel, text = stringResource(R.string.common_cancel), small = true, modifier = Modifier.padding(start = 6.dp))
     }
 }
 
 @Composable
 private fun MoveArrow(icon: ImageVector, labelRes: Int, onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        Icon(imageVector = icon, contentDescription = stringResource(labelRes))
-    }
+    Box(Modifier.padding(start = 6.dp)) { tv.own.owntv.mobile.ui.screens.settings.MoveKey(icon, labelRes, true, onClick) }
 }
 
 /** Hide or show every row in the chosen span — or back out of it. */

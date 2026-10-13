@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -235,8 +234,8 @@ private fun GlassPreview() {
     ) {
         Text(
             text = stringResource(R.string.settings_glass_live_preview),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = tv.own.owntv.mobile.ui.stage.stageText(15f, 700),
+            color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.text,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()

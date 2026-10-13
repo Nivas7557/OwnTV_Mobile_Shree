@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,7 +47,6 @@ import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.sheetListHeight
 import tv.own.owntv.mobile.ui.components.MobileButton
 import tv.own.owntv.mobile.ui.components.MobileButtonStyle
-import tv.own.owntv.mobile.ui.components.MobileListRow
 import tv.own.owntv.mobile.ui.components.MobileTextField
 import tv.own.owntv.mobile.ui.components.SettingRow
 import tv.own.owntv.mobile.ui.theme.MobileDimens
@@ -333,9 +331,9 @@ private fun EpgSourceSheet(
                 imeAction = ImeAction.Done,
                 modifier = Modifier.fillMaxWidth(),
             )
-            MobileListRow(
+            SettingRow(
                 title = stringResource(R.string.settings_epg_sources_auto_refresh_title),
-                subtitle = epgRefreshLabel(refresh),
+                value = epgRefreshLabel(refresh),
                 onClick = { showRefresh = true },
             )
             SettingRow(
@@ -390,8 +388,8 @@ private fun EpgSourceSheet(
             if (list != null && list.isEmpty()) {
                 Text(
                     text = stringResource(R.string.settings_epg_sources_none_playlist),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = tv.own.owntv.mobile.ui.stage.stageText(13.5f, 500),
+                    color = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.dim,
                     modifier = Modifier.padding(horizontal = MobileDimens.ScreenPaddingH),
                 )
             }
@@ -399,10 +397,9 @@ private fun EpgSourceSheet(
                 // A portal guide has no address to show, and nothing to fill in — say what it is, and
                 // add it straight away rather than putting an internal marker in a URL box.
                 val portal = tv.own.owntv.core.repository.EpgRepository.stalkerSourceIdOf(option.url) != null
-                MobileListRow(
+                tv.own.owntv.mobile.ui.stage.StageSettingRow(
                     title = option.name,
                     subtitle = if (portal) stringResource(R.string.settings_epg_sources_portal_guide) else tv.own.owntv.core.network.HttpClient.redactUrl(option.url),
-                    trailing = { tv.own.owntv.mobile.ui.stage.StageRadio(option.url == url) },
                     onClick = {
                         showPlaylists = false
                         if (portal) {
@@ -414,7 +411,7 @@ private fun EpgSourceSheet(
                             if (name.isBlank()) name = option.name
                         }
                     },
-                )
+                ) { tv.own.owntv.mobile.ui.stage.StageRadio(option.url == url) }
             }
         }
     }

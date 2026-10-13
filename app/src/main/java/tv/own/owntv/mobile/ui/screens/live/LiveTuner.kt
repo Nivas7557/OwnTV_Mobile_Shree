@@ -582,6 +582,8 @@ class LiveTuner(
 
     /** Play [channelId] in Live TV's preview pane (see [previewing]). */
     fun preview(channelId: Long) {
+        // Casting: the television plays what is picked, as before — a silent preview belongs to the phone.
+        if (cast.deviceName.value != null) return tune(channelId)
         if (loadedId == channelId) return
         // A channel opened full screen and brought back to the pane is a real tune; a tap on another
         // row leaves it, as on the television.
