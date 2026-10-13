@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -325,13 +326,29 @@ fun StagePageHeader(
     }
     Column(modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
         Row(
-            verticalAlignment = if (heading != null) Alignment.CenterVertically else Alignment.Top,
+            verticalAlignment = if (heading != null || backLabel != null) Alignment.CenterVertically else Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // The cluster keeps its room (its playlist pill is only the mark) so the avatar is always there; a
             // title too long for the rest ("Programmübersicht" at a large font) shrinks rather than being cut.
-            // Home's scrolled heading shares the row.
-            Box(Modifier.weight(1f)) {
+            // Home's scrolled heading shares the row. A pushed page's way back ("‹ More") sits ABOVE its title
+            // (the mockup's `header(…, { back })`, M8-02); a place's own crumb sits below.
+            Column(Modifier.weight(1f)) {
+                if (backLabel != null) {
+                    val interaction = remember { MutableInteractionSource() }
+                    Row(
+                        Modifier
+                            .padding(bottom = 4.dp)
+                            .stageClickable(interaction, onBack, null)
+                            .semantics { contentDescription = backLabel },
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
+                        // `.crumb` is muted 500; only a bold part (a category) takes the accent.
+                        Text(backLabel, style = stageText(13f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
                 if (heading != null) {
                     HomeHeadingText(heading)
                 } else if (title != null) {
@@ -352,20 +369,7 @@ fun StagePageHeader(
                 cluster()
             }
         }
-        if (backLabel != null) {
-            val interaction = remember { MutableInteractionSource() }
-            Row(
-                Modifier
-                    .padding(top = 5.dp)
-                    .stageClickable(interaction, onBack, null)
-                    .semantics { contentDescription = backLabel },
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
-                Text(backLabel, style = stageText(13f, 700), color = stageAccent.accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        } else if (crumb != null) {
+        if (backLabel == null && crumb != null) {
             val interaction = remember { MutableInteractionSource() }
             Row(
                 Modifier
@@ -393,7 +397,8 @@ fun StagePageHeader(
 /**
  * The top-right cluster (`.cl`): the playlist pill, search and the avatar that opens More. [playlist] is
  * the pill's state: null hides it (settings and More pages), [ClusterPlaylist.iconOnly] is Home's layers
- * pill. [extra] takes anything that must stay reachable from every page (the cast button).
+ * pill. [extra] takes anything that must stay reachable from every page (the cast button); a weighted
+ * item there (Home's Resume pill) is the one that shortens, so the avatar never leaves the screen.
  */
 @Composable
 fun ShellCluster(
@@ -403,7 +408,7 @@ fun ShellCluster(
     onPlaylist: () -> Unit,
     onSearch: () -> Unit,
     onAvatar: () -> Unit,
-    extra: @Composable () -> Unit = {},
+    extra: @Composable RowScope.() -> Unit = {},
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         extra()
@@ -435,17 +440,17 @@ data class ClusterPlaylist(val label: String, val mark: PlaylistMark?, val switc
 
 /**
  * `.av`: the profile as a 32 dp circle — its own picture (the drawn tile or a photo), or with none its
- * initial on the mockup's warm gradient. A tap opens More.
+ * initial on the mockup's warm gradient. A tap opens More. More's profile card draws it at 44 dp and the
+ * profile chooser at 104 (M8-08), neither with a tap of its own; the initial is 0.41 of the circle.
  */
 @Composable
-private fun ShellAvatar(profile: ProfileEntity?, onClick: () -> Unit) {
+internal fun ShellAvatar(profile: ProfileEntity?, onClick: (() -> Unit)?, diameter: androidx.compose.ui.unit.Dp = 32.dp) {
     val interaction = remember { MutableInteractionSource() }
     val more = stringResource(R.string.common_nav_more)
     val modifier = Modifier
-        .size(32.dp)
+        .size(diameter)
         .clip(CircleShape)
-        .stageClickable(interaction, onClick, null)
-        .semantics { contentDescription = more }
+        .then(if (onClick != null) Modifier.stageClickable(interaction, onClick, null).semantics { contentDescription = more } else Modifier)
     if (profile != null && (profile.avatarId >= 0 || !profile.avatarPath.isNullOrBlank())) {
         ProfileAvatar(profile.avatarId, modifier, profile.avatarPath.orEmpty())
     } else {
@@ -457,7 +462,7 @@ private fun ShellAvatar(profile: ProfileEntity?, onClick: () -> Unit) {
         ) {
             Text(
                 profile?.name?.firstOrNull()?.uppercase().orEmpty(),
-                style = stageText(14f, 800, lineHeight = 1f),
+                style = stageText(if (diameter == 32.dp) 14f else diameter.value * 0.41f, 800, lineHeight = 1f),
                 color = Color(0xFF2A0D12),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

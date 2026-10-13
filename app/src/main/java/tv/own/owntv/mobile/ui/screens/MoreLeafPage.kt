@@ -21,14 +21,15 @@ fun MoreLeafPage(
     onOpenChannel: (channelId: Long, openCatchup: Boolean) -> Unit,
     onOpenItem: (LibraryTab, Long) -> Unit,
     onOpenPlayer: () -> Unit,
+    onOpenLanguage: () -> Unit,
 ) {
     when (leaf) {
         MoreLeaf.PROFILES -> SettingsProfilePage()
-        MoreLeaf.FAVORITES -> FavoritesScreen(onOpenChannel, onOpenItem, onOpenPlayer)
+        MoreLeaf.FAVORITES -> FavoritesScreen(onOpenChannel, onOpenItem)
         MoreLeaf.HISTORY -> WatchHistoryScreen(onOpenChannel, onOpenItem, onOpenPlayer)
         MoreLeaf.BACKUP -> SettingsBackupPage()
         MoreLeaf.LOCAL_SYNC -> SettingsLocalSyncPage()
         MoreLeaf.ERROR_LOG -> SettingsErrorLogPage()
-        MoreLeaf.ABOUT -> AboutPage()
+        MoreLeaf.ABOUT -> AboutPage(onOpenLanguage)
     }
 }

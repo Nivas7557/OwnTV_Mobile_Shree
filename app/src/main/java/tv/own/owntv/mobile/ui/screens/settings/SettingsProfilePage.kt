@@ -1,5 +1,7 @@
 package tv.own.owntv.mobile.ui.screens.settings
 
+import androidx.activity.compose.LocalActivity
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +40,9 @@ private val ROW_AVATAR_SIZE = 36.dp
 fun SettingsProfilePage(
     modifier: Modifier = Modifier,
     vm: ProfilesViewModel = koinViewModel(),
-    gateSession: ProfileGateSession = koinViewModel(),
+    // The shell's own session (the Activity's), not one of this page's: an unlock recorded on a copy
+    // never reached the shell, so a switch from here asked "Who's watching?" again.
+    gateSession: ProfileGateSession = koinViewModel(viewModelStoreOwner = LocalActivity.current as ComponentActivity),
 ) {
     val profiles by vm.profiles.collectAsStateWithLifecycle()
     val activeId by vm.activeProfileId.collectAsStateWithLifecycle()

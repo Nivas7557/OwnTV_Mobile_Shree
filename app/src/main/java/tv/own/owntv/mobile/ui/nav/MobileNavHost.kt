@@ -56,6 +56,7 @@ import tv.own.owntv.mobile.ui.theme.LocalMobileMotion
 fun MobileNavHost(
     navController: NavHostController,
     scrollToTop: SharedFlow<String>,
+    onSwitchProfile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // One layout around the whole graph: it is what lets a poster tile on one screen and the header
@@ -85,6 +86,7 @@ fun MobileNavHost(
                             navController.navigate(it.route) { launchSingleTop = true }
                         },
                         onOpenLeaf = { navController.navigate(it.route) { launchSingleTop = true } },
+                        onSwitchProfile = onSwitchProfile,
                         onDevRoute = { navController.navigate(it.route) },
                     )
                     MobileDestination.HOME -> HomeScreen(
@@ -220,6 +222,7 @@ fun MobileNavHost(
                             navController.navigate(detailRoute(tab.parent.route, tab, id))
                         },
                         onOpenPlayer = { navController.navigate(PLAYER_ROUTE) },
+                        onOpenLanguage = { navController.navigate(tv.own.owntv.mobile.ui.screens.settings.SettingsLeaf.LANGUAGE.route) },
                     )
                 }
             }

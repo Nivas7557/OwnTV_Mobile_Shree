@@ -224,6 +224,16 @@ object MobileIcons {
         }
     }
     val Person: ImageVector by lazy { stage(StageGlyph.PERSON) }
+    val Phone: ImageVector by lazy { stage(StageGlyph.PHONE) }
+    // No Stage glyph: the profile chooser's 🔒 PIN tag (M8-08) — a body and its shackle.
+    val Lock: ImageVector by lazy {
+        glyph() {
+            box(5f, 11f, 19f, 20.5f, 2f)
+            line(8f, 11f, 8f, 8f)
+            line(16f, 11f, 16f, 8f)
+            arc(12f, 8f, 4f, 180f, 180f)
+        }
+    }
     val People: ImageVector by lazy {
         glyph() {
             ring(9f, 8f, 3.3f); arc(9f, 19f, 6f, 180f, 180f)

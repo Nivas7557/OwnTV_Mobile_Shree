@@ -114,25 +114,9 @@ fun LibraryScreen(
     onPlay: () -> Unit,
     modifier: Modifier = Modifier,
     fixedTab: LibraryTab? = null,
-    /**
-     * Pins the grid to one folder and takes the tool row away — how the Favourites and History
-     * screens show films and shows without a second copy of this grid existing.
-     */
-    lockedKey: LiveKey? = null,
     vm: LibraryViewModel = koinViewModel(),
 ) {
     LaunchedEffect(fixedTab) { fixedTab?.let { vm.select(it) } }
-    // Locking and unlocking are one pair: the pin belongs to this screen's lifetime, not to the view
-    // model's. On the television that view model is a single instance shared with the browse section,
-    // so a pin left behind froze its category rail. `DisposableEffect` (not `LaunchedEffect`) also
-    // means the pin is in place before the first frame, so the list never flashes the wrong folder.
-    if (lockedKey != null) {
-        val pinned = lockedKey
-        DisposableEffect(pinned) {
-            vm.lock(pinned)
-            onDispose { vm.unlock() }
-        }
-    }
 
     val tab by vm.tab.collectAsStateWithLifecycle()
     val categories by vm.categories.collectAsStateWithLifecycle()
@@ -189,13 +173,10 @@ fun LibraryScreen(
         tappedItem = null
     }
 
-    // The header's crumb (M5-01): "‹ Disney+ Kids Movies · 136 titles", a tap opens the categories. A locked
-    // list (Favourites, History) is one folder already and its page names it.
+    // The header's crumb (M5-01): "‹ Disney+ Kids Movies · 136 titles", a tap opens the categories.
     val categoryLabel = categories.firstOrNull { it.key == selected }?.label(tab).orEmpty()
     val countText = groupedCountText(if (movies) R.plurals.content_vod_title_count else R.plurals.content_vod_series_count, count)
-    if (lockedKey == null) {
-        ProvidePageCrumb { owner -> PageCrumb(categoryLabel, countText, owner = owner) { categoriesOpen = true } }
-    }
+    ProvidePageCrumb { owner -> PageCrumb(categoryLabel, countText, owner = owner) { categoriesOpen = true } }
 
     // A show's list row says how many seasons it has — read for the rows on screen only.
     if (!movies && viewMode == SettingsRepository.VodViewMode.LIST) {
@@ -215,39 +196,37 @@ fun LibraryScreen(
     val columns = chosenColumns.takeIf { it > 0 } ?: (maxWidth.value.toInt() / COLUMN_WIDTH_DP).coerceIn(MIN_COLUMNS, MAX_COLUMNS)
 
     Column(Modifier.fillMaxSize()) {
-        if (lockedKey == null) {
-            // `.tools`: the search field takes the room, then the order and Grid | List at the right. No categories
-            // tool (owner, 12 Oct): the crumb under the title opens the same sheet.
-            Row(
-                Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                StageSearchField(
-                    value = query,
-                    onValueChange = vm::setQuery,
-                    placeholder = stringResource(R.string.common_search),
-                    inline = true,
-                    modifier = Modifier.weight(1f),
-                )
-                // The order and Grid | List sit at the right edge and the search takes all the rest; a long order
-                // ("Hinzugefügt am" at a large font) shortens at 150 dp rather than squeezing the field to its icon.
-                StageTool(
-                    onClick = { sortOpen = true },
-                    icon = MobileIcons.Sort,
-                    value = stringResource(sort.labelRes()),
-                    on = sortOpen,
-                    modifier = Modifier.widthIn(max = 150.dp),
-                )
-                val views = SettingsRepository.VodViewMode.entries
-                StageSegmented(
-                    options = views.map { stringResource(it.labelRes()) },
-                    selected = views.indexOf(viewMode),
-                    onSelect = { vm.setViewMode(views[it]) },
-                    icons = listOf(MobileIcons.GridView, MobileIcons.FormatListBulleted),
-                    iconOnly = true,
-                )
-            }
+        // `.tools`: the search field takes the room, then the order and Grid | List at the right. No categories
+        // tool (owner, 12 Oct): the crumb under the title opens the same sheet.
+        Row(
+            Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StageSearchField(
+                value = query,
+                onValueChange = vm::setQuery,
+                placeholder = stringResource(R.string.common_search),
+                inline = true,
+                modifier = Modifier.weight(1f),
+            )
+            // The order and Grid | List sit at the right edge and the search takes all the rest; a long order
+            // ("Hinzugefügt am" at a large font) shortens at 150 dp rather than squeezing the field to its icon.
+            StageTool(
+                onClick = { sortOpen = true },
+                icon = MobileIcons.Sort,
+                value = stringResource(sort.labelRes()),
+                on = sortOpen,
+                modifier = Modifier.widthIn(max = 150.dp),
+            )
+            val views = SettingsRepository.VodViewMode.entries
+            StageSegmented(
+                options = views.map { stringResource(it.labelRes()) },
+                selected = views.indexOf(viewMode),
+                onSelect = { vm.setViewMode(views[it]) },
+                icons = listOf(MobileIcons.GridView, MobileIcons.FormatListBulleted),
+                iconOnly = true,
+            )
         }
         // Empty only once the first page has actually come back — otherwise every category change
         // flashes "No movies here" for as long as the query takes on a 170k-title catalogue.

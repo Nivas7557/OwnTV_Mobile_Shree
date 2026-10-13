@@ -82,6 +82,7 @@ import tv.own.owntv.mobile.ui.stage.StageSheetHeader
 import tv.own.owntv.mobile.ui.stage.StageStill
 import tv.own.owntv.mobile.ui.stage.StageSwitch
 import tv.own.owntv.mobile.ui.stage.StageTool
+import tv.own.owntv.mobile.ui.stage.StageTabs
 import tv.own.owntv.mobile.ui.stage.stageAccent
 import tv.own.owntv.mobile.ui.stage.stageClickable
 import tv.own.owntv.mobile.ui.stage.stageGlass
@@ -316,38 +317,12 @@ private fun DownloadTabs(
     folderOpen: Boolean,
     onFolder: () -> Unit,
 ) {
-    val palette = LocalStagePalette.current
-    val accent = stageAccent.accent
-    Row(
-        Modifier
-            .padding(start = 18.dp, end = 14.dp, top = 16.dp)
-            .fillMaxWidth()
-            .drawWithContent {
-                drawContent()
-                drawRect(palette.ink.copy(alpha = 0.1f), topLeft = Offset(0f, size.height - 1.dp.toPx()), size = size.copy(height = 1.dp.toPx()))
-            },
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
-        verticalAlignment = Alignment.Bottom,
+    StageTabs(
+        tabs = tabs.map { (t, n) -> stringResource(t.labelRes) to n },
+        selected = setOf(tabs.indexOfFirst { it.first == selected }),
+        onSelect = { onSelect(tabs[it].first) },
+        modifier = Modifier.padding(start = 18.dp, end = 14.dp, top = 16.dp),
     ) {
-        tabs.forEach { (t, n) ->
-            val on = t == selected
-            val interaction = remember { MutableInteractionSource() }
-            Column(Modifier.stageClickable(interaction, { onSelect(t) }, null, Role.Tab).width(IntrinsicSize.Max)) {
-                Text(
-                    buildAnnotatedString {
-                        append(stringResource(t.labelRes))
-                        append(" ")
-                        withStyle(SpanStyle(color = palette.dim, fontSize = stageText(11f, 700).fontSize)) { append(NumberFormat.getIntegerInstance().format(n)) }
-                    },
-                    style = stageText(14f, if (on) 800 else 700),
-                    color = if (on) palette.text else palette.muted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-                Box(Modifier.fillMaxWidth().height(3.dp).background(if (on) accent else Color.Transparent))
-            }
-        }
         Spacer(Modifier.weight(1f))
         StageTool(
             onClick = onFolder,

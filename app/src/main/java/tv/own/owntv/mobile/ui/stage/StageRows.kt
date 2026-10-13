@@ -248,6 +248,9 @@ fun StageMenuItem(
     tags: (@Composable RowScope.() -> Unit)? = null,
     mark: tv.own.owntv.core.ui.stage.PlaylistMark? = null,
     onLongClick: (() -> Unit)? = null,
+    /** More's rows (M8-01) are 48 high and end in a dim 13 dp chevron. */
+    height: Dp = 46.dp,
+    chevron: Boolean = false,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -266,7 +269,7 @@ fun StageMenuItem(
     Row(
         modifier
             .fillMaxWidth()
-            .height(46.dp)
+            .height(height)
             // Not available here (no trailer, not in history): the whole row at 45%, as the mockup dims it.
             .then(if (enabled) Modifier else Modifier.alpha(0.45f))
             .clip(shape)
@@ -299,6 +302,7 @@ fun StageMenuItem(
             if (checked) StageIcon(MobileIcons.Check, 18.dp, if (pressed) accent.onAccent else accent.accent)
             // On a filled row the playlist's own colour would vanish into the accent: it takes the row's text colour.
             mark?.let { StagePlaylistMark(it, Modifier.padding(start = 2.dp), tint = if (pressed) accent.onAccent else null) }
+            if (chevron) StageIcon(MobileIcons.KeyboardArrowRight, 13.dp, sideTint)
         }
     }
 }

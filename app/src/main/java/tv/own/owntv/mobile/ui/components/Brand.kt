@@ -108,6 +108,24 @@ fun BrandLockup(markSize: Int, textSize: Int, modifier: Modifier = Modifier, sta
 }
 
 /**
+ * The #227 wordmark by @m3th0d93 (D5, the TV's `Wordmark`): lowercase "own" in cream on a dark page (the
+ * text colour on a light one), "tv" in the accent, drawn from core's two vectors at [width]; its height
+ * follows the 988 × 182 drawing.
+ */
+@Composable
+fun Wordmark(width: Dp, modifier: Modifier = Modifier) {
+    val palette = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current
+    val own = if (palette.isLight) palette.text else WordmarkCream
+    val tv = tv.own.owntv.mobile.ui.stage.stageAccent.accent
+    androidx.compose.foundation.layout.Box(modifier.size(width, width * 182f / 988f)) {
+        Image(painterResource(R.drawable.owntv_wordmark_own), null, Modifier.matchParentSize(), colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(own))
+        Image(painterResource(R.drawable.owntv_wordmark_tv), null, Modifier.matchParentSize(), colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(tv))
+    }
+}
+
+private val WordmarkCream = Color(0xFFFFF6EE)
+
+/**
  * The icon colours as two rows of four tiles, each showing its own flat mark, with the chosen
  * colour's name underneath. Used by the setup step and by Settings.
  */

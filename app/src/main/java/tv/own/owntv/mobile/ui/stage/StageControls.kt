@@ -1,5 +1,9 @@
 package tv.own.owntv.mobile.ui.stage
 
+import androidx.compose.ui.text.withStyle
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -201,6 +205,8 @@ fun StageTool(
     /** After the text: the ⌄ of a tool that opens choices ("Today ⌄"). */
     trailingIcon: ImageVector? = null,
     contentDescription: String? = null,
+    /** History's clear tool: the danger colour. */
+    danger: Boolean = false,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -212,7 +218,7 @@ fun StageTool(
         on -> accent.accent.copy(alpha = 0.18f)
         else -> palette.controlFill
     }
-    val fg = if (pressed) accent.onAccent else if (on) accent.accent else palette.muted
+    val fg = if (pressed) accent.onAccent else if (on) accent.accent else if (danger) palette.danger else palette.muted
     val strong = if (pressed) accent.onAccent else if (on) accent.accent else palette.text
     Row(
         modifier
@@ -328,9 +334,9 @@ fun StageSizeBar(fraction: Float, onChange: (Float) -> Unit, modifier: Modifier 
 
 enum class StageTagTone { PLAIN, ACCENT, WARN }
 
-/** `.tag`: 9.5 / 800 caps-sized text on a 5 dp chip — ink, accent, or warn. */
+/** `.tag`: 9.5 / 800 caps-sized text on a 5 dp chip — ink, accent, or warn; an [icon] leads it (More's "⚠ Never"). */
 @Composable
-fun StageTag(text: String, modifier: Modifier = Modifier, tone: StageTagTone = StageTagTone.PLAIN) {
+fun StageTag(text: String, modifier: Modifier = Modifier, tone: StageTagTone = StageTagTone.PLAIN, icon: ImageVector? = null) {
     val palette = LocalStagePalette.current
     val accent = stageAccent.accent
     val (fill, fg) = when (tone) {
@@ -338,13 +344,14 @@ fun StageTag(text: String, modifier: Modifier = Modifier, tone: StageTagTone = S
         StageTagTone.ACCENT -> accent.copy(alpha = 0.2f) to accent
         StageTagTone.WARN -> (if (palette.isLight) Color(184, 100, 10).copy(alpha = 0.12f) else Color(255, 179, 92).copy(alpha = 0.16f)) to palette.warn
     }
-    Text(
-        text,
-        style = stageText(9.5f, 800, 0.05.em),
-        color = fg,
-        maxLines = 1, overflow = TextOverflow.Ellipsis,
-        modifier = modifier.clip(RoundedCornerShape(StageRadii.Tag)).background(fill).padding(horizontal = 5.dp, vertical = 2.dp),
-    )
+    Row(
+        modifier.clip(RoundedCornerShape(StageRadii.Tag)).background(fill).padding(horizontal = 5.dp, vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        icon?.let { StageIcon(it, 13.dp, fg) }
+        Text(text, style = stageText(9.5f, 800, 0.05.em), color = fg, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
 }
 
 /** `.rec`: the RECOMMENDED tag of a choice sheet. */
@@ -472,6 +479,11 @@ fun StageSearchField(
     keyboardType: KeyboardType = KeyboardType.Text,
     /** [onSearch] runs on this key as well — Done on a name prompt. */
     imeAction: ImeAction = ImeAction.Search,
+    /** A backup password: masked, and the keyboard offers no suggestions. */
+    password: Boolean = false,
+    /** Search's ✕ at the end while there is text (M8-09); [clearLabel] is its spoken name. */
+    onClear: (() -> Unit)? = null,
+    clearLabel: String? = null,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -484,7 +496,8 @@ fun StageSearchField(
         singleLine = true,
         textStyle = style.copy(color = palette.text),
         cursorBrush = SolidColor(accent.accent),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        keyboardOptions = KeyboardOptions(keyboardType = if (password) KeyboardType.Password else keyboardType, imeAction = imeAction),
+        visualTransformation = if (password) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
         keyboardActions = androidx.compose.foundation.text.KeyboardActions(
             onSearch = { onSearch?.invoke() },
             onDone = { onSearch?.invoke() },
@@ -510,6 +523,14 @@ fun StageSearchField(
                 Box(Modifier.weight(1f)) {
                     if (value.isEmpty()) Text(placeholder, style = style, color = palette.dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     field()
+                }
+                if (onClear != null && value.isNotEmpty()) {
+                    Box(
+                        Modifier
+                            .size(28.dp)
+                            .clickable(role = Role.Button, onClickLabel = clearLabel, onClick = onClear),
+                        contentAlignment = Alignment.Center,
+                    ) { StageIcon(MobileIcons.Close, 16.dp, palette.text) }
                 }
             }
         },
@@ -584,10 +605,60 @@ fun StageLabel(text: String, modifier: Modifier = Modifier, color: Color = Local
 
 /** `.eyebrow`: the trend glyph and the rank line, 12.5 / 700 in the accent. */
 @Composable
-fun StageEyebrow(text: String, modifier: Modifier = Modifier) {
+fun StageEyebrow(text: String, modifier: Modifier = Modifier, icon: ImageVector = MobileIcons.Trend) {
     val accent = stageAccent.accent
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-        StageIcon(MobileIcons.Trend, 12.5.dp, accent)
+        StageIcon(icon, 12.5.dp, accent)
         Text(text, style = stageText(12.5f, 700), color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/**
+ * `.tabs` (Downloads M7-01, Search M8-09): each tab its label (14 / 800 open, 14 / 700 muted otherwise) and
+ * count (11 dim), the 3 dp accent line under each one in [selected] (Downloads: the open tab; Search's filter
+ * buttons: any number on), a 1 dp rule under them all; [trailing] at the end.
+ */
+@Composable
+fun StageTabs(
+    tabs: List<Pair<String, Int>>,
+    selected: Set<Int>,
+    onSelect: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    trailing: @Composable RowScope.() -> Unit = {},
+) {
+    val palette = LocalStagePalette.current
+    val accent = stageAccent.accent
+    Row(
+        modifier
+            .fillMaxWidth()
+            .drawWithContent {
+                drawContent()
+                drawRect(palette.ink.copy(alpha = 0.1f), topLeft = androidx.compose.ui.geometry.Offset(0f, size.height - 1.dp.toPx()), size = size.copy(height = 1.dp.toPx()))
+            },
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        tabs.forEachIndexed { i, (label, n) ->
+            val on = i in selected
+            val interaction = remember { MutableInteractionSource() }
+            Column(Modifier.clickable(interaction, indication = null, role = Role.Tab, onClick = { onSelect(i) }).width(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
+                Text(
+                    androidx.compose.ui.text.buildAnnotatedString {
+                        append(label)
+                        append(" ")
+                        withStyle(androidx.compose.ui.text.SpanStyle(color = palette.dim, fontSize = stageText(11f, 700).fontSize)) {
+                            append(java.text.NumberFormat.getIntegerInstance().format(n))
+                        }
+                    },
+                    style = stageText(14f, if (on) 800 else 700),
+                    color = if (on) palette.text else palette.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+                Box(Modifier.fillMaxWidth().height(3.dp).background(if (on) accent else Color.Transparent))
+            }
+        }
+        trailing()
     }
 }

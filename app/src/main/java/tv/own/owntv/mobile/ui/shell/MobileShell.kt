@@ -1,5 +1,8 @@
 package tv.own.owntv.mobile.ui.shell
 
+import tv.own.owntv.mobile.ui.screens.MoreLeaf
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
 import android.app.Activity
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
@@ -167,6 +170,9 @@ fun MobileShell(
         return
     }
     val gateRequired = profileGateRequired(loadedProfiles)
+    // With no chooser needed (one profile, no PIN) the person using the app has entered as that profile;
+    // so adding a second profile keeps them in rather than throwing them to "Who's watching?".
+    LaunchedEffect(gateRequired, activeId) { if (!gateRequired) gateSession.unlock(activeId) }
     if (!shellMayCompose(
             profiles = loadedProfiles,
             activeProfileId = activeId,
@@ -181,6 +187,25 @@ fun MobileShell(
             vm = profilesViewModel,
         )
         return
+    }
+    // More › Switch (M8-01): the same chooser, over the app rather than instead of it, so Back leaves
+    // it and the page you were on is still there. Choosing someone unlocks them in this session.
+    var choosingProfile by remember { mutableStateOf(false) }
+    if (choosingProfile) {
+        Dialog(
+            onDismissRequest = { choosingProfile = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        ) {
+            ProfileGate(
+                profiles = loadedProfiles,
+                onEntered = {
+                    gateSession.unlock(it.id)
+                    choosingProfile = false
+                },
+                modifier = Modifier.fillMaxSize(),
+                vm = profilesViewModel,
+            )
+        }
     }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -360,10 +385,12 @@ fun MobileShell(
     // carry no crumb; a detail page (a film, a channel) draws its own title and keeps only the crumb.
     val topLevel = currentRoute == MobileDestination.MORE.route ||
         MobileDestination.rail.any { it.route == currentRoute }
-    val titleRes = if (currentRoute == MobileDestination.HOME.route) null else pageTitleRes(currentRoute)
+    // About names itself with the wordmark (M8-07): its header is the crumb alone.
+    val titleRes = if (currentRoute == MobileDestination.HOME.route || currentRoute == MoreLeaf.ABOUT.route) null else pageTitleRes(currentRoute)
     val previousRoute = navController.previousBackStackEntry?.destination?.route
     // Downloads says where its files are instead of where it came from (M7-01): its crumb is the storage line.
-    val ownCrumb = topLevel || currentRoute == MobileDestination.DOWNLOADS.route
+    // Search's crumb is the query and its count (M8-09).
+    val ownCrumb = topLevel || currentRoute == MobileDestination.DOWNLOADS.route || currentRoute == SEARCH_ROUTE_PATTERN
     val backLabel = if (ownCrumb || previousRoute == null) null else stringResource(anyTitleRes(previousRoute))
 
     // The playlist pill belongs to the browse places: in full on Live TV, Guide, Movies, Series and Downloads
@@ -381,7 +408,7 @@ fun MobileShell(
         currentRoute in listOf(
             MobileDestination.LIVE.route, MobileDestination.GUIDE.route,
             MobileDestination.MOVIES.route, MobileDestination.SERIES.route,
-            MobileDestination.DOWNLOADS.route,
+            MobileDestination.DOWNLOADS.route, SEARCH_ROUTE_PATTERN,
         ) -> ClusterPlaylist(
             label = when {
                 playlists.size == 1 -> playlists.first().displayName()
@@ -443,24 +470,30 @@ fun MobileShell(
                     crumb = pageCrumb.value.takeIf { ownCrumb },
                     backPill = onTitlePage,
                 ) {
+                    // More draws no cluster (M8-01), nor does About (M8-07); the other More pages keep only
+                    // the avatar (M8-02 … M8-06).
+                    val moreLeaf = MoreLeaf.entries.firstOrNull { it.route == currentRoute }
+                    if (currentRoute == MobileDestination.MORE.route || moreLeaf == MoreLeaf.ABOUT) return@StagePageHeader
                     ShellCluster(
                         playlist = clusterPlaylist,
                         profile = activeProfile,
                         // The TV Guide has Search among its own tools (M4-01), so the cluster leaves it out; a
                         // title page has none either (M5-06).
-                        showSearch = currentRoute != SEARCH_ROUTE_PATTERN && currentRoute != MobileDestination.GUIDE.route && !onTitlePage,
+                        showSearch = currentRoute != SEARCH_ROUTE_PATTERN && currentRoute != MobileDestination.GUIDE.route &&
+                            !onTitlePage && moreLeaf == null,
                         onPlaylist = { if (playlists.size > 1) playlistSheet = true },
                         onSearch = { navController.navigate(SEARCH_ROUTE) { launchSingleTop = true } },
                         onAvatar = { navController.navigate(MobileDestination.MORE.route) { launchSingleTop = true } },
                         extra = {
                             // Home's Resume pill, while its hero is in view (the scrolled heading has
-                            // no room beside it).
+                            // no room beside it). It gives up width first, so at UI zoom 120 % the avatar
+                            // stays on the screen.
                             homeChrome.resume?.takeIf { onHome && homeChrome.heading == null }?.let { resume ->
                                 StagePill(
                                     onClick = resume.onClick,
                                     text = resume.name,
                                     icon = MobileIcons.PlayArrow,
-                                    modifier = Modifier.widthIn(max = 150.dp),
+                                    modifier = Modifier.weight(1f, fill = false).widthIn(max = 150.dp),
                                 )
                             }
                             // It appears only when there is a receiver to send to; which way round it is
@@ -559,6 +592,7 @@ fun MobileShell(
                         MobileNavHost(
                             navController = navController,
                             scrollToTop = shellViewModel.scrollToTop,
+                            onSwitchProfile = { choosingProfile = true },
                         )
                     }
                     // Low over the page, under the mini player: a sync running while the user browses is
@@ -740,7 +774,7 @@ private fun anyTitleRes(route: String): Int =
  * repairs those rows without a migration, and matches what the setup flow now writes for a new one.
  */
 @Composable
-private fun SourceEntity.displayName(): String = name.ifBlank {
+internal fun SourceEntity.displayName(): String = name.ifBlank {
     stringResource(
         when (type) {
             SourceType.XTREAM -> tv.own.owntv.mobile.R.string.setup_default_iptv

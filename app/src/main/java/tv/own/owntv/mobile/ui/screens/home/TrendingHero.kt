@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -225,59 +226,62 @@ fun TrendingHero(
         }
         Spacer(Modifier.height(14.dp))
         // When the row cannot hold every label ("Open episodes", German), Trailer gives up its word and
-        // becomes a round button, so ⓘ and ♥ always fit and nothing is squeezed to an empty box (TV #4).
+        // becomes a round button; when even that does not fit (UI zoom 120 %) it leaves the row — it stays
+        // in the hold menu — so ⓘ and ♥ always fit and nothing is squeezed to an empty box (TV #4).
+        // The row's own width, not the window's: UI zoom scales the density, not screenWidthDp.
         val measurer = rememberTextMeasurer()
         val buttonStyle = stageText(14f, 700)
         val playLabel = stringResource(if (item is TrendingHomeItem.Movie) R.string.home_trending_play else R.string.home_trending_open_episodes)
         val trailerWord = stringResource(R.string.home_trending_trailer)
         val versionsCount = extras.versions.takeIf { it > 1 }?.let { formatCount(it) }
         val density = LocalDensity.current
-        val rowWidth = LocalConfiguration.current.screenWidthDp.dp - 36.dp
-        val trailerFits = with(density) {
-            fun w(text: String) = measurer.measure(text, buttonStyle).size.width.toDp()
-            val labelled = 36.dp + 16.dp + 7.dp
-            val needed = labelled + w(playLabel) + labelled + w(trailerWord) +
-                (versionsCount?.let { 28.dp + 16.dp + 7.dp + w(it) } ?: 44.dp) + 44.dp * 2 + 8.dp * 4
-            needed <= rowWidth
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            // The labelled buttons share what ⓘ and ♥ leave, so those two always fit (TV #4); a long
-            // Trailer label is the one that shortens.
-            Row(Modifier.weight(1f, fill = false), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val isMovie = item is TrendingHomeItem.Movie
-                StageButton(
-                    onClick = onPlay,
-                    text = playLabel,
-                    icon = if (isMovie) MobileIcons.PlayArrow else MobileIcons.Series,
-                    style = StageButtonStyle.PRIMARY,
-                )
-                trendingTrailer(item)?.let { key ->
-                    val trailerLabel = stringResource(R.string.home_trending_trailer)
-                    StageButton(
-                        onClick = { context.playTrailer(key) },
-                        modifier = Modifier.semantics { contentDescription = trailerLabel },
-                        text = trailerLabel.takeIf { trailerFits },
-                        icon = MobileIcons.PlayCircle,
-                    )
-                }
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val (trailerShown, trailerFits) = with(density) {
+                fun w(text: String) = measurer.measure(text, buttonStyle).size.width.toDp()
+                val labelled = 36.dp + 16.dp + 7.dp
+                val others = labelled + w(playLabel) +
+                    (versionsCount?.let { 28.dp + 16.dp + 7.dp + w(it) } ?: 44.dp) + 44.dp * 2 + 8.dp * 4
+                (others + 44.dp <= maxWidth) to (others + labelled + w(trailerWord) <= maxWidth)
             }
-            // Versions keeps its own width like ⓘ and ♥: when the estimate above is short, only Trailer's word
-            // shortens — the count was the one squeezed to "…" (M5 check).
-            val versionsLabel = stringResource(R.string.home_trending_all_versions)
-            StageButton(
-                onClick = onVersions,
-                modifier = Modifier.semantics { contentDescription = versionsLabel },
-                icon = MobileIcons.Layers,
-                trailing = versionsCount,
-            )
-            val infoLabel = stringResource(R.string.home_trending_more_details)
-            StageButton(onClick = onInfo, modifier = Modifier.semantics { contentDescription = infoLabel }, icon = MobileIcons.Info)
-            val favouriteLabel = stringResource(if (favourite) R.string.content_remove_favourite else R.string.content_add_favourite)
-            StageButton(
-                onClick = onFavourite,
-                modifier = Modifier.semantics { contentDescription = favouriteLabel },
-                icon = if (favourite) MobileIcons.Favorite else MobileIcons.FavoriteBorder,
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                // The labelled buttons share what ⓘ and ♥ leave, so those two always fit (TV #4); a long
+                // Trailer label is the one that shortens.
+                Row(Modifier.weight(1f, fill = false), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val isMovie = item is TrendingHomeItem.Movie
+                    StageButton(
+                        onClick = onPlay,
+                        text = playLabel,
+                        icon = if (isMovie) MobileIcons.PlayArrow else MobileIcons.Series,
+                        style = StageButtonStyle.PRIMARY,
+                    )
+                    trendingTrailer(item)?.takeIf { trailerShown }?.let { key ->
+                        val trailerLabel = stringResource(R.string.home_trending_trailer)
+                        StageButton(
+                            onClick = { context.playTrailer(key) },
+                            modifier = Modifier.semantics { contentDescription = trailerLabel },
+                            text = trailerLabel.takeIf { trailerFits },
+                            icon = MobileIcons.PlayCircle,
+                        )
+                    }
+                }
+                // Versions keeps its own width like ⓘ and ♥: when the estimate above is short, only Trailer's word
+                // shortens — the count was the one squeezed to "…" (M5 check).
+                val versionsLabel = stringResource(R.string.home_trending_all_versions)
+                StageButton(
+                    onClick = onVersions,
+                    modifier = Modifier.semantics { contentDescription = versionsLabel },
+                    icon = MobileIcons.Layers,
+                    trailing = versionsCount,
+                )
+                val infoLabel = stringResource(R.string.home_trending_more_details)
+                StageButton(onClick = onInfo, modifier = Modifier.semantics { contentDescription = infoLabel }, icon = MobileIcons.Info)
+                val favouriteLabel = stringResource(if (favourite) R.string.content_remove_favourite else R.string.content_add_favourite)
+                StageButton(
+                    onClick = onFavourite,
+                    modifier = Modifier.semantics { contentDescription = favouriteLabel },
+                    icon = if (favourite) MobileIcons.Favorite else MobileIcons.FavoriteBorder,
+                )
+            }
         }
         Spacer(Modifier.height(14.dp))
         PagerDots(count = items.size, active = activeIndex)

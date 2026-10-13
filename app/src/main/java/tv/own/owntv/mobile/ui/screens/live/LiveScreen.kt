@@ -101,32 +101,15 @@ fun LiveScreen(
     onOpenChannel: (channelId: Long, openCatchup: Boolean) -> Unit,
     onOpenPlayer: () -> Unit,
     modifier: Modifier = Modifier,
-    /**
-     * Pins the list to one folder and takes the chip strip away — how the Favourites and History
-     * screens show channels without a second copy of this list existing.
-     */
-    lockedKey: LiveKey? = null,
     vm: LiveViewModel = koinViewModel(),
 ) {
-    // Locking and unlocking are one pair: the pin belongs to this screen's lifetime, not to the view
-    // model's. On the television that view model is a single instance shared with the browse section,
-    // so a pin left behind froze its category rail. `DisposableEffect` (not `LaunchedEffect`) also
-    // means the pin is in place before the first frame, so the list never flashes the wrong folder.
     // Channels kept with "Add to Multiview" are spent by playing one. While any are waiting, a tap
     // plays rather than browses — see the tap handler below.
     val tuner: LiveTuner = koinInject()
     val multiviewSelection by tuner.multiviewSelection.collectAsStateWithLifecycle()
     val multiviewPending = multiviewSelection.isNotEmpty()
 
-    if (lockedKey != null) {
-        val pinned = lockedKey
-        DisposableEffect(pinned) {
-            vm.lock(pinned)
-            onDispose { vm.unlock() }
-        }
-    }
-
-    if (lockedKey == null) LaunchedEffect(Unit) { vm.applyStartupSelection() }
+    LaunchedEffect(Unit) { vm.applyStartupSelection() }
 
     val categories by vm.categories.collectAsStateWithLifecycle()
     val selected by vm.selected.collectAsStateWithLifecycle()
@@ -161,8 +144,8 @@ fun LiveScreen(
     val playing by tuner.channel.collectAsStateWithLifecycle()
     val playingNowNext by tuner.nowNext.collectAsStateWithLifecycle()
     // M3-02: on a phone a tap plays the channel in a preview on top of Live TV, instead of opening a
-    // channel page. A list pinned to one folder (Favourites, History) still opens the page.
-    val inlinePreview = !twoPane && lockedKey == null
+    // channel page.
+    val inlinePreview = !twoPane
     val showPreview = inlinePreview && playing != null
     val paneHasChannel = (twoPane && previewing != null) || showPreview
     DisposableEffect(paneHasChannel) {
@@ -189,13 +172,11 @@ fun LiveScreen(
     // list (Favourites, History) is one folder already and its page names it.
     val categoryLabel = categories.firstOrNull { it.key == selected }?.label().orEmpty()
     val liveView by vm.liveView.collectAsStateWithLifecycle()
-    // M3-06: "Live TV opens in: Guide" draws the guide grid in place of the list (not in a locked list).
-    val guideView = lockedKey == null && liveView == SettingsRepository.LiveView.GUIDE
+    // M3-06: "Live TV opens in: Guide" draws the guide grid in place of the list.
+    val guideView = liveView == SettingsRepository.LiveView.GUIDE
     val countText = if (guideView) stringResource(R.string.content_live_guide_view)
     else groupedCountText(R.plurals.content_live_channel_count, count)
-    if (lockedKey == null) {
-        ProvidePageCrumb { owner -> PageCrumb(categoryLabel, countText, owner = owner) { categoryPicker = true } }
-    }
+    ProvidePageCrumb { owner -> PageCrumb(categoryLabel, countText, owner = owner) { categoryPicker = true } }
 
     // The guide is read for what is actually on screen. Watching the visible range rather than each
     // row means one batched query per scroll settle instead of one per row appearing.
@@ -237,7 +218,7 @@ fun LiveScreen(
                 onGuideView = vm::toggleLiveView,
                 modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 12.dp),
             )
-        } else if (lockedKey == null) {
+        } else {
             // `.tools`: the search field takes the room, then the order tool (Provider / A–Z), then Guide view.
             Row(
                 Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 12.dp),

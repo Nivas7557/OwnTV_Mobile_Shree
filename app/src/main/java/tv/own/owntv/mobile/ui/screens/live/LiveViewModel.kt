@@ -417,42 +417,11 @@ class LiveViewModel(
         }.map { ch -> cust.itemNames[CustomizeKeys.channel(ch)]?.let { ch.copy(name = it) } ?: ch }
     }
 
-    /**
-     * Set while this view model is serving More -> Favourites or More -> History rather than the
-     * browse section. Those screens are one folder each: the selection is theirs to fix, and it must
-     * not be persisted as the remembered category.
-     */
-    private var lockedKey: LiveKey? = null
-
-    /** What the browse section was showing before the pin, so [unlock] can put it back. */
-    private var previousKey: LiveKey? = null
-
-    fun lock(key: LiveKey) {
-        if (lockedKey == null) previousKey = _selected.value
-        lockedKey = key
-        _selected.value = key
-    }
-
-    /**
-     * Release the pin and put the browse section back where it was.
-     *
-     * **This is not optional bookkeeping.** On the television this view model is a single instance
-     * shared between the browse section and the More screens, so a pin that outlived the screen that
-     * took it froze the section's category rail — focusable, but every click a no-op. The screen that
-     * locks therefore unlocks on dispose.
-     */
-    fun unlock() {
-        val previous = previousKey ?: return
-        lockedKey = null
-        previousKey = null
-        _selected.value = previous
-    }
-
     init {
         viewModelScope.launch {
             if (settings.rememberCategoryLive.first()) {
                 parseLiveKey(settings.lastLiveCategory.first())?.let {
-                    if (lockedKey == null && !startupApplied) _selected.value = it
+                    if (!startupApplied) _selected.value = it
                 }
             }
         }
@@ -462,18 +431,18 @@ class LiveViewModel(
 
     /**
      * "Start on: Favorites" outranks the remembered folder — it is what the user asked this launch to
-     * open on, and it applies to this launch only. Called by the Live TV tab itself: a locked list, or the
-     * TV Guide borrowing this list of categories, must not eat it.
+     * open on, and it applies to this launch only. Called by the Live TV tab itself: the TV Guide borrowing
+     * this list of categories must not eat it.
      */
     fun applyStartupSelection() {
-        if (lockedKey == null && startupSelection.consumeFavorites()) {
+        if (startupSelection.consumeFavorites()) {
             startupApplied = true
             _selected.value = LiveKey.Favorites
         }
     }
 
     fun select(key: LiveKey) {
-        if (lockedKey != null || _selected.value == key) return
+        if (_selected.value == key) return
         _selected.value = key
         _query.value = ""
         viewModelScope.launch { settings.setLastLiveCategory(key.serialize()) }
