@@ -73,6 +73,8 @@ fun MoreScreen(
     scrollToTop: SharedFlow<String>,
     onNavigate: (MobileDestination) -> Unit,
     onOpenLeaf: (MoreLeaf) -> Unit,
+    /** The profile card opens Settings › Profile (M9-04). */
+    onOpenProfiles: () -> Unit,
     onSwitchProfile: () -> Unit,
     onDevRoute: (DevRoute) -> Unit,
     modifier: Modifier = Modifier,
@@ -114,7 +116,7 @@ fun MoreScreen(
                 line = playlistLabel + stringResource(R.string.content_epg_bits_separator) +
                     pluralStringResource(R.plurals.more_playlist_count, playlists.size, playlists.size),
                 avatar = { ShellAvatar(profile, onClick = null, diameter = 44.dp) },
-                onOpen = { onOpenLeaf(MoreLeaf.PROFILES) },
+                onOpen = onOpenProfiles,
                 onSwitch = onSwitchProfile,
             )
         }

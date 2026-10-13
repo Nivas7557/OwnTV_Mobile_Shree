@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
@@ -105,8 +106,10 @@ fun StageButton(
     }
     Row(
         modifier
+            // Not available yet (a form not filled in): the whole button at 45 %, no glow — as a dimmed menu item.
+            .then(if (enabled) Modifier else Modifier.alpha(0.45f))
             .then(
-                if (style == StageButtonStyle.PRIMARY) {
+                if (style == StageButtonStyle.PRIMARY && enabled) {
                     Modifier.stageShadow(
                         accent.accent.copy(alpha = if (palette.isLight) 0.3f else 0.4f),
                         if (palette.isLight) 16.dp else 24.dp,
@@ -255,6 +258,8 @@ fun StageSegmented(
     modifier: Modifier = Modifier,
     icons: List<ImageVector?> = emptyList(),
     iconOnly: Boolean = false,
+    /** Each option takes an equal share of the width (the add form's Xtream · M3U · Stalker, M9-20). */
+    fill: Boolean = false,
 ) {
     val palette = LocalStagePalette.current
     Row(
@@ -269,6 +274,7 @@ fun StageSegmented(
             val chip = RoundedCornerShape(9.dp)
             Row(
                 Modifier
+                    .then(if (fill) Modifier.weight(1f) else Modifier)
                     .height(28.dp)
                     .then(
                         when {
@@ -281,7 +287,7 @@ fun StageSegmented(
                     .clickable(role = Role.Tab, onClick = { onSelect(i) })
                     .then(if (iconOnly) Modifier.semantics { contentDescription = label } else Modifier)
                     .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp, if (fill) Alignment.CenterHorizontally else Alignment.Start),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val fg = if (on) palette.text else palette.muted
@@ -484,6 +490,8 @@ fun StageSearchField(
     /** Search's ✕ at the end while there is text (M8-09); [clearLabel] is its spoken name. */
     onClear: (() -> Unit)? = null,
     clearLabel: String? = null,
+    /** At the end of the field, 11 dim: Settings search's "5 results" (M9-02). */
+    trailingText: String? = null,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -524,6 +532,7 @@ fun StageSearchField(
                     if (value.isEmpty()) Text(placeholder, style = style, color = palette.dim, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     field()
                 }
+                trailingText?.let { Text(it, style = stageText(11f, 500), color = palette.dim, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 if (onClear != null && value.isNotEmpty()) {
                     Box(
                         Modifier

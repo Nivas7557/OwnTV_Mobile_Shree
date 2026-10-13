@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -110,6 +111,14 @@ fun StageSettingRow(
     role: Role? = Role.Button,
     /** 60 on a settings page; a sheet's switch rows are 48 (the Guide's SHOW). */
     minHeight: Dp = 60.dp,
+    /** Drawn in the icon's 34 dp place instead (a profile's avatar, a playlist's mark). */
+    leading: (@Composable () -> Unit)? = null,
+    /** Above the title, 11.5 muted: a search result's path (M9-02). */
+    overline: String? = null,
+    /** The title as styled text (a search result with its match in the accent). */
+    styledTitle: androidx.compose.ui.text.AnnotatedString? = null,
+    /** The line's colour when it is a value rather than a description (a form row's text, its dim example). */
+    subtitleColor: Color? = null,
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
     val palette = LocalStagePalette.current
@@ -122,19 +131,27 @@ fun StageSettingRow(
         gap = 12.dp,
         role = role,
     ) {
-        if (icon != null) {
+        if (leading != null) {
+            // At least the icon's 34 dp; a wider picture (a playlist mark, "GOLD") keeps its own width.
+            Box(Modifier.defaultMinSize(34.dp, 34.dp), contentAlignment = Alignment.Center) { leading() }
+        } else if (icon != null) {
             Box(
                 Modifier.size(34.dp).clip(RoundedCornerShape(StageRadii.SettingIcon)).background(palette.controlFill),
                 contentAlignment = Alignment.Center,
             ) { StageIcon(icon, 17.dp, palette.muted) }
         }
         Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
-            Text(title, style = stageText(14.5f, 700), color = palette.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            overline?.let { Text(it, style = stageText(11.5f, 500, lineHeight = 1.3f), color = palette.muted, modifier = Modifier.padding(bottom = 2.dp)) }
+            if (styledTitle != null) {
+                Text(styledTitle, style = stageText(14.5f, 700), color = palette.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            } else {
+                Text(title, style = stageText(14.5f, 700), color = palette.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
             subtitle?.let {
                 Text(
                     it,
                     style = stageText(11.5f, 500, lineHeight = 1.3f),
-                    color = palette.muted,
+                    color = subtitleColor ?: palette.muted,
                     modifier = Modifier.padding(top = 1.dp),
                 )
             }

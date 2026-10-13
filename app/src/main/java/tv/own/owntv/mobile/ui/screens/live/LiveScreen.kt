@@ -146,6 +146,8 @@ fun LiveScreen(
     // M3-02: on a phone a tap plays the channel in a preview on top of Live TV, instead of opening a
     // channel page.
     val inlinePreview = !twoPane
+    // Settings › Live TV › Live preview: off, a tap opens the channel full screen with no preview first.
+    val previewOn by koinInject<tv.own.owntv.core.settings.SettingsRepository>().livePreviewEnabled.collectAsStateWithLifecycle(true)
     val showPreview = inlinePreview && playing != null
     val paneHasChannel = (twoPane && previewing != null) || showPreview
     DisposableEffect(paneHasChannel) {
@@ -165,6 +167,8 @@ fun LiveScreen(
     }
     val openFullscreen = {
         toFullscreen = true
+        // A preview becomes a watched channel only here (History, the media session).
+        tuner.promote()
         onOpenPlayer()
     }
 
@@ -309,7 +313,8 @@ fun LiveScreen(
                                         twoPane -> previewing = channel.id
                                         // The second tap on the playing channel is full screen.
                                         inlinePreview && channel.id == playing?.id -> openFullscreen()
-                                        inlinePreview -> tuner.tune(channel.id)
+                                        inlinePreview && !previewOn -> { tuner.tune(channel.id); openFullscreen() }
+                                        inlinePreview -> tuner.preview(channel.id)
                                         else -> onOpenChannel(channel.id, false)
                                     }
                                 },

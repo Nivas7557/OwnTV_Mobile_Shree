@@ -207,10 +207,8 @@ private fun TranslationContributionSheet(onDismiss: () -> Unit) {
         }
     }
 
-    MobileBottomSheet(
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.settings_language_help_translate),
-    ) {
+    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+        tv.own.owntv.mobile.ui.stage.StageSheetHeader(stringResource(R.string.settings_language_help_translate))
         Column(
             modifier = Modifier
                 .fillMaxWidth()

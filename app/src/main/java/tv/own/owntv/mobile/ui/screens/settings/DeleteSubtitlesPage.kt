@@ -23,7 +23,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import tv.own.owntv.core.database.dao.LinkedSubtitle
 import tv.own.owntv.mobile.R
-import tv.own.owntv.mobile.ui.components.FilterChipRow
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import tv.own.owntv.mobile.ui.stage.StageTool
 import tv.own.owntv.mobile.ui.components.MobileListRow
 import tv.own.owntv.mobile.ui.screens.settings.customize.ConfirmDialog
 
@@ -75,17 +77,15 @@ fun DeleteSubtitlesPage(
         }
         settingsNote(R.string.player_subtitles_delete_description)
         settingsGroup(key = "sections") {
-            FilterChipRow(
-                labels = sections.map {
-                    stringResource(
-                        R.string.settings_section_count,
-                        stringResource(it.labelRes()),
-                        counts.getValue(it),
+            Row(Modifier.padding(start = 8.dp, end = 8.dp, bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                sections.forEach { s ->
+                    StageTool(
+                        onClick = { vm.selectSection(s) },
+                        label = stringResource(R.string.settings_section_count, stringResource(s.labelRes()), counts.getValue(s)),
+                        on = s == section,
                     )
-                },
-                selectedIndex = sections.indexOf(section),
-                onSelect = { vm.selectSection(sections[it]) },
-            )
+                }
+            }
         }
 
         if (items.isEmpty()) {

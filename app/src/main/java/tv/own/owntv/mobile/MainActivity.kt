@@ -103,6 +103,22 @@ open class MainActivity : FragmentActivity() {
         }
     }
 
+    /**
+     * The chosen app language, on the Activity's own resources — the screen reads its strings from here, not
+     * from the Application's. Without it a language picked in the app showed again only until the next cold
+     * start, then the phone's own language came back while Settings still named the chosen one (the TV wraps
+     * its Activity the same way).
+     *
+     * An override of the locales alone, not the TV's wrapped context: that context is a frozen copy of the
+     * whole configuration, and this Activity handles rotation itself, so after turning the phone back
+     * upright the shell still read the landscape width and kept the side rail.
+     */
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(newBase)
+        val locales = AppLocale.wrap(newBase, LocaleStore.from(newBase).readBlocking()).resources.configuration.locales
+        applyOverrideConfiguration(android.content.res.Configuration().apply { setLocales(locales) })
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // The launch screen (the icon colour's flip card) must be installed before super.onCreate;
         // it then swaps the activity to Theme.OwnTVMobile via postSplashScreenTheme.

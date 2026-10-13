@@ -31,10 +31,12 @@ import tv.own.owntv.mobile.ui.screens.live.ChannelDetailScreen
 import tv.own.owntv.mobile.ui.screens.live.LiveScreen
 import tv.own.owntv.mobile.ui.screens.search.SearchScreen
 import tv.own.owntv.mobile.ui.screens.settings.SettingsGroup
-import tv.own.owntv.mobile.ui.screens.settings.SettingsGroupPage
+import tv.own.owntv.mobile.ui.screens.settings.SettingsGroupScreen
+import tv.own.owntv.mobile.ui.screens.settings.LocalSettingsNav
 import tv.own.owntv.mobile.ui.screens.settings.SettingsLeaf
 import tv.own.owntv.mobile.ui.screens.settings.SettingsLeafPage
 import tv.own.owntv.mobile.ui.screens.settings.SettingsScreen
+import tv.own.owntv.mobile.ui.setup.SetupEntry
 import tv.own.owntv.mobile.ui.setup.SetupFlow
 import tv.own.owntv.mobile.ui.shell.LocalMiniRequested
 import tv.own.owntv.mobile.ui.shell.navigateToTab
@@ -86,6 +88,7 @@ fun MobileNavHost(
                             navController.navigate(it.route) { launchSingleTop = true }
                         },
                         onOpenLeaf = { navController.navigate(it.route) { launchSingleTop = true } },
+                        onOpenProfiles = { navController.navigate(SettingsGroup.PROFILE.route) { launchSingleTop = true } },
                         onSwitchProfile = onSwitchProfile,
                         onDevRoute = { navController.navigate(it.route) },
                     )
@@ -129,10 +132,7 @@ fun MobileNavHost(
                             },
                             onPlay = { navController.navigate(PLAYER_ROUTE) },
                         )
-                    MobileDestination.SETTINGS -> SettingsScreen(
-                        onOpenRoute = { navController.navigate(it) },
-                        onAddSource = { navController.navigate(SETUP_ROUTE) },
-                    )
+                    MobileDestination.SETTINGS -> SettingsScreen(onOpenRoute = { navController.navigate(it) })
                 }
                 }
             }
@@ -194,15 +194,20 @@ fun MobileNavHost(
                 },
             )
         }
-        // The seven group pages and every leaf under them. Each is a route rather than an expanding
-        // block, so the system back gesture is what closes it.
-        val openRoute: (String) -> Unit = { navController.navigate(it) }
-        val addSource: () -> Unit = { navController.navigate(SETUP_ROUTE) }
+        // The twelve group pages and the full pages under them (M9, M9B). Each is a route, so the
+        // system back gesture is what closes it; a row that opens a page navigates through LocalSettingsNav.
+        val openRoute: (String) -> Unit = { navController.navigate(it) { launchSingleTop = true } }
         SettingsGroup.entries.forEach { group ->
-            composable(group.route) { SettingsGroupPage(group, openRoute) }
+            composable(group.route) {
+                CompositionLocalProvider(LocalSettingsNav provides openRoute) { SettingsGroupScreen(group) }
+            }
         }
         SettingsLeaf.entries.forEach { leaf ->
-            composable(leaf.route) { SettingsLeafPage(leaf, openRoute, addSource) }
+            composable(leaf.route) {
+                CompositionLocalProvider(LocalSettingsNav provides openRoute) {
+                    SettingsLeafPage(leaf, onSetup = { navController.navigate(setupRoute(it)) })
+                }
+            }
         }
         // The More pages. Separate routes from the settings ones on purpose: what left Settings has
         // left, so nothing under `settings/` can reach them and the settings search cannot see them.
@@ -239,10 +244,14 @@ fun MobileNavHost(
                 },
             )
         }
-        composable(SETUP_ROUTE) {
+        composable(
+            route = SETUP_ROUTE_PATTERN,
+            arguments = listOf(navArgument(ARG_ENTRY) { type = NavType.StringType; defaultValue = SetupEntry.ADD_CONTENT.name }),
+        ) { entry ->
             SetupFlow(
                 onDone = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },
+                entry = runCatching { SetupEntry.valueOf(entry.arguments?.getString(ARG_ENTRY).orEmpty()) }.getOrDefault(SetupEntry.ADD_CONTENT),
             )
         }
         if (BuildConfig.DEV_TOOLS) {
@@ -332,6 +341,11 @@ const val PLAYER_ROUTE = "player"
  * tabs that lead to empty screens, and on a first run there is nothing behind it to go back to.
  */
 const val SETUP_ROUTE = "setup"
+private const val ARG_ENTRY = "entry"
+const val SETUP_ROUTE_PATTERN = "$SETUP_ROUTE?$ARG_ENTRY={$ARG_ENTRY}"
+
+/** The setup flow entered at [entry] (Settings' Add a source, M9-19). */
+fun setupRoute(entry: SetupEntry): String = "$SETUP_ROUTE?$ARG_ENTRY=${entry.name}"
 
 /**
  * One field over everything. A route rather than a tab, because search is reached from the top bar of

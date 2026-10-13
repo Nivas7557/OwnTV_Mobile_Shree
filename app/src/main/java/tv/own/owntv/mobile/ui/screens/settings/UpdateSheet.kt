@@ -60,10 +60,8 @@ fun UpdateSheet(onDismiss: () -> Unit, checkOnOpen: Boolean = false) {
         if (checkOnOpen) manager.check()
     }
 
-    MobileBottomSheet(
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.update_title),
-    ) {
+    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+        tv.own.owntv.mobile.ui.stage.StageSheetHeader(stringResource(R.string.update_title))
         Column(Modifier.padding(horizontal = MobileDimens.ScreenPaddingH)) {
             when (val s = state) {
                 UpdateManager.State.Idle, UpdateManager.State.Checking -> {

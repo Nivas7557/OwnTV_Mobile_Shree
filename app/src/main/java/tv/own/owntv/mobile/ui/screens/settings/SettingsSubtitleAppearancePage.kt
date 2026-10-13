@@ -209,10 +209,8 @@ private fun SubtitleColorSheet(
     var hexInput by remember { mutableStateOf(color.removePrefix("#")) }
     var hexError by remember { mutableStateOf(false) }
 
-    MobileBottomSheet(
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.settings_subtitle_color),
-    ) {
+    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+        tv.own.owntv.mobile.ui.stage.StageSheetHeader(stringResource(R.string.settings_subtitle_color))
         MobileListRow(
             title = stringResource(R.string.settings_subtitle_default),
             subtitle = stringResource(R.string.settings_subtitle_color_default_description),

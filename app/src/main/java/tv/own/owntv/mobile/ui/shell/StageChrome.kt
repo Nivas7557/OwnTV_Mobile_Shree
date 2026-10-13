@@ -369,7 +369,7 @@ fun StagePageHeader(
                 cluster()
             }
         }
-        if (backLabel == null && crumb != null) {
+        if (crumb != null) {
             val interaction = remember { MutableInteractionSource() }
             Row(
                 Modifier

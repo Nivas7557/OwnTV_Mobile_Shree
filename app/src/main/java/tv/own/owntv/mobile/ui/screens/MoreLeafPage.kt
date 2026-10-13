@@ -6,7 +6,6 @@ import tv.own.owntv.mobile.ui.screens.settings.AboutPage
 import tv.own.owntv.mobile.ui.screens.settings.SettingsBackupPage
 import tv.own.owntv.mobile.ui.screens.settings.SettingsErrorLogPage
 import tv.own.owntv.mobile.ui.screens.settings.SettingsLocalSyncPage
-import tv.own.owntv.mobile.ui.screens.settings.SettingsProfilePage
 
 /**
  * One More page, chosen by its route — the same shape `SettingsGroupPage` has, and for the same
@@ -24,7 +23,6 @@ fun MoreLeafPage(
     onOpenLanguage: () -> Unit,
 ) {
     when (leaf) {
-        MoreLeaf.PROFILES -> SettingsProfilePage()
         MoreLeaf.FAVORITES -> FavoritesScreen(onOpenChannel, onOpenItem)
         MoreLeaf.HISTORY -> WatchHistoryScreen(onOpenChannel, onOpenItem, onOpenPlayer)
         MoreLeaf.BACKUP -> SettingsBackupPage()

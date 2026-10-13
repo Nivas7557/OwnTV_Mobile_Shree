@@ -509,6 +509,8 @@ class LiveTuner(
     private var lastCatchup: EpgProgrammeEntity? = null
 
     init {
+        // Preview sound applies to the pane already playing, as on the television.
+        scope.launch { settings.livePreviewAudio.collect { on -> if (_previewing.value) exo.setMuted(!on) } }
         scope.launch { player.archiveEnded.collect { continueAfterCatchup() } }
         scope.launch { player.archiveStalled.collect { liveAfterStall() } }
     }
@@ -564,6 +566,52 @@ class LiveTuner(
             open(channel)
             loadSiblings(channel)
         }
+    }
+
+    private val _previewing = MutableStateFlow(false)
+
+    /**
+     * Live TV's pane is playing the channel as the television's preview: ExoPlayer only, muted unless
+     * Settings › Live TV › Preview sound is on, and **not** watched — no History, no "previous channel",
+     * no media session — until [promote] opens it full screen. A glance is not a view.
+     */
+    val previewing: StateFlow<Boolean> = _previewing
+
+    /** The channel row the preview is playing, unrenamed, for [promote]. */
+    private var previewChannel: ChannelEntity? = null
+
+    /** Play [channelId] in Live TV's preview pane (see [previewing]). */
+    fun preview(channelId: Long) {
+        if (loadedId == channelId) return
+        // A channel opened full screen and brought back to the pane is a real tune; a tap on another
+        // row leaves it, as on the television.
+        if (!_previewing.value && loadedId != null) stop()
+        loadedId = channelId
+        live.launch {
+            val channel = withContext(Dispatchers.IO) { channelDao.getById(channelId) } ?: return@launch
+            val pid = ctx.value.profileId.takeIf { it >= 0 }
+            if (pid == null || !dataSaver.allowsStreaming() ||
+                !AdultCategoryClassifier.allows(pid, channel.categoryId, profileDao, categoryDao)
+            ) {
+                loadedId = _channel.value?.id
+                return@launch
+            }
+            previewChannel = channel
+            _previewing.value = true
+            _channel.value = custom.value.itemNames[CustomizeKeys.channel(channel)]?.let { channel.copy(name = it) } ?: channel
+            live.preview(channel, muted = !settings.livePreviewAudio.first())
+            _nowNext.value = epgReader.nowNext(channel, custom.value, settings.epgOffsetMinutes.first())
+            loadSiblings(channel)
+        }
+    }
+
+    /** Open the previewed channel full screen: core unmutes the stream already playing, and it is watched from here. */
+    fun promote() {
+        val channel = previewChannel?.takeIf { _previewing.value } ?: return
+        _previewing.value = false
+        previewChannel = null
+        live.expectPromotion(channel)
+        live.launch { open(channel) }
     }
 
     /** Switch to another channel without leaving the screen — the Channels tab and the overlay. */
@@ -639,6 +687,8 @@ class LiveTuner(
         // A renamed channel keeps its new name on this screen too — the row the user tapped had it.
         val named = custom.value.itemNames[CustomizeKeys.channel(channel)]?.let { channel.copy(name = it) } ?: channel
         _channel.value = named
+        _previewing.value = false
+        previewChannel = null
         _nowNext.value = null
         _timelineProgrammes.value = emptyList()
         // The television first, if one has been picked. It plays the stream itself, so nothing below
@@ -1070,6 +1120,8 @@ class LiveTuner(
     fun stop() {
         timeshift.clear()
         loadedId = null
+        _previewing.value = false
+        previewChannel = null
         lastCatchup = null
         _channel.value = null
         _nowNext.value = null

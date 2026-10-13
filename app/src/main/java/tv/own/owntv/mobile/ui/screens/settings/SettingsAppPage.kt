@@ -38,7 +38,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,8 +46,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
-import kotlinx.coroutines.flow.debounce
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,138 +58,14 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
-import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.companion.CompanionLink
-import tv.own.owntv.core.i18n.LocaleStore
 import tv.own.owntv.core.i18n.SupportedLocales
-import tv.own.owntv.core.settings.StartupMode
 import tv.own.owntv.mobile.BuildConfig
 import tv.own.owntv.mobile.R
-import tv.own.owntv.mobile.ui.components.MobileBottomSheet
-import tv.own.owntv.mobile.ui.components.MobileButton
-import tv.own.owntv.mobile.ui.components.MobileButtonStyle
-import tv.own.owntv.mobile.ui.components.MobileListRow
-import tv.own.owntv.mobile.ui.components.MobileTextField
-import tv.own.owntv.mobile.ui.components.SettingRow
-import tv.own.owntv.mobile.ui.theme.MobileDimens
 import tv.own.owntv.player.PlaybackErrorLog
 import java.text.DateFormat
 import java.util.Date
-
-/**
- * Language, what the app opens on, and the update check.
- *
- * **This page once said there would never be an update check here**, on the grounds that a phone
- * gets its updates from the store it came from. This app does not come from a store — it is
- * sideloaded — so nothing else was ever going to tell anyone a new version existed. It is the
- * television's updater exactly: core's `UpdateManager` and core's strings, in a sheet instead of a
- * dialog. It needs `REQUEST_INSTALL_PACKAGES`, which the manifest now declares and explains.
- *
- * About and the error log used to be here too; a page of facts and a log are not preferences, so
- * both are More pages now — see [AboutPage] and [SettingsErrorLogPage].
- */
-@Composable
-fun SettingsAppPage(
-    onOpenLanguage: () -> Unit,
-    modifier: Modifier = Modifier,
-    vm: SettingsViewModel = koinViewModel(),
-    localeStore: LocaleStore = koinInject(),
-) {
-    val tag = localeStore.currentTag.pref("")
-    val mode = vm.startupMode.pref(StartupMode.HOME)
-    val channel = vm.startupChannel.pref(null)
-
-    val updateOnStart = vm.settings.updateCheckOnStart.pref(true)
-
-    val context = LocalContext.current
-    var startupSheet by remember { mutableStateOf(false) }
-    var channelSheet by remember { mutableStateOf(false) }
-    var updateSheet by remember { mutableStateOf(false) }
-    val appIcon = vm.settings.appIcon.pref(tv.own.owntv.core.brand.AppIcon.DEFAULT)
-    var showAppIcon by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-
-    if (showAppIcon) {
-        tv.own.owntv.mobile.ui.components.AppIconSettingsDialog(
-            chosen = appIcon,
-            onPick = { vm.edit { setAppIcon(it) } },
-            onDismiss = { showAppIcon = false },
-        )
-    }
-
-    SettingsPage(modifier) {
-        settingsSection(R.string.settings_app_group) {
-            SettingRow(
-                title = stringResource(R.string.settings_language),
-                subtitle = stringResource(R.string.settings_language_description),
-                value = localeLabel(tag),
-                showChevron = true,
-                onClick = onOpenLanguage,
-            )
-
-            SettingRow(
-                title = stringResource(R.string.settings_app_icon),
-                subtitle = stringResource(R.string.settings_app_icon_summary),
-                value = stringResource(appIcon.label),
-                onClick = { showAppIcon = true },
-            )
-
-            SettingRow(
-                title = stringResource(R.string.settings_app_startup),
-                subtitle = stringResource(R.string.settings_app_startup_description),
-                value = if (mode == StartupMode.SPECIFIC_CHANNEL && channel != null) {
-                    channel.name
-                } else {
-                    stringResource(mode.labelRes())
-                },
-                onClick = { startupSheet = true },
-            )
-
-            SettingRow(
-                title = stringResource(R.string.settings_check_updates),
-                subtitle = stringResource(R.string.settings_check_updates_description),
-                onClick = { updateSheet = true },
-            )
-
-            SettingRow(
-                title = stringResource(R.string.settings_update_startup),
-                subtitle = stringResource(R.string.settings_update_startup_description),
-                checked = updateOnStart,
-                onCheckedChange = { on -> vm.edit { setUpdateCheckOnStart(on) } },
-            )
-        }
-
-    }
-
-    if (updateSheet) {
-        UpdateSheet(onDismiss = { updateSheet = false }, checkOnOpen = true)
-    }
-
-    if (startupSheet) {
-        SettingsChoiceSheet(
-            title = stringResource(R.string.settings_app_startup_dialog),
-            choices = StartupMode.entries.map {
-                SettingsChoice(it, stringResource(it.labelRes()))
-            },
-            selected = mode,
-            // Picking "Specific channel" is only half an answer — the channel itself is the setting.
-            onSelect = { picked ->
-                if (picked == StartupMode.SPECIFIC_CHANNEL) channelSheet = true else vm.setStartupMode(picked)
-            },
-            onDismiss = { startupSheet = false },
-        )
-    }
-
-    if (channelSheet) {
-        StartupChannelSheet(
-            vm = vm,
-            onPick = { picked -> vm.setStartupChannel(picked); channelSheet = false },
-            onDismiss = { channelSheet = false },
-        )
-    }
-}
 
 /**
  * The version, the licence, where the source lives and how to reach the people who use it.
@@ -289,41 +162,6 @@ fun AboutPage(onOpenLanguage: () -> Unit, modifier: Modifier = Modifier) {
         }
     }
     if (updateSheet) UpdateSheet(onDismiss = { updateSheet = false }, checkOnOpen = true)
-}
-
-/** A search box over the profile's live channels — a playlist is far too long to scroll blind. */
-@Composable
-private fun StartupChannelSheet(
-    vm: SettingsViewModel,
-    onPick: (ChannelEntity) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var query by remember { mutableStateOf("") }
-    var results by remember { mutableStateOf<List<ChannelEntity>>(emptyList()) }
-    // Debounced like the guide's own search: every keystroke otherwise costs an FTS query over
-    // the whole live catalogue for a prefix the user has already moved past. Collected in an
-    // effect, not in composition: flow operators in composition restart on every recomposition
-    // and trip the FlowOperatorInvokedInComposition lint.
-    var debouncedQuery by remember { mutableStateOf(query) }
-    LaunchedEffect(Unit) {
-        snapshotFlow { query }.debounce(SEARCH_DEBOUNCE_MS).collect { debouncedQuery = it }
-    }
-    LaunchedEffect(debouncedQuery) { results = vm.searchChannels(debouncedQuery) }
-
-    MobileBottomSheet(
-        onDismissRequest = onDismiss,
-        title = stringResource(R.string.settings_startup_specific_channel),
-    ) {
-        MobileTextField(
-            value = query,
-            onValueChange = { query = it },
-            label = stringResource(R.string.common_search),
-            modifier = Modifier.padding(horizontal = MobileDimens.ScreenPaddingH),
-        )
-        results.forEach { channel ->
-            MobileListRow(title = channel.name, onClick = { onPick(channel) })
-        }
-    }
 }
 
 /**
@@ -449,9 +287,18 @@ private fun LogEntry(entry: PlaybackErrorLog.Entry, line: String, selected: Bool
     }
 }
 
+/** "Synced today 06:10": [loggedWhen] inside a sentence — only Today / Yesterday lose their capital, never a month (#6). */
+@Composable
+internal fun syncedWhen(atMs: Long): String {
+    val text = loggedWhen(atMs)
+    val relative = android.text.format.DateUtils.isToday(atMs) ||
+        android.text.format.DateUtils.isToday(atMs + android.text.format.DateUtils.DAY_IN_MILLIS)
+    return if (relative) text.replaceFirstChar { it.lowercase(LocalConfiguration.current.locales[0]) } else text
+}
+
 /** "Today 20:15", "Yesterday 22:41", "28 Sep 18:02" — when the entry was written. */
 @Composable
-private fun loggedWhen(atMs: Long): String {
+internal fun loggedWhen(atMs: Long): String {
     val locale = LocalConfiguration.current.locales[0]
     val time = android.icu.text.SimpleDateFormat(android.text.format.DateFormat.getBestDateTimePattern(locale, "jm"), locale).format(Date(atMs))
     return when {
@@ -474,21 +321,6 @@ private fun openLink(context: Context, url: String) {
     }
 }
 
-@Composable
-private fun localeLabel(tag: String): String =
-    if (tag.isBlank()) {
-        stringResource(R.string.settings_language_device)
-    } else {
-        SupportedLocales.pickerRows.firstOrNull { it.languageTag == tag }?.endonym ?: tag
-    }
-
-private fun StartupMode.labelRes() = when (this) {
-    StartupMode.HOME -> R.string.settings_startup_home
-    StartupMode.LAST_CHANNEL -> R.string.settings_startup_last_channel
-    StartupMode.FAVORITES -> R.string.settings_startup_favorites
-    StartupMode.SPECIFIC_CHANNEL -> R.string.settings_startup_specific_channel
-}
-
 private fun PlaybackErrorLog.Kind.labelRes() = when (this) {
     PlaybackErrorLog.Kind.ERROR -> R.string.settings_playback_kind_error
     PlaybackErrorLog.Kind.EVENT -> R.string.settings_playback_kind_event
@@ -502,5 +334,3 @@ private fun String.engineName(): String = when (trim().lowercase()) {
     else -> this
 }
 
-/** Keystroke settle before the startup-channel picker queries — the guide uses the same 300 ms. */
-private const val SEARCH_DEBOUNCE_MS = 300L

@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.Constraints
 import kotlin.math.roundToInt
 import tv.own.owntv.core.ui.stage.PlaylistMark
 import tv.own.owntv.mobile.ui.stage.stageBackground
-import androidx.compose.ui.graphics.luminance
 import tv.own.owntv.mobile.cast.CastController
 import tv.own.owntv.mobile.cast.CastRouteButton
 import android.widget.Toast
@@ -53,8 +52,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -92,7 +91,7 @@ import tv.own.owntv.mobile.ui.nav.isTitleRoute
 import tv.own.owntv.mobile.ui.nav.liveChannelRoute
 import tv.own.owntv.mobile.ui.nav.SEARCH_ROUTE
 import tv.own.owntv.mobile.ui.nav.SEARCH_ROUTE_PATTERN
-import tv.own.owntv.mobile.ui.nav.SETUP_ROUTE
+import tv.own.owntv.mobile.ui.nav.SETUP_ROUTE_PATTERN
 import tv.own.owntv.core.profile.profileGateRequired
 import tv.own.owntv.core.profile.shellMayCompose
 import tv.own.owntv.mobile.ui.profiles.ProfileGate
@@ -108,6 +107,7 @@ import tv.own.owntv.mobile.ui.screens.library.VodTuner
 import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import tv.own.owntv.mobile.ui.screens.morePageTitleRes
 import tv.own.owntv.mobile.ui.screens.settings.settingsPageTitleRes
+import tv.own.owntv.mobile.ui.screens.settings.isSettingsPage
 import tv.own.owntv.mobile.ui.theme.MobileDimens
 import tv.own.owntv.mobile.ui.theme.MobileNavShape
 import tv.own.owntv.mobile.ui.theme.glassSurface
@@ -222,7 +222,7 @@ fun MobileShell(
 
     // The full screen player is the one destination that owns the whole display: no bars, no rail,
     // and no mini player, because the thing the mini player would be showing is already on screen.
-    val fullscreen = currentRoute == PLAYER_ROUTE || currentRoute == SETUP_ROUTE
+    val fullscreen = currentRoute == PLAYER_ROUTE || currentRoute == SETUP_ROUTE_PATTERN
     val tuner: LiveTuner = koinInject()
     val vodTuner: VodTuner = koinInject()
     val channel by tuner.channel.collectAsStateWithLifecycle()
@@ -391,7 +391,11 @@ fun MobileShell(
     // Downloads says where its files are instead of where it came from (M7-01): its crumb is the storage line.
     // Search's crumb is the query and its count (M8-09).
     val ownCrumb = topLevel || currentRoute == MobileDestination.DOWNLOADS.route || currentRoute == SEARCH_ROUTE_PATTERN
-    val backLabel = if (ownCrumb || previousRoute == null) null else stringResource(anyTitleRes(previousRoute))
+    val settingsPage = isSettingsPage(currentRoute)
+    val backLabel = if (ownCrumb || settingsPage || previousRoute == null) null else stringResource(anyTitleRes(previousRoute))
+    // Settings draws "‹ More" above its title and its hint below (M9-01); a settings page has only its crumb,
+    // "‹ Settings · 13 settings" (M9-03 …).
+    val showCrumb = ownCrumb || settingsPage || currentRoute == MobileDestination.SETTINGS.route
 
     // The playlist pill belongs to the browse places: in full on Live TV, Guide, Movies, Series and Downloads
     // (M7-01), as the layers icon on Home (its hero needs the width). Settings and More pages leave it out.
@@ -423,7 +427,8 @@ fun MobileShell(
         else -> null
     }
     val activeProfile = loadedProfiles.firstOrNull { it.id == activeId }
-    val onSurfaceLight = MaterialTheme.colorScheme.onSurface.luminance() > 0.5f
+    // The Stage palette, not Material's scheme: the latter stayed dark in Light, so the icon came out pale on pale.
+    val onSurfaceLight = !LocalStagePalette.current.isLight
 
     // The status and gesture bars' icons follow the app's own theme, not the phone's night mode (which
     // `enableEdgeToEdge` reads): dark on a Light page, light everywhere else and over the player.
@@ -467,7 +472,7 @@ fun MobileShell(
                     backLabel = backLabel,
                     onBack = { navController.popBackStack() },
                     heading = homeChrome.heading.takeIf { onHome },
-                    crumb = pageCrumb.value.takeIf { ownCrumb },
+                    crumb = pageCrumb.value.takeIf { showCrumb },
                     backPill = onTitlePage,
                 ) {
                     // More draws no cluster (M8-01), nor does About (M8-07); the other More pages keep only

@@ -635,7 +635,7 @@ private fun DownloadOptionsSheet(
  * a card's label (the TV's). [root] is the download folder (a path or a document-tree URI); blank or null = the
  * app's own folder. Null when the system cannot say, and the crumb then shows the free space alone.
  */
-private fun volumeName(context: Context, root: String?): String? = runCatching {
+internal fun volumeName(context: Context, root: String?): String? = runCatching {
     val sm = context.getSystemService(StorageManager::class.java)
     val volume = if (root != null && MediaTarget.isDocument(root)) {
         val id = Uri.decode(root.substringAfterLast('/')).substringBefore(':')

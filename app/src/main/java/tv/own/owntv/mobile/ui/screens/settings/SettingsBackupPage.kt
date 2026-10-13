@@ -370,7 +370,7 @@ private fun IncludedChip(text: String) {
  * [onRestart] mints a fresh PIN after a failure or a lock (restore only).
  */
 @Composable
-private fun RemoteSheet(
+internal fun RemoteSheet(
     title: String,
     body: String,
     state: CompanionServerState,

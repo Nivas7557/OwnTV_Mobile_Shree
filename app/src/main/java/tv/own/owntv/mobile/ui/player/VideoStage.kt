@@ -89,7 +89,9 @@ fun VideoStage(
     // mpv within seconds. A parameter that three of four callers forget is the wrong shape.
     val tuner: LiveTuner = koinInject()
     val liveOnExo by tuner.liveOnExo.collectAsStateWithLifecycle()
-    val liveExo = tuner.exoEngine.takeIf { liveOnExo }
+    // Live TV's preview pane is always ExoPlayer's (core's preview), before any tune says so.
+    val previewing by tuner.previewing.collectAsStateWithLifecycle()
+    val liveExo = tuner.exoEngine.takeIf { liveOnExo || previewing }
 
     // Shape comes from whichever engine actually holds the video, or the frame is laid out against
     // numbers the idle one last reported.

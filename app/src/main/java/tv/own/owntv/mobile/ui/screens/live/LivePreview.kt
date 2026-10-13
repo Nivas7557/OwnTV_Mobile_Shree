@@ -77,7 +77,8 @@ internal fun LivePreview(
     modifier: Modifier = Modifier,
 ) {
     val engine by tuner.activeEngine.collectAsStateWithLifecycle()
-    val chips by engine.streamChips.collectAsStateWithLifecycle()
+    val previewing by tuner.previewing.collectAsStateWithLifecycle()
+    val chips by (if (previewing) tuner.exoEngine else engine).streamChips.collectAsStateWithLifecycle()
     val name = remember(channel.name) { ProviderTags.parse(channel.name).name }
     val fullscreen = stringResource(R.string.multiview_tile_fullscreen)
     val shape = RoundedCornerShape(StageRadii.Video)

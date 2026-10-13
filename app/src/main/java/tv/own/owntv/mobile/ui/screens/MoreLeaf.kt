@@ -15,7 +15,6 @@ import tv.own.owntv.mobile.R
  * nameless in the other.
  */
 enum class MoreLeaf(slug: String, @param:StringRes val titleRes: Int) {
-    PROFILES("profiles", R.string.profiles_title),
     FAVORITES("favorites", R.string.content_category_favorites),
     HISTORY("history", R.string.content_category_history),
     BACKUP("backup", R.string.settings_backup_title),

@@ -3,6 +3,8 @@ package tv.own.owntv.mobile.ui.setup
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,6 +71,12 @@ import tv.own.owntv.mobile.ui.theme.MobileDimens
  * The television's own sequence, name for name. See `SetupWizardSteps.kt` for why the TV's two
  * "chooser" steps have no counterpart here.
  */
+/**
+ * Where an "Add a source" from Settings enters the flow (M9-19 picks the way there itself): the form ("Type it
+ * here", pre-filled when Remote sent one), the backup picker, or another profile's playlists.
+ */
+enum class SetupEntry { ADD_CONTENT, FORM, IMPORT, EXISTING }
+
 private enum class Step {
     WELCOME, DISPLAY_SIZE, DISCLAIMER, CHOICE, SYNC_DEVICE, CREATE_PROFILE, ADD_CONTENT, EXISTING, FORM, IMPORTING, RESTORE
 }
@@ -87,15 +95,24 @@ fun SetupFlow(
     onDone: (profileId: Long?) -> Unit,
     modifier: Modifier = Modifier,
     onCancel: (() -> Unit)? = null,
+    entry: SetupEntry = SetupEntry.ADD_CONTENT,
 ) {
     val vm: SetupViewModel = koinViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
     val progress by vm.progress.collectAsStateWithLifecycle()
     // No way to cancel means there is nothing behind this flow, which is exactly what a first run is.
     val firstRun = onCancel == null
-    var step by rememberSaveable(firstRun) {
-        mutableStateOf(if (firstRun) Step.WELCOME else Step.ADD_CONTENT)
+    val entryStep = when {
+        firstRun -> Step.WELCOME
+        entry == SetupEntry.FORM -> Step.FORM
+        entry == SetupEntry.IMPORT -> Step.RESTORE
+        entry == SetupEntry.EXISTING -> Step.EXISTING
+        else -> Step.ADD_CONTENT
     }
+    var step by rememberSaveable(firstRun) { mutableStateOf(entryStep) }
+    // A submission from Remote (M9-19), read once by the form it pre-fills.
+    val remotePayload by vm.remotePayload.collectAsStateWithLifecycle()
+    val remoteInitial = remember(remotePayload) { remotePayload?.toFormValues() }
     // Refreshed on every arrival at Add content, because restoring a backup on the way here can
     // create the very profiles whose playlists this step offers to share.
     var existing by remember { mutableStateOf<List<SourceEntity>>(emptyList()) }
@@ -108,6 +125,8 @@ fun SetupFlow(
     var importOrigin by rememberSaveable { mutableStateOf(Step.FORM) }
     // Where Back from the backup picker returns to — the first-run choice, or Add content.
     var backupOrigin by rememberSaveable { mutableStateOf(Step.ADD_CONTENT) }
+    // Entered straight on Import: the picker opens at once, as the Import card promised.
+    var openedPicker by rememberSaveable { mutableStateOf(false) }
 
     // The picked file, and what the user chose to take out of it. Both `null` until each is
     // answered, which is what drives the sheet below: a file with no choice yet is the question.
@@ -144,7 +163,9 @@ fun SetupFlow(
     // Back walks the wizard backwards rather than out of the app. From the very first step there is
     // nowhere to go unless the caller gave us somewhere, and an install with no playlist has nothing
     // behind it at all.
-    val atStart = step == (if (firstRun) Step.WELCOME else Step.ADD_CONTENT)
+    val atStart = step == entryStep
+    // Back from the step this flow was entered on leaves it, back to Settings' Add a source.
+    val leave = { vm.reset(); onCancel?.invoke() }
     BackHandler(enabled = !atStart || onCancel != null) {
         when (step) {
             Step.WELCOME -> onCancel?.invoke()
@@ -158,12 +179,19 @@ fun SetupFlow(
             // Not `onCancel?.invoke()`: `firstRun` IS `onCancel == null`, so this branch is only
             // reached when there is one, and the compiler knows it.
             Step.ADD_CONTENT -> if (firstRun) step = Step.CREATE_PROFILE else onCancel()
-            Step.EXISTING -> step = Step.ADD_CONTENT
-            Step.FORM -> { vm.reset(); step = Step.ADD_CONTENT }
-            Step.RESTORE -> { vm.reset(); step = backupOrigin }
+            Step.EXISTING -> if (entryStep == Step.EXISTING) leave() else step = Step.ADD_CONTENT
+            Step.FORM -> if (entryStep == Step.FORM) leave() else { vm.reset(); step = Step.ADD_CONTENT }
+            Step.RESTORE -> if (entryStep == Step.RESTORE) leave() else { vm.reset(); step = backupOrigin }
             Step.IMPORTING -> Unit // the buttons on that screen decide; a stray swipe must not abandon a sync
         }
     }
+
+    LaunchedEffect(Unit) {
+        if (entryStep == Step.RESTORE && !openedPicker) { openedPicker = true; pickBackup() }
+        if (entryStep == Step.EXISTING) existing = runCatching { vm.availableExistingSources() }.getOrDefault(emptyList())
+    }
+    // Read once: a later "Type it here" must not be filled from an old submission.
+    LaunchedEffect(step) { if (step != Step.FORM && remotePayload != null) vm.consumeRemotePayload() }
 
     Box(modifier = modifier.fillMaxSize()) {
         when (step) {
@@ -218,9 +246,14 @@ fun SetupFlow(
                     importOrigin = Step.EXISTING
                     step = Step.IMPORTING
                 },
-                onBack = { step = Step.ADD_CONTENT },
+                onBack = { if (entryStep == Step.EXISTING) leave() else step = Step.ADD_CONTENT },
             )
-            Step.FORM -> AddSourceForm(
+            Step.FORM -> Column(Modifier.fillMaxSize().statusBarsPadding()) {
+              // From Settings' Add a source (M9-20): the page's own title, and "‹ Playlists · Add a source" back.
+              if (!firstRun) FormHeader(onBack = { if (entryStep == Step.FORM) leave() else { vm.reset(); step = Step.ADD_CONTENT } })
+              AddSourceForm(
+                // Remote's submission fills the form; the user still presses Start import.
+                initial = remoteInitial,
                 onStartXtream = { name, server, user, pass, ua, referer, refresh, live, movies, series, hls ->
                     vm.startXtream(
                         name.ifBlank { defaultIptvName },
@@ -239,10 +272,10 @@ fun SetupFlow(
                     )
                     step = Step.IMPORTING
                 },
-                // Every other step gets its insets from [SetupPage]; the form has its own scrolling
-                // column, and without this its first line sat under the status bar's clock.
-                modifier = Modifier.statusBarsPadding(),
-            )
+                // Every other step gets its insets from [SetupPage]; the column above keeps the form's first
+                // line out from under the status bar's clock.
+              )
+            }
             Step.IMPORTING -> ImportProgress(
                 state = state,
                 progressText = progress?.importProgressDisplay(),
@@ -261,7 +294,7 @@ fun SetupFlow(
                     },
                     onContinue = { vm.finish(onDone) },
                     onPickAgain = { vm.reset(); restoreFile = null; restoreSections = null; pickBackup() },
-                    onBack = { vm.reset(); restoreFile = null; restoreSections = null; step = backupOrigin },
+                    onBack = { vm.reset(); restoreFile = null; restoreSections = null; if (entryStep == Step.RESTORE) leave() else step = backupOrigin },
                 )
                 // A file is picked and nothing has been asked of it yet — so ask, over the top.
                 val picked = restoreFile
@@ -275,7 +308,7 @@ fun SetupFlow(
                         onDismiss = {
                             vm.reset()
                             restoreFile = null
-                            step = backupOrigin
+                            if (entryStep == Step.RESTORE) leave() else step = backupOrigin
                         },
                     )
                 }
@@ -625,4 +658,57 @@ private fun Detail(text: String) {
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+/** A Remote submission as the form's own values (the TV fills its Add Source screen the same way). */
+private fun tv.own.owntv.core.companion.CompanionPayload.toFormValues(): SourceFormValues = SourceFormValues(
+    kind = when (type) {
+        tv.own.owntv.core.model.SourceType.M3U -> SourceKind.M3U
+        tv.own.owntv.core.model.SourceType.STALKER -> SourceKind.STALKER
+        else -> SourceKind.XTREAM
+    },
+    name = name,
+    urlOrServer = if (type == tv.own.owntv.core.model.SourceType.STALKER) portalUrl else server,
+    username = user,
+    password = pass,
+    mac = mac,
+    serialNumber = serialNumber,
+    deviceId = deviceId,
+    deviceId2 = deviceId2,
+    signature = signature,
+    userAgent = userAgent,
+    autoRefresh = tv.own.owntv.core.settings.PlaylistRefresh.parse(autoRefresh),
+    live = syncLive,
+    movies = syncMovies,
+    series = syncSeries,
+)
+
+/** The Stage page header for the add form opened from Settings: title (28 / 800), then the muted way back. */
+@Composable
+private fun FormHeader(onBack: () -> Unit) {
+    val palette = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)) {
+        Text(
+            stringResource(R.string.settings_add_type_here),
+            style = tv.own.owntv.mobile.ui.stage.stageText(28f, 800),
+            color = palette.text,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        )
+        Row(
+            Modifier.padding(top = 5.dp).clickable(interaction, indication = null, onClick = onBack),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            tv.own.owntv.mobile.ui.stage.StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
+            Text(
+                stringResource(R.string.settings_playlists) + stringResource(R.string.content_epg_bits_separator) + stringResource(R.string.content_add_source),
+                style = tv.own.owntv.mobile.ui.stage.stageText(13f, 500),
+                color = palette.muted,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
+        }
+    }
 }
