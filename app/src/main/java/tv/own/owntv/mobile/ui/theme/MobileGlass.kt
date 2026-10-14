@@ -359,13 +359,13 @@ private fun buildLuminanceMap(bitmap: Bitmap): BackdropLuminanceMap {
  */
 @Composable
 fun GlassBackdropRoot(content: @Composable () -> Unit) {
-    val settings: SettingsRepository = koinInject()
-    val bgImagePath by settings.bgImagePath.collectAsStateWithLifecycle("")
-    val glass = LocalGlass.current
-    // The wallpaper belongs to the Glass Effect, so it goes away with it: switching glass off and
-    // being left with a picture the panels no longer sample is the wrong half of the feature.
-    val hasImage = bgImagePath.isNotBlank() && glass.enabled
-    val frosted = hasImage && supportsBackdropBlur && glass.blurStrength > 0f
+    // Glass & background (M11): the picture is Background › Picture's, not the glass's — Glass off keeps it, and
+    // Stage or Plain hide it while the file stays for a return to Picture.
+    val bg = tv.own.owntv.mobile.ui.stage.LocalStageBackground.current
+    val bgImagePath = bg.imagePath
+    val hasImage = bg.showsPicture
+    // The ladder serves the picture's own Blur as well as the glass that samples it.
+    val frosted = hasImage && supportsBackdropBlur
 
     // Ten full-screen textures is real memory even though only the rungs actually drawn are ever
     // rasterized, so a low-RAM phone gets half the rungs — a coarser ladder over the same range,
@@ -426,7 +426,6 @@ fun GlassBackdropRoot(content: @Composable () -> Unit) {
                     .fillMaxSize()
                     .drawWithContent {
                         sharp.record { this@drawWithContent.drawContent() }
-                        drawLayer(sharp)
                         if (frosted) {
                             levels.forEachIndexed { index, layer ->
                                 val radius = radiiPx[index]
@@ -434,8 +433,22 @@ fun GlassBackdropRoot(content: @Composable () -> Unit) {
                                 layer.record { drawLayer(sharp) }
                             }
                         }
+                        // The picture at its Blur, from the same ladder (the TV's BackgroundPicture); sharp at 0
+                        // or on a device that cannot blur.
+                        val shown = if (bg.blurPct > 0) backdrop?.frostFor(bg.blurPct / 100f) else null
+                        if (shown == null) {
+                            drawLayer(sharp)
+                        } else {
+                            shown.lower.alpha = 1f
+                            drawLayer(shown.lower)
+                            shown.upper?.let { it.alpha = shown.upperWeight; drawLayer(it) }
+                        }
                     },
             )
+            // Darken. Light: the picture fades into the paper instead, always far enough for dark ink to read.
+            val dim = bg.dimPct / 100f
+            val light = tv.own.owntv.mobile.ui.stage.LocalStagePalette.current.isLight
+            Box(Modifier.fillMaxSize().background(if (light) Color(0xFFF4F7F5).copy(alpha = 0.55f + 0.45f * dim) else Color(0xFF05080A).copy(alpha = dim)))
         }
         CompositionLocalProvider(
             LocalGlassBackdrop provides backdrop,

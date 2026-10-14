@@ -56,7 +56,6 @@ import tv.own.owntv.core.theme.ThemeMode
 import tv.own.owntv.core.theme.UiZoom
 import tv.own.owntv.core.theme.roles
 import tv.own.owntv.mobile.R
-import tv.own.owntv.mobile.ui.components.AppIconSettingsDialog
 import tv.own.owntv.mobile.ui.components.ColorPickerSheet
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileIcons
@@ -590,7 +589,7 @@ private fun appSections(vm: SettingsViewModel): List<SettingSection> {
                 SettingItem(
                     "app_icon", MobileIcons.Palette, stringResource(R.string.settings_app_icon), stringResource(R.string.settings_line_app_icon),
                     SettingValue.Opens(stringResource(appIcon.label)),
-                    sheet = { dismiss -> AppIconSettingsDialog(chosen = appIcon, onPick = { vm.edit { setAppIcon(it) } }, onDismiss = dismiss) },
+                    sheet = { dismiss -> AppIconSheet(chosen = appIcon, onPick = { vm.edit { setAppIcon(it) } }, onDismiss = dismiss) },
                 ),
                 switchItem(
                     "brand_accent", MobileIcons.Palette, stringResource(R.string.settings_brand_accent),

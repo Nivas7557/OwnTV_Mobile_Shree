@@ -15,6 +15,7 @@ import okhttp3.Protocol
 import okio.Path.Companion.toOkioPath
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
@@ -185,6 +186,15 @@ class OwnTVMobileApp : Application(), androidx.work.Configuration.Provider {
             reminders = org.koin.core.context.GlobalContext.get().get(),
             settings = org.koin.core.context.GlobalContext.get().get(),
         )
+        // A new user starts on Stage with glass on (owner, 2026-10-14); an existing install keeps its look.
+        appScope.launch {
+            runCatching {
+                org.koin.core.context.GlobalContext.get().get<tv.own.owntv.core.settings.SettingsRepository>().applyPhoneStageDefaults(
+                    tv.own.owntv.core.theme.GlassConfig(scope = tv.own.owntv.core.theme.GlassSurface.entries.toSet()).toBitmask(),
+                    tv.own.owntv.mobile.ui.screens.settings.PHONE_GLASS_DEFAULT_PCT,
+                )
+            }
+        }
     }
 
     /** Process-long scope for [tv.own.owntv.player.PlaybackStartup]; never cancelled. */

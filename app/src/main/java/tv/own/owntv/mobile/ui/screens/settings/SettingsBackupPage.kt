@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -293,7 +292,7 @@ fun SettingsBackupPage(
     LaunchedEffect(vm.outcome) { if (vm.outcome is BackupViewModel.Outcome.Restored) restoredPending = true }
     if (restoredPending && vm.outcome == null) {
         if (chosenIcon != null && chosenIcon != appliedIcon) {
-            tv.own.owntv.mobile.ui.components.AppIconRestartDialog(chosenIcon) { restoredPending = false }
+            AppIconRestartSheet(chosenIcon) { restoredPending = false }
         } else {
             LaunchedEffect(Unit) { restoredPending = false }
         }
@@ -659,32 +658,6 @@ private fun OutcomeSheet(outcome: BackupViewModel.Outcome, onDismiss: () -> Unit
     }
 }
 
-/** A tick, its label and the line that says what it covers — the whole row toggles it. */
-@Composable
-internal fun CheckRow(
-    label: String,
-    description: String?,
-    checked: Boolean,
-    onToggle: (Boolean) -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Checkbox(checked = checked, onCheckedChange = onToggle)
-        Column(Modifier.weight(1f)) {
-            Text(label, style = MaterialTheme.typography.bodyLarge)
-            if (description != null) {
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
 /** Cancel and confirm, right-aligned under a sheet's body — the shape these sheets end in. */
 @Composable
 internal fun SheetButtons(
@@ -707,16 +680,6 @@ internal fun SheetButtons(
         )
         MobileButton(text = confirm, onClick = onConfirm, enabled = confirmEnabled)
     }
-}
-
-@Composable
-internal fun Label(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = MobileDimens.GapSmall),
-    )
 }
 
 @Composable

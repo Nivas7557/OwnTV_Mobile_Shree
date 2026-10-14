@@ -308,6 +308,11 @@ fun MobileShell(
                 Toast.makeText(context, startupUnavailable, Toast.LENGTH_LONG).show()
         }
     }
+    // The wizard's "Add a TV guide" (M10-W9): setup is over, so EPG sources opens — and its Add opens itself.
+    val addEpg = tv.own.owntv.mobile.ui.setup.SetupHandoff.addEpg
+    LaunchedEffect(addEpg) {
+        if (addEpg) navController.navigate(tv.own.owntv.mobile.ui.screens.settings.SettingsLeaf.EPG_SOURCES.route)
+    }
 
     val favorite by tuner.isFavorite.collectAsStateWithLifecycle()
     var windowMenu by remember { mutableStateOf(false) }

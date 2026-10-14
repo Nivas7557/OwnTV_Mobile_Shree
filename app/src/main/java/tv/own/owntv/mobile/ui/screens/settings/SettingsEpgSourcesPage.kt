@@ -70,7 +70,7 @@ fun SettingsEpgSourcesPage(
 
     var menuSource by remember { mutableStateOf<EpgSource?>(null) }
     var editSource by remember { mutableStateOf<EpgSource?>(null) }
-    var addSource by remember { mutableStateOf(false) }
+    var addSource by remember { mutableStateOf(tv.own.owntv.mobile.ui.setup.SetupHandoff.takeAddEpg()) }
     var refreshFor by remember { mutableStateOf<EpgSource?>(null) }
     var manualDaysFor by remember { mutableStateOf<EpgSource?>(null) }
     var confirmDelete by remember { mutableStateOf<EpgSource?>(null) }

@@ -74,26 +74,31 @@ fun AddSourcePage(onSetup: (SetupEntry) -> Unit, modifier: Modifier = Modifier, 
         }
     }
 
-    if (remote) {
-        val state by vm.remoteState.collectAsStateWithLifecycle()
-        val payload by vm.remotePayload.collectAsStateWithLifecycle()
-        // A submission arrived: the server's job is done, and the form opens filled in.
-        LaunchedEffect(payload) {
-            if (payload != null) {
-                vm.stopRemote()
-                remote = false
-                onSetup(SetupEntry.FORM)
-            }
+    if (remote) RemoteSourceSheet(vm, onReceived = { remote = false; onSetup(SetupEntry.FORM) }, onDismiss = { remote = false })
+}
+
+/**
+ * Remote, open (M9-19, and the wizard's W7): the companion server's address and code. A submission stops the
+ * server and [onReceived] opens the form it fills in. The caller starts the server as it opens this.
+ */
+@Composable
+internal fun RemoteSourceSheet(vm: SetupViewModel, onReceived: () -> Unit, onDismiss: () -> Unit) {
+    val state by vm.remoteState.collectAsStateWithLifecycle()
+    val payload by vm.remotePayload.collectAsStateWithLifecycle()
+    LaunchedEffect(payload) {
+        if (payload != null) {
+            vm.stopRemote()
+            onReceived()
         }
-        RemoteSheet(
-            title = stringResource(R.string.setup_from_phone),
-            body = stringResource(R.string.settings_help_add_from_phone_mobile),
-            state = state,
-            preparing = false,
-            onRestart = { vm.startRemote() },
-            onDismiss = { vm.stopRemote(); remote = false },
-        )
     }
+    RemoteSheet(
+        title = stringResource(R.string.setup_from_phone),
+        body = stringResource(R.string.settings_help_add_from_phone_mobile),
+        state = state,
+        preparing = false,
+        onRestart = { vm.startRemote() },
+        onDismiss = { vm.stopRemote(); onDismiss() },
+    )
 }
 
 /** `.card`: 18 dp corners on ink 4.5%, the icon, the name (14.5 / 800) and its line; pressed takes the fx look. */

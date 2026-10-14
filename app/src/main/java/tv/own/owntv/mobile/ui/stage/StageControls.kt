@@ -74,7 +74,8 @@ import tv.own.owntv.mobile.ui.theme.LocalMobileMotion
 fun StageIcon(icon: ImageVector, size: Dp, tint: Color, modifier: Modifier = Modifier) =
     Icon(icon, contentDescription = null, tint = tint, modifier = modifier.size(size))
 
-enum class StageButtonStyle { PRIMARY, SECONDARY, DANGER }
+/** PLAIN: no fill until pressed (the wizard's Back, `btn sm` with `background:none`). */
+enum class StageButtonStyle { PRIMARY, SECONDARY, DANGER, PLAIN }
 
 /**
  * `.btn`: 44 dp (34 [small]), the ink fill; PRIMARY is the accent with its glow, DANGER the danger text.
@@ -91,6 +92,8 @@ fun StageButton(
     small: Boolean = false,
     enabled: Boolean = true,
     trailing: String? = null,
+    /** After the text (the wizard's "Continue ›"). */
+    trailingIcon: ImageVector? = null,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
@@ -121,7 +124,13 @@ fun StageButton(
             .height(if (small) 34.dp else 44.dp)
             .then(if (text == null && trailing == null) Modifier.width(if (small) 34.dp else 44.dp) else Modifier)
             .clip(shape)
-            .background(if (filled) accent.accent else palette.ink.copy(alpha = 0.08f))
+            .background(
+                when {
+                    filled -> accent.accent
+                    style == StageButtonStyle.PLAIN -> Color.Transparent
+                    else -> palette.ink.copy(alpha = 0.08f)
+                },
+            )
             .clickable(interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(
                 horizontal = when {
@@ -147,6 +156,7 @@ fun StageButton(
                 overflow = TextOverflow.Ellipsis,
             )
         }
+        trailingIcon?.let { StageIcon(it, 14.dp, fg) }
     }
 }
 

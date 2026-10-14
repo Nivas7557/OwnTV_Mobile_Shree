@@ -24,8 +24,6 @@ import kotlinx.coroutines.flow.Flow
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.stageText
-import tv.own.owntv.core.theme.GlassPreset
-import tv.own.owntv.core.theme.GlassSurface
 
 /**
  * The TV's twelve settings groups (M9-01), in its order, each a page of rows. The Video player level of the
@@ -168,37 +166,3 @@ fun <T> SettingsChoiceSheet(
 /** A slider's stops, so it lands on core's step size instead of anywhere between two of them. */
 internal fun stepsFor(min: Int, max: Int, step: Int): Int = ((max - min) / step) - 1
 
-@Composable
-internal fun GlassSurface.labelRes(): Int = when (this) {
-    GlassSurface.PANELS -> R.string.settings_glass_surface_panels
-    GlassSurface.SIDEBAR -> R.string.settings_glass_surface_sidebar
-    GlassSurface.PREVIEW -> R.string.settings_glass_surface_preview
-    GlassSurface.DIALOGS -> R.string.settings_glass_surface_dialogs
-    GlassSurface.TOPBAR -> R.string.settings_glass_surface_topbar
-    GlassSurface.CARDS -> R.string.settings_glass_surface_cards
-    GlassSurface.MINI_PLAYER -> R.string.settings_glass_surface_miniplayer
-    GlassSurface.PLAYER_CONTROLS -> R.string.settings_glass_surface_player_controls
-    GlassSurface.TOASTS -> R.string.settings_glass_surface_toasts
-}
-
-@Composable
-internal fun GlassPreset.labelRes(): Int = when (this) {
-    GlassPreset.ULTRA_CLEAR -> R.string.settings_glass_preset_ultra_clear
-    GlassPreset.CLEAR -> R.string.settings_glass_preset_clear
-    GlassPreset.BALANCED -> R.string.settings_glass_preset_balanced
-    GlassPreset.TINTED -> R.string.settings_glass_preset_tinted
-    GlassPreset.OPAQUE -> R.string.settings_glass_preset_opaque
-    GlassPreset.AURORA -> R.string.settings_glass_preset_aurora
-    GlassPreset.CUSTOM -> R.string.settings_glass_preset_custom
-}
-
-@Composable
-internal fun GlassPreset.descriptionRes(): Int = when (this) {
-    GlassPreset.ULTRA_CLEAR -> R.string.settings_glass_preset_ultra_clear_description
-    GlassPreset.CLEAR -> R.string.settings_glass_preset_clear_description
-    GlassPreset.BALANCED -> R.string.settings_glass_preset_balanced_description
-    GlassPreset.TINTED -> R.string.settings_glass_preset_tinted_description
-    GlassPreset.OPAQUE -> R.string.settings_glass_preset_opaque_description
-    GlassPreset.AURORA -> R.string.settings_glass_preset_aurora_description
-    GlassPreset.CUSTOM -> R.string.settings_glass_preset_custom_description
-}

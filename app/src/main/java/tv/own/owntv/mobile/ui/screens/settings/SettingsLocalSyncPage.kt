@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -45,7 +43,9 @@ import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileTextField
 import tv.own.owntv.mobile.ui.components.SettingRow
 import tv.own.owntv.mobile.ui.components.sheetListHeight
-import tv.own.owntv.mobile.ui.setup.SetupPage
+import tv.own.owntv.mobile.ui.setup.WizardFrame
+import tv.own.owntv.mobile.ui.setup.WizardStep
+import tv.own.owntv.mobile.ui.setup.WizardSweepBar
 import tv.own.owntv.mobile.ui.theme.MobileDimens
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
@@ -225,13 +225,14 @@ fun SetupLocalSyncStep(
     Box(modifier) {
         // Title only. Every sheet below already says what to do, and the find sheet in particular
         // carries this step's instruction verbatim — printing it here too showed it twice at once.
-        SetupPage {
-            Text(
-                text = stringResource(R.string.setup_sync_device),
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            if (vm.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-        }
+        WizardFrame(
+            step = WizardStep.PROFILE,
+            title = stringResource(R.string.setup_sync_device),
+            sub = null,
+            next = null,
+            onNext = {},
+            onBack = null,
+        ) { if (vm.busy) WizardSweepBar() }
 
         when (step) {
             null -> Unit

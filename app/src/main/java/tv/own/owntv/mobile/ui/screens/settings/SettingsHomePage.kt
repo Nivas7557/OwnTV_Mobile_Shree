@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import tv.own.owntv.mobile.ui.components.SettingRow
+import tv.own.owntv.mobile.ui.stage.StageSegmented
 import tv.own.owntv.mobile.ui.stage.StageSettingRow
 import tv.own.owntv.mobile.ui.stage.StageSwitch
 
@@ -70,20 +71,15 @@ fun SettingsHomePage(
             // Only worth offering while the row is actually on — with Trending off there is nothing
             // for the choice to apply to, so it is not shown at all.
             if (trendingOn) {
-                SettingRow(
-                    title = stringResource(R.string.home_trending_style),
-                    value = stringResource(home.trendingStyle.labelRes()),
-                    onClick = {
-                        editHome {
-                            it.copy(
-                                trendingStyle = when (it.trendingStyle) {
-                                    HomeTrendingStyle.HERO -> HomeTrendingStyle.POSTERS
-                                    HomeTrendingStyle.POSTERS -> HomeTrendingStyle.HERO
-                                },
-                            )
-                        }
-                    },
-                )
+                // Two shapes, both in view: a segmented control, not a ⌄ that promises a list.
+                val styles = HomeTrendingStyle.entries
+                StageSettingRow(title = stringResource(R.string.home_trending_style)) {
+                    StageSegmented(
+                        options = styles.map { stringResource(it.labelRes()) },
+                        selected = styles.indexOf(home.trendingStyle),
+                        onSelect = { i -> editHome { it.copy(trendingStyle = styles[i]) } },
+                    )
+                }
             }
         }
 

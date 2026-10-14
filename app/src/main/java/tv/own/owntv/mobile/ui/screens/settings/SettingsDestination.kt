@@ -40,8 +40,8 @@ fun SettingsLeafPage(leaf: SettingsLeaf, onSetup: (SetupEntry) -> Unit) {
     }
 }
 
-/** Pages whose crumb carries a count of their own (M9-17, M9-21, M9-22). */
-private val OWN_CRUMB = setOf(SettingsLeaf.PLAYLISTS, SettingsLeaf.EPG_SOURCES, SettingsLeaf.CUSTOMIZE)
+/** Pages whose crumb carries a count of their own (M9-17, M9-21, M9-22, M9-23). */
+private val OWN_CRUMB = setOf(SettingsLeaf.PLAYLISTS, SettingsLeaf.EPG_SOURCES, SettingsLeaf.CUSTOMIZE, SettingsLeaf.GLASS_EFFECT)
 
 /** What a settings route calls itself in the header, or null when it is not one. */
 fun settingsPageTitleRes(route: String?): Int? = when (route) {
