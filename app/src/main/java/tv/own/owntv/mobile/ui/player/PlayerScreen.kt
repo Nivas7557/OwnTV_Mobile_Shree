@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,7 +58,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import tv.own.owntv.mobile.MainActivity
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.cast.CastController
 import tv.own.owntv.mobile.playback.PipController
@@ -71,7 +69,16 @@ import tv.own.owntv.core.subtitles.SubtitleController
 import tv.own.owntv.mobile.ui.screens.ContentActions
 import tv.own.owntv.mobile.ui.setup.copyPickedFile
 import tv.own.owntv.mobile.ui.theme.LocalAccentOnVideo
-import tv.own.owntv.mobile.ui.theme.glassDialogWindow
+import tv.own.owntv.mobile.ui.components.MobileBottomSheet
+import tv.own.owntv.mobile.ui.screens.settings.SheetText
+import tv.own.owntv.mobile.ui.screens.settings.StageConfirmSheet
+import tv.own.owntv.mobile.ui.stage.StageButton
+import tv.own.owntv.mobile.ui.stage.StageButtonStyle
+import tv.own.owntv.mobile.ui.stage.StageMenuItem
+import tv.own.owntv.mobile.ui.stage.StageSheetHeader
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.semantics.Role
 import tv.own.owntv.mobile.ui.screens.library.VodTuner
 import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import tv.own.owntv.player.ErrorInfo
@@ -292,17 +299,14 @@ fun PlayerScreen(
     // N4 — back on a channel whose saved copy was kept: continue from there, or stay live.
     val timeshiftResumeAt by tuner.timeshiftResumeAt.collectAsStateWithLifecycle()
     if (timeshiftResumeAt != null) {
-        AlertDialog(
-            modifier = Modifier.glassDialogWindow(),
-            onDismissRequest = tuner::dismissTimeshiftResume,
-            title = { Text(stringResource(R.string.player_timeshift_resume_title)) },
-            text = { Text(stringResource(R.string.player_timeshift_resume_message)) },
-            confirmButton = {
-                TextButton(onClick = tuner::resumeTimeshift) { Text(stringResource(R.string.common_resume)) }
-            },
-            dismissButton = {
-                TextButton(onClick = tuner::dismissTimeshiftResume) { Text(stringResource(R.string.player_go_live)) }
-            },
+        // Resume clears the offer itself, so the sheet's dismiss after it is a no-op.
+        StageConfirmSheet(
+            title = stringResource(R.string.player_timeshift_resume_title),
+            text = stringResource(R.string.player_timeshift_resume_message),
+            confirm = stringResource(R.string.common_resume),
+            onConfirm = tuner::resumeTimeshift,
+            onDismiss = tuner::dismissTimeshiftResume,
+            cancel = stringResource(R.string.player_go_live),
         )
     }
 
@@ -310,29 +314,20 @@ fun PlayerScreen(
     // Dismissing is watching — the picture is already on and the download stays paused.
     downloadWatchPrompt?.let { p ->
         var rememberAnswer by remember(p) { mutableStateOf(false) }
-        AlertDialog(
-            modifier = Modifier.glassDialogWindow(),
+        MobileBottomSheet(
             onDismissRequest = { downloadWatchGuard.answer(watch = true, remember = rememberAnswer) },
-            title = { Text(stringResource(R.string.content_download_watch_title)) },
-            text = {
-                androidx.compose.foundation.layout.Column {
-                    Text(stringResource(R.string.content_download_watch_body, p.playlistName))
-                    androidx.compose.foundation.layout.Row(
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        androidx.compose.material3.Checkbox(checked = rememberAnswer, onCheckedChange = { rememberAnswer = it })
-                        Text(stringResource(R.string.content_download_watch_remember))
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { downloadWatchGuard.answer(watch = true, remember = rememberAnswer) }) {
-                    Text(stringResource(R.string.content_download_watch_watch))
-                }
-            },
-            dismissButton = {
-                TextButton(
+            stage = true,
+        ) {
+            StageSheetHeader(stringResource(R.string.content_download_watch_title))
+            SheetText(stringResource(R.string.content_download_watch_body, p.playlistName))
+            StageMenuItem(
+                stringResource(R.string.content_download_watch_remember),
+                onClick = { rememberAnswer = !rememberAnswer },
+                checked = rememberAnswer,
+                role = Role.Checkbox,
+            )
+            Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StageButton(
                     onClick = {
                         downloadWatchGuard.answer(watch = false, remember = rememberAnswer)
                         // Stopped, not left playing in the mini player: the download needs the stream.
@@ -340,11 +335,17 @@ fun PlayerScreen(
                         vodTuner.stop()
                         onExit()
                     },
-                ) {
-                    Text(stringResource(R.string.content_download_watch_keep))
-                }
-            },
-        )
+                    text = stringResource(R.string.content_download_watch_keep),
+                    modifier = Modifier.weight(1f),
+                )
+                StageButton(
+                    onClick = { downloadWatchGuard.answer(watch = true, remember = rememberAnswer) },
+                    text = stringResource(R.string.content_download_watch_watch),
+                    style = StageButtonStyle.PRIMARY,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
     }
 
     // The automatic advance, made visible. The engine starts the next episode eight seconds before the

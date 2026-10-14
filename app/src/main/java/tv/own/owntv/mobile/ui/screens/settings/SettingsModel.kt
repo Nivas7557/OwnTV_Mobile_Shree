@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -333,9 +331,6 @@ class QuickPins(val keys: List<String>, private val save: (List<String>) -> Unit
         val to = at.getOrNull(p + delta) ?: return
         save(keys.toMutableList().apply { add(to, removeAt(at[p])) })
     }
-
-    /** The phone row each stored key stands for, in the pinned order, once each. */
-    fun rowKeys(): List<String> = keys.map { QUICK_ALIASES[it] ?: it }.distinct()
 }
 
 /**

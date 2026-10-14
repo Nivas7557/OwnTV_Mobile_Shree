@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -40,8 +39,6 @@ import tv.own.owntv.core.sync.local.SyncFailure
 import tv.own.owntv.core.sync.local.shortCodes
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
-import tv.own.owntv.mobile.ui.components.MobileTextField
-import tv.own.owntv.mobile.ui.components.SettingRow
 import tv.own.owntv.mobile.ui.components.sheetListHeight
 import tv.own.owntv.mobile.ui.setup.WizardFrame
 import tv.own.owntv.mobile.ui.setup.WizardStep

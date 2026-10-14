@@ -64,7 +64,7 @@ import tv.own.owntv.player.PlaybackSession
 /**
  * What is playing, and everything a screen needs to ask about it.
  *
- * It outlives every screen deliberately. The channel screen, the fullscreen player and the docked
+ * It outlives every screen deliberately. Live TV's preview, the fullscreen player and the docked
  * mini player are three views of **one** stream, and a user who leaves the channel screen while a
  * match is on has not asked for it to stop — so the tuning state cannot belong to a view model that
  * dies with its route. Only [stop] ends playback.

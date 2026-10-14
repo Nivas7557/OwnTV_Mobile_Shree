@@ -2,33 +2,19 @@ package tv.own.owntv.mobile.ui.components
 
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import tv.own.owntv.core.brand.AppIcon
 import tv.own.owntv.core.brand.AppIconSwitcher
 import tv.own.owntv.mobile.R
@@ -87,48 +73,6 @@ private fun PixelMark(triangle: Color, modifier: Modifier) {
             drawCircle(color, m.DOT_RADIUS * u, androidx.compose.ui.geometry.Offset(d.x * u, d.y * u))
         }
         drawCircle(Color(m.POWER), m.POWER_RADIUS * u, androidx.compose.ui.geometry.Offset(m.POWER_X * u, m.POWER_Y * u))
-    }
-}
-
-/**
- * The "OwnTV" lockup of the pass-6 mockup: the mark, then the wordmark — "Own" in the text colour,
- * "TV" in the icon's own accent (its darker on-light accent on a light theme), extra bold with
- * -0.025 em tracking. Side by side the gap is 0.26 × the mark; [stacked] puts the mark above with a
- * 0.2 × gap. The wordmark is live text in the user's main font, so it follows a font change.
- */
-@Composable
-fun BrandLockup(markSize: Int, textSize: Int, modifier: Modifier = Modifier, stacked: Boolean = false) {
-    val icon = rememberAppliedIcon()
-    val scheme = MaterialTheme.colorScheme
-    val tvColor = Color(if (scheme.background.luminance() < 0.5f) icon.accent else icon.accentOnLight)
-    val parts = @Composable {
-        BrandMark(icon, markSize.dp)
-        Text(
-            text = buildAnnotatedString {
-                withStyle(androidx.compose.ui.text.SpanStyle(color = scheme.onSurface)) {
-                    append(stringResource(R.string.brand_own))
-                }
-                withStyle(androidx.compose.ui.text.SpanStyle(color = tvColor)) {
-                    append(stringResource(R.string.brand_tv))
-                }
-            },
-            fontSize = textSize.sp,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = (-0.025).em,
-        )
-    }
-    if (stacked) {
-        Column(
-            modifier,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy((markSize * 0.2f).dp),
-        ) { parts() }
-    } else {
-        Row(
-            modifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy((markSize * 0.26f).dp),
-        ) { parts() }
     }
 }
 

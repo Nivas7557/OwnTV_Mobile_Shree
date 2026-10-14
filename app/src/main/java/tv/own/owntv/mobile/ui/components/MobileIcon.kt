@@ -54,9 +54,6 @@ object MobileIcons {
         glyph() { box(3f, 4f, 21f, 17f, 2.5f); line(8f, 21f, 16f, 21f); line(12f, 17f, 12f, 21f) }
     }
     val Movie: ImageVector by lazy { stage(StageGlyph.MOVIES) }
-    val Theaters: ImageVector by lazy {
-        glyph() { box(6f, 4f, 21f, 14f, 2f); line(3f, 8f, 3f, 20f, 18f, 20f) }
-    }
     val VideoLibrary: ImageVector by lazy {
         glyph() {
             box(7f, 3f, 21f, 15f, 2f)
@@ -100,9 +97,6 @@ object MobileIcons {
     val Check: ImageVector by lazy { stage(StageGlyph.CHECK) }
     val CheckCircle: ImageVector by lazy {
         glyph() { ring(12f, 12f, 9f); line(7.5f, 12.3f, 10.7f, 15.5f, 16.5f, 8.8f) }
-    }
-    val RadioButtonUnchecked: ImageVector by lazy {
-        glyph() { ring(12f, 12f, 9f) }
     }
     val Delete: ImageVector by lazy { stage(StageGlyph.TRASH) }
     val Edit: ImageVector by lazy { stage(StageGlyph.PENCIL) }
@@ -171,12 +165,6 @@ object MobileIcons {
 
     // ---- Lists --------------------------------------------------------------------------------
 
-    val PlaylistAdd: ImageVector by lazy {
-        glyph() {
-            line(4f, 7f, 16f, 7f); line(4f, 12f, 16f, 12f); line(4f, 17f, 11f, 17f)
-            line(18f, 13.5f, 18f, 20.5f); line(14.5f, 17f, 21.5f, 17f)
-        }
-    }
     val PlaylistPlay: ImageVector by lazy {
         glyph() {
             line(4f, 7f, 16f, 7f); line(4f, 12f, 16f, 12f); line(4f, 17f, 11f, 17f)
@@ -234,12 +222,6 @@ object MobileIcons {
             arc(12f, 8f, 4f, 180f, 180f)
         }
     }
-    val People: ImageVector by lazy {
-        glyph() {
-            ring(9f, 8f, 3.3f); arc(9f, 19f, 6f, 180f, 180f)
-            ring(17f, 7.5f, 2.6f); arc(17.5f, 18f, 4.6f, 200f, 130f)
-        }
-    }
 
     // ---- Player -------------------------------------------------------------------------------
 
@@ -291,12 +273,6 @@ object MobileIcons {
         }
     }
     val Palette: ImageVector by lazy { stage(StageGlyph.PALETTE) }
-    val TextFields: ImageVector by lazy {
-        glyph() {
-            line(2f, 19f, 7f, 5f, 12f, 19f); line(3.7f, 14.6f, 10.3f, 14.6f)
-            line(14.5f, 19f, 17.7f, 11f, 21f, 19f); line(15.6f, 16.2f, 19.8f, 16.2f)
-        }
-    }
     val Title: ImageVector by lazy {
         glyph() { line(4f, 6f, 20f, 6f); line(12f, 6f, 12f, 19f) }
     }

@@ -48,7 +48,6 @@ import tv.own.owntv.mobile.ui.components.ChannelLogoImage
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import tv.own.owntv.mobile.ui.components.sheetOpen
 import tv.own.owntv.mobile.ui.player.VideoStage
-import tv.own.owntv.mobile.ui.screens.home.formatCount
 import tv.own.owntv.mobile.ui.screens.home.timeLeftText
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.StageIcon

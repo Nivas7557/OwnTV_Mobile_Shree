@@ -44,11 +44,11 @@ Two rows ended somewhere other than where the mockup put them. Both are explaine
 
 | Feature | Done | Shape it took |
 |---|---|---|
-| Live TV browse | ✅ | Three panels became chips + list + detail |
+| Live TV browse | ✅ | Three panels became a crumb + categories sheet, the list, and a preview on top (beside the list when wide) |
 | EPG / Guide | ✅ | The grid was kept, and *On now* added as the portrait default; Timeline is a third shape |
-| Movies / Series browse | ✅ | One Library tab with a segmented control |
+| Movies / Series browse | ✅ | Two tabs, as the television's rail; a glass title card beside the grid when wide |
 | Long-press menus | ✅ | Bottom sheets, with the same actions in the same saved order |
-| Settings — 10 groups | ✅ | A tile grid became a list with drill-down; the search box was kept |
+| Settings — 12 groups | ✅ | The television's twelve groups as cards in two columns; search by setting name |
 | Player: subtitles, zoom, speed, volume boost | ✅ | The same functions on a gesture *and* a button surface — no gesture-only function. The panels are sheets rather than centred dialogs, and **they scroll**: until 2026-09-17 a sheet taller than a sideways phone silently dropped its last rows, which hid A/V sync, subtitle timing and subtitle search. The audio button is also always on the bar, as the television's is, so A/V sync is reachable on a single-soundtrack film |
 | Mini player / audio bar | ✅ | Three choices, not one: a floating window, a docked bar, or off |
 

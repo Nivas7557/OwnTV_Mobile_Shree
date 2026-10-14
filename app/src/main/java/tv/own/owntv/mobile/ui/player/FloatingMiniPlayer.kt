@@ -53,7 +53,6 @@ import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileListRow
-import tv.own.owntv.mobile.ui.theme.MobileDimens
 import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import tv.own.owntv.player.OwnTVPlayer
 import tv.own.owntv.player.PlaybackEngine

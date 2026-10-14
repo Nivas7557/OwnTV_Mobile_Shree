@@ -9,7 +9,6 @@ import androidx.compose.ui.res.pluralStringResource
 import tv.own.owntv.core.epg.displayLogoUrl
 import tv.own.owntv.core.live.ProviderTags
 import tv.own.owntv.mobile.ui.components.ChannelLogoImage
-import tv.own.owntv.mobile.ui.screens.home.formatCount
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.StageIcon
 import tv.own.owntv.mobile.ui.stage.StageRadii
@@ -21,9 +20,7 @@ import tv.own.owntv.mobile.ui.stage.StageStepper
 import tv.own.owntv.mobile.ui.stage.stageAccent
 import tv.own.owntv.mobile.ui.stage.stageText
 import tv.own.owntv.mobile.ui.components.MobileIcons
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -55,7 +52,6 @@ import tv.own.owntv.core.model.ContentMenu
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.ContentMenuSheet
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
-import tv.own.owntv.mobile.ui.components.MobileButton
 import tv.own.owntv.mobile.ui.components.MoveToCategorySheet
 import tv.own.owntv.mobile.ui.components.NewCategoryDialog
 import tv.own.owntv.mobile.ui.components.ReorderSheet

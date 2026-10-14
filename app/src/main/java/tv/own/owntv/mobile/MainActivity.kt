@@ -320,7 +320,7 @@ open class MainActivity : FragmentActivity() {
      * Nobody touches the screen during a film, and the phone's own timeout does not know that.
      *
      * Held on the window, by the activity, once — not by the composable that draws the picture. There
-     * are three of those (the channel screen, the full screen player, the mini player) and they hand
+     * are three of those (Live TV's preview, the full screen player, the mini player) and they hand
      * the stream to one another: the arriving one would set the flag and the leaving one would then
      * clear it, which is exactly why the screen still went dark mid-film.
      */

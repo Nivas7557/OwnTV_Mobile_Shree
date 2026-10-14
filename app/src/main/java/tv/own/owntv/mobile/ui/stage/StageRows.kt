@@ -24,6 +24,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -184,7 +187,17 @@ fun StageRowValue(
             }
             append(value)
         }
-        Text(text, style = stageText(12.5f, 700), color = if (plain || accentPart != null) palette.text else accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        // A row measures its value first; uncapped, a long one ("Plus Jakarta Sans · 100%") at a large zoom and
+        // font left the title so little room that it broke mid-word. Measured in the zoomed density, so it holds.
+        val maxWidth = with(LocalDensity.current) { (LocalWindowInfo.current.containerSize.width * 0.4f).toDp() }
+        Text(
+            text,
+            style = stageText(12.5f, 700),
+            color = if (plain || accentPart != null) palette.text else accent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.widthIn(max = maxWidth),
+        )
         when (chevron) {
             StageChevron.NONE -> Unit
             StageChevron.DOWN -> StageIcon(MobileIcons.KeyboardArrowDown, 14.dp, palette.muted)

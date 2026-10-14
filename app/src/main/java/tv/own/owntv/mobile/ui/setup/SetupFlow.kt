@@ -440,6 +440,15 @@ private fun RestoreSectionsSheet(
                 ) { StageSwitch(deviceSettings) }
             }
         }
+        // A first run with no playlists restored has nothing to play (the TV's same warning).
+        if (sections.isNotEmpty() && BackupManager.Section.SOURCES !in sections) {
+            Text(
+                stringResource(R.string.settings_backup_no_sources_warning),
+                style = stageText(12.5f, 600),
+                color = LocalStagePalette.current.warn,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            )
+        }
         // Confirm does not dismiss: answering is what closes the sheet, and dismissing means leaving.
         val enabled = sections.isNotEmpty()
         StageMenuItem(

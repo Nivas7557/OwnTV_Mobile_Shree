@@ -18,7 +18,6 @@ import tv.own.owntv.core.parser.XtEpgEntry
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.ui.stage.PlaylistMark
 import tv.own.owntv.mobile.ui.components.rememberClockTick
-import tv.own.owntv.mobile.ui.screens.home.formatCount
 import tv.own.owntv.mobile.ui.screens.home.timeLeftText
 import tv.own.owntv.mobile.ui.shell.ProvidePageCrumb
 import tv.own.owntv.mobile.ui.shell.PageCrumb

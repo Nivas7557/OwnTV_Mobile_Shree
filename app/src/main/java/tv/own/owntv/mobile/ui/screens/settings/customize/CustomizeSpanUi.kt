@@ -28,12 +28,6 @@ import tv.own.owntv.core.util.Pin
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 
-/** The tick that marks a row as part of the span being selected. */
-internal fun spanTick(selected: Boolean): (@Composable () -> Unit)? =
-    if (!selected) null else {
-        { tv.own.owntv.mobile.ui.stage.StageIcon(MobileIcons.Check, 18.dp, tv.own.owntv.mobile.ui.stage.stageAccent.accent) }
-    }
-
 /**
  * The strip that appears while a span is being picked: what to do next, and a way out.
  *

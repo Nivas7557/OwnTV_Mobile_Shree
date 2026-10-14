@@ -245,11 +245,6 @@ class DetailViewModel(
         .map { prog -> prog.values.filter { it.isFinished() }.map { it.itemId }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
-    /** The episode the row marker points at: the one watched most recently, finished or not. */
-    val lastWatchedId: StateFlow<Long?> = episodeProgress
-        .map { prog -> prog.values.maxByOrNull { it.updatedAt }?.itemId }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
     /**
      * What the "Next up" card offers: the episode still in progress, else the one after the last
      * finished, else the first — and nothing at all once the whole show has been watched.

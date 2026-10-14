@@ -31,9 +31,6 @@ import tv.own.owntv.core.content.AdultCategoryClassifier
 import tv.own.owntv.core.customize.CustomizationStore
 import tv.own.owntv.core.customize.CustomizeKeys
 import tv.own.owntv.core.customize.SectionCustomizations
-import tv.own.owntv.core.customize.CategoryRailEditor
-import tv.own.owntv.core.customize.MoveKind
-import tv.own.owntv.core.customize.railCategories
 import tv.own.owntv.core.database.dao.CategoryDao
 import tv.own.owntv.core.database.dao.ChannelDao
 import tv.own.owntv.core.database.dao.ContentOrderDao
@@ -45,7 +42,6 @@ import tv.own.owntv.core.database.dao.SourceDao
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.core.database.entity.EpgProgrammeEntity
 import tv.own.owntv.core.database.entity.FavoriteEntity
-import tv.own.owntv.core.epg.EpgMatcher
 import tv.own.owntv.core.epg.EpgShift
 import tv.own.owntv.core.epg.EpgAutoMatcher
 import tv.own.owntv.core.epg.GuideCandidate
@@ -61,7 +57,6 @@ import tv.own.owntv.core.repository.ActiveProfileSources
 import tv.own.owntv.core.repository.EpgRepository
 import tv.own.owntv.core.repository.activeProfileSources
 import tv.own.owntv.core.settings.SettingsRepository
-import tv.own.owntv.mobile.ui.screens.live.LiveCategory
 import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import java.util.Calendar
 

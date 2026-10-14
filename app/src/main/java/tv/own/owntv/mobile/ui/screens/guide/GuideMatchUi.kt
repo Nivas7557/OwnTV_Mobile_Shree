@@ -52,7 +52,6 @@ import tv.own.owntv.mobile.ui.stage.stageText
 import kotlin.math.roundToInt
 import tv.own.owntv.core.database.entity.ChannelEntity
 import tv.own.owntv.mobile.R
-import tv.own.owntv.mobile.ui.screens.home.groupedCountText
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.sheetListHeight
 import tv.own.owntv.mobile.ui.screens.live.EpgMatchSheet
@@ -219,23 +218,6 @@ internal fun GuideChannelFollowUp(dialog: GuideChannelDialog, channel: ChannelEn
         )
     }
 }
-
-/** "Guide loaded: 412 channels. The guide contains 91,204 programs. Catch-up on 30 channels." */
-@Composable
-fun epgStatsText(stats: GuideStats): String = stringResource(
-    R.string.content_epg_stats_loaded,
-    groupedCountText(R.plurals.content_epg_stats_channels, stats.guideChannels),
-    groupedCountText(R.plurals.content_epg_stats_programmes, stats.programmes),
-    if (stats.catchupChannels == 0) {
-        stringResource(R.string.content_epg_stats_no_catchup)
-    } else {
-        pluralStringResource(
-            R.plurals.content_epg_stats_catchup_available,
-            stats.catchupChannels,
-            stats.catchupChannels,
-        )
-    },
-)
 
 /** The one line an auto-match run leaves behind, whatever happened. */
 @Composable

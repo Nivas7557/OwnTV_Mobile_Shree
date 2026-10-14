@@ -5,12 +5,8 @@ import android.net.Uri
 import android.os.storage.StorageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +26,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -84,7 +77,6 @@ import tv.own.owntv.mobile.ui.stage.StageSwitch
 import tv.own.owntv.mobile.ui.stage.StageTool
 import tv.own.owntv.mobile.ui.stage.StageTabs
 import tv.own.owntv.mobile.ui.stage.stageAccent
-import tv.own.owntv.mobile.ui.stage.stageClickable
 import tv.own.owntv.mobile.ui.stage.stageGlass
 import tv.own.owntv.mobile.ui.stage.stageText
 import java.text.NumberFormat

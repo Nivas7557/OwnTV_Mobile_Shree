@@ -42,7 +42,6 @@ import tv.own.owntv.core.storage.MediaTarget
 import tv.own.owntv.core.storage.StorageAccess
 import tv.own.owntv.core.trending.ProviderVariantParser
 import tv.own.owntv.mobile.ui.screens.library.VodTuner
-import java.io.File
 
 /**
  * What has been saved for offline watching, and how the queue is getting on.

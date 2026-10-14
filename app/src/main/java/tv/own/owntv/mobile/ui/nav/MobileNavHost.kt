@@ -17,6 +17,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.compose.animation.AnimatedContentScope
+import org.koin.compose.koinInject
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import tv.own.owntv.core.settings.SettingsRepository
+import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import tv.own.owntv.mobile.ui.shell.ReportShownPage
 import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.SharedFlow
@@ -33,7 +38,6 @@ import tv.own.owntv.mobile.ui.screens.home.HomeScreen
 import tv.own.owntv.mobile.ui.screens.library.DetailScreen
 import tv.own.owntv.mobile.ui.screens.library.LibraryScreen
 import tv.own.owntv.mobile.ui.screens.library.LibraryTab
-import tv.own.owntv.mobile.ui.screens.live.ChannelDetailScreen
 import tv.own.owntv.mobile.ui.screens.live.LiveScreen
 import tv.own.owntv.mobile.ui.screens.search.SearchScreen
 import tv.own.owntv.mobile.ui.screens.settings.SettingsGroup
@@ -69,6 +73,10 @@ fun MobileNavHost(
 ) {
     // One layout around the whole graph: it is what lets a poster tile on one screen and the header
     // image on the next be understood as the same picture rather than two pictures crossfading.
+    val tuner: LiveTuner = koinInject()
+    // A channel opened from Home, Favourites or History plays full screen, as on the television.
+    val playChannel = { channelId: Long -> tuner.tune(channelId); navController.navigate(PLAYER_ROUTE) }
+    val previewOn by koinInject<SettingsRepository>().livePreviewEnabled.collectAsStateWithLifecycle(true)
     SharedTransitionLayout(modifier = modifier) {
         CompositionLocalProvider(LocalSharedTransition provides this) {
     // Navigation's own default is a 700 ms crossfade that ignores the reduce-motion setting. The
@@ -102,9 +110,7 @@ fun MobileNavHost(
                     )
                     MobileDestination.HOME -> HomeScreen(
                         scrollToTop = scrollToTop,
-                        onOpenChannel = { channelId ->
-                            navController.navigate(channelRoute(destination, channelId, false))
-                        },
+                        onOpenChannel = playChannel,
                         onOpenMovie = { id ->
                             navController.navigate(detailRoute(destination.route, LibraryTab.MOVIES, id))
                         },
@@ -142,8 +148,7 @@ fun MobileNavHost(
                 }
             }
         }
-        // A film or a show sits under the tab it was opened from, so the bar keeps that tab selected
-        // — the same reason the channel screen lives under Live.
+        // A film or a show sits under the tab it was opened from, so the bar keeps that tab selected.
         LIBRARY_PARENTS.forEach { parent ->
             page(
                 route = "${parent.route}/{$ARG_TAB}/{$ARG_ITEM_ID}",
@@ -166,30 +171,21 @@ fun MobileNavHost(
                 }
             }
         }
-        CHANNEL_PARENTS.forEach { parent ->
-            page(
-                route = "${parent.route}/$CHANNEL_SEGMENT/{$ARG_CHANNEL_ID}/{$ARG_CATCHUP}",
-                arguments = listOf(
-                    navArgument(ARG_CHANNEL_ID) { type = NavType.LongType },
-                    navArgument(ARG_CATCHUP) { type = NavType.BoolType },
-                ),
-            ) { entry ->
-                ChannelDetailScreen(
-                    channelId = entry.arguments?.getLong(ARG_CHANNEL_ID) ?: return@page,
-                    openCatchup = entry.arguments?.getBoolean(ARG_CATCHUP) == true,
-                    onFullscreen = { navController.navigate(PLAYER_ROUTE) },
-                    onBack = { navController.popBackStack() },
-                )
-            }
-        }
         page(
             route = SEARCH_ROUTE_PATTERN,
             arguments = listOf(navArgument(ARG_QUERY) { type = NavType.StringType; defaultValue = "" }),
         ) { entry ->
             SearchScreen(
                 initialQuery = entry.arguments?.getString(ARG_QUERY).orEmpty(),
+                // Search goes to the channel (TV): Live TV, with it in the preview on top — or full
+                // screen when Live preview is off, as a tap in Live TV does then.
                 onOpenChannel = { channelId ->
-                    navController.navigate(channelRoute(MobileDestination.LIVE, channelId, false))
+                    if (previewOn) {
+                        tuner.preview(channelId)
+                        navController.navigateToTab(MobileDestination.LIVE)
+                    } else {
+                        playChannel(channelId)
+                    }
                 },
                 onOpenMovie = { id ->
                     navController.navigate(detailRoute(LibraryTab.MOVIES.parent.route, LibraryTab.MOVIES, id))
@@ -223,11 +219,7 @@ fun MobileNavHost(
                         leaf = leaf,
                         // A channel or a title opened from Favourites lands on the screen it has
                         // under its own tab — the same convention the Guide uses for its channels.
-                        onOpenChannel = { channelId, openCatchup ->
-                            navController.navigate(
-                                channelRoute(MobileDestination.LIVE, channelId, openCatchup),
-                            )
-                        },
+                        onOpenChannel = { channelId, _ -> playChannel(channelId) },
                         onOpenItem = { tab, id ->
                             navController.navigate(detailRoute(tab.parent.route, tab, id))
                         },
@@ -245,7 +237,7 @@ fun MobileNavHost(
             PlayerScreen(
                 onExit = {
                     miniRequested.value = true
-                    navController.leavePlayerStillPlaying()
+                    navController.popBackStack()
                 },
             )
         }
@@ -276,46 +268,6 @@ private fun NavGraphBuilder.page(
     ReportShownPage(entry)
     content(entry)
 }
-
-/**
- * A channel, watched. It sits under the tab it was opened from so the shell keeps that tab selected
- * and its title while the channel is open — a detail screen is not a fifth tab.
- *
- * The `channel` segment is what keeps this apart from a film's route under the same parent: both are
- * "parent then two arguments", and the matcher goes by shape, not by argument type.
- */
-private fun channelRoute(parent: MobileDestination, channelId: Long, openCatchup: Boolean) =
-    "${parent.route}/$CHANNEL_SEGMENT/$channelId/$openCatchup"
-
-/** A channel opened from outside the graph — the profile's "Start on a channel" setting. */
-fun liveChannelRoute(channelId: Long) = channelRoute(MobileDestination.LIVE, channelId, false)
-
-/** A channel screen draws the picture itself, under whichever tab it was opened from. */
-fun isChannelRoute(route: String?): Boolean = route?.contains("/$CHANNEL_SEGMENT/") == true
-
-/**
- * Leave the full screen player with the stream still running — the small-window button, Sound only,
- * and the swipe down.
- *
- * It has to leave **every** screen that draws the picture, not just the top one. A channel is watched
- * from its own screen, so popping the player alone landed the user back on that screen, and the shell
- * hides the mini player wherever the stream is already on display: the picture went away, no bar and
- * no floating window arrived, and the two buttons looked broken. A film's page is not one of these —
- * it describes the film, it does not play it — so only channel screens are walked past.
- */
-private fun NavHostController.leavePlayerStillPlaying() {
-    popBackStack()
-    while (isChannelRoute(currentDestination?.route)) {
-        if (!popBackStack()) return
-    }
-}
-
-private const val ARG_CHANNEL_ID = "channelId"
-private const val ARG_CATCHUP = "catchup"
-private const val CHANNEL_SEGMENT = "channel"
-
-/** The tabs a channel can be opened from. Guide sends its channels to Live's. */
-private val CHANNEL_PARENTS = listOf(MobileDestination.LIVE, MobileDestination.HOME)
 
 /** The tabs a film or a show can be opened from, and therefore returned to. */
 private val LIBRARY_PARENTS = listOf(

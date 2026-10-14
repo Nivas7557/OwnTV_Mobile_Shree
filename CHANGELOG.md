@@ -10,6 +10,7 @@
 ## Unreleased
 
 ### New features
+- **🎭 Stage design: the television's new look on phone and tablet**
 - **🎨 Pixel app icon and Plus Jakarta Sans, the new default font**
 - **🔊 Volume swipe controls the phone's volume**
 - **⏪ Resume a saved channel: ask, always or never**
@@ -29,6 +30,7 @@
 - **🗂️ Downloads and recordings whose file is gone say "File missing"**
 
 ### Fixes
+- **📡 Pause and rewind live TV: a channel comes back by itself after a network outage**
 - **😴 The screen no longer turns off when a film stops to buffer**
 - **Custom categories in the player's channel list and the Multiview picker**
 - **🎞️ Catch-up plays on the hardware decoder and freezes on its first frame less often**

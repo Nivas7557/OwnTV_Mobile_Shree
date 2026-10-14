@@ -77,9 +77,7 @@ import tv.own.owntv.mobile.ui.nav.MobileDestination.Companion.visible
 import tv.own.owntv.mobile.ui.nav.MobileNavHost
 import tv.own.owntv.mobile.playback.PipController
 import tv.own.owntv.mobile.ui.nav.PLAYER_ROUTE
-import tv.own.owntv.mobile.ui.nav.isChannelRoute
 import tv.own.owntv.mobile.ui.nav.isTitleRoute
-import tv.own.owntv.mobile.ui.nav.liveChannelRoute
 import tv.own.owntv.mobile.ui.nav.SEARCH_ROUTE
 import tv.own.owntv.mobile.ui.nav.SEARCH_ROUTE_PATTERN
 import tv.own.owntv.mobile.ui.nav.SETUP_ROUTE_PATTERN
@@ -221,12 +219,9 @@ fun MobileShell(
     // Only ever ONE view of the picture at a time: the engine renders into a single surface, and a
     // second one attaching would take it away from the first. So no mini player on a screen that is
     // already showing the stream.
-    // A channel screen sits under whichever tab it was opened from, so the tab it is under is not
-    // what says the picture is on screen — the route being a channel's is. On a tablet the channel
-    // is watched inside the Live TV route instead, in the pane beside the list, so the route cannot
-    // answer it and the screen raises this flag itself.
+    // Live TV raises this while its preview shows the picture, so no mini player is put over it.
     val streamOnScreen = remember { mutableStateOf(false) }
-    val showingStream = fullscreen || isChannelRoute(currentRoute) || streamOnScreen.value
+    val showingStream = fullscreen || streamOnScreen.value
     // A mini player is something the user asks for in the full screen player, never something the
     // app decides for them — see [LocalMiniRequested].
     val miniRequested = remember { mutableStateOf(false) }
@@ -293,7 +288,11 @@ fun MobileShell(
                 startupLive.requestFavorites()
                 navController.navigateToTab(MobileDestination.LIVE)
             }
-            is StartupTarget.Channel -> navController.navigate(liveChannelRoute(target.id))
+            // Start on a channel: it plays full screen, as on the television.
+            is StartupTarget.Channel -> {
+                tuner.tune(target.id)
+                navController.navigate(PLAYER_ROUTE)
+            }
             StartupTarget.ChannelUnavailable ->
                 Toast.makeText(context, startupUnavailable, Toast.LENGTH_LONG).show()
         }

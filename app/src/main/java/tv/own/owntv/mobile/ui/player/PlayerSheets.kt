@@ -37,7 +37,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -475,10 +474,13 @@ private fun ChannelSheet(
     // a sheet that would cover the whole short screen.
     if (configuration.screenWidthDp > configuration.screenHeightDp) {
         androidx.activity.compose.BackHandler(onBack = onDismiss)
+        // The panel sits at the start edge, so in right-to-left the wash comes from the right.
+        val rtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
+        val wash = if (rtl) arrayOf(0.3f to Color.Transparent, 1f to Color(0xBF020506)) else arrayOf(0f to Color(0xBF020506), 0.7f to Color.Transparent)
         Box(
             Modifier
                 .fillMaxSize()
-                .background(Brush.horizontalGradient(0f to Color(0xBF020506), 0.7f to Color.Transparent))
+                .background(Brush.horizontalGradient(*wash))
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onDismiss),
         ) {
             Column(
