@@ -693,7 +693,8 @@ fun PlayerScreen(
             logoUrl = channel?.displayLogoUrl ?: film?.posterUrl,
             // Nothing is drawn over the picture in the little window: it is a thumbnail, and the
             // system draws its own buttons on top of it.
-            visible = controlsVisible && !inPip,
+            // Held sideways the channel list is a panel over the picture alone (M3-10): the controls step aside.
+            visible = controlsVisible && !inPip && !(sheet == PlayerSheet.CHANNELS && landscape),
             isLive = isLive,
             offsetSec = offsetSecState,
             archiveWindowSec = archiveWindowSec,

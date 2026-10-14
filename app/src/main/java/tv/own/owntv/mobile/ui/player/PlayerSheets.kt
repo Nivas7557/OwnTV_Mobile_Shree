@@ -1,5 +1,14 @@
 package tv.own.owntv.mobile.ui.player
 
+import tv.own.owntv.mobile.ui.stage.stageGlass
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.draw.clip
@@ -460,7 +469,48 @@ private fun ChannelSheet(
     val nowMs by rememberClockTick()
     val sep = stringResource(R.string.content_epg_bits_separator)
     val heading = title?.let { ProviderTags.parse(it).name } ?: stringResource(R.string.content_channel_overlay_title)
-    MobileBottomSheet(onDismissRequest = onDismiss, title = heading, stage = true) {
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val body: @Composable (Boolean) -> Unit = { side -> ChannelSheetBody(heading, channels, playing, now, nowMs, sep, side, onTuneToNumber, onPick, onDismiss) }
+    // Held sideways (M3-10): a glass panel down the left of the picture, over a wash from that side, instead of
+    // a sheet that would cover the whole short screen.
+    if (configuration.screenWidthDp > configuration.screenHeightDp) {
+        androidx.activity.compose.BackHandler(onBack = onDismiss)
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(Brush.horizontalGradient(0f to Color(0xBF020506), 0.7f to Color.Transparent))
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onDismiss),
+        ) {
+            Column(
+                Modifier
+                    .padding(14.dp)
+                    .width(380.dp)
+                    .fillMaxHeight()
+                    .stageGlass(RoundedCornerShape(24.dp))
+                    // The panel's own taps stay in it.
+                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
+            ) { body(true) }
+        }
+        return
+    }
+    MobileBottomSheet(onDismissRequest = onDismiss, title = heading, stage = true) { body(false) }
+}
+
+@Composable
+private fun ChannelSheetBody(
+    heading: String,
+    channels: List<ChannelEntity>,
+    playing: ChannelEntity?,
+    now: Map<Long, XtEpgEntry>,
+    nowMs: Long,
+    sep: String,
+    side: Boolean,
+    onTuneToNumber: (suspend (Int) -> DirectTune)?,
+    onPick: (ChannelEntity) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    run {
         StageSheetHeader(
             title = heading,
             extra = formatCount(channels.size) + sep + stringResource(R.string.common_nav_live_tv),
@@ -473,7 +523,7 @@ private fun ChannelSheet(
             },
         )
         if (onTuneToNumber != null) DirectTuneField(onTuneToNumber, onDismiss)
-        LazyColumn(Modifier.heightIn(max = sheetListHeight())) {
+        LazyColumn(if (side) Modifier.fillMaxHeight() else Modifier.heightIn(max = sheetListHeight())) {
             items(channels, key = { it.id }) { channel ->
                 val current = channel.id == playing?.id
                 Box(if (current) Modifier.stageSelectedBar() else Modifier) {

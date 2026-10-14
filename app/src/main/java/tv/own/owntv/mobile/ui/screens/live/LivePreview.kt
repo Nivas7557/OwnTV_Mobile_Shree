@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -75,6 +76,10 @@ internal fun LivePreview(
     nowMs: Long,
     onFullscreen: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Beside the list (M12): the video at 16:9 across the pane instead of 212 dp, no side margin. */
+    wide: Boolean = false,
+    /** A tablet's pane (M12-03): the bigger title and the programme's plot. */
+    tablet: Boolean = false,
 ) {
     val engine by tuner.activeEngine.collectAsStateWithLifecycle()
     val previewing by tuner.previewing.collectAsStateWithLifecycle()
@@ -83,11 +88,11 @@ internal fun LivePreview(
     val fullscreen = stringResource(R.string.multiview_tile_fullscreen)
     val shape = RoundedCornerShape(StageRadii.Video)
     val dark = !LocalStagePalette.current.isLight
-    Column(modifier.fillMaxWidth().padding(horizontal = 14.dp)) {
+    Column(modifier.fillMaxWidth().padding(start = if (wide) 0.dp else 14.dp, end = 14.dp)) {
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(212.dp)
+                .then(if (wide) Modifier.aspectRatio(16f / 9f) else Modifier.height(212.dp))
                 // `.video`: 0 20 50 black 55% (light: 0 14 32 rgb(20,40,32) 22%).
                 .then(
                     if (dark) Modifier.stageShadow(Color.Black.copy(alpha = 0.55f), 50.dp, 20.dp, shape)
@@ -131,13 +136,29 @@ internal fun LivePreview(
             }
         }
         val now = nowNext?.now
-        if (now != null) ProgrammeBlock(now, nowNext.nowDetails, nowNext.next, nowNext.upcoming.firstOrNull(), nowMs)
+        if (now != null) {
+            // Beside the list (M12-01/03) the block is title, line and progress — 18, or 26 with the plot on a
+            // tablet; what comes next is the phone's (M3-02), where the list is under it.
+            ProgrammeBlock(
+                now, nowNext.nowDetails, nowNext.next.takeIf { !wide }, nowNext.upcoming.firstOrNull(), nowMs,
+                titleSize = if (tablet) 26f else if (wide) 18f else 20f,
+                plot = now.description?.takeIf { tablet && it.isNotBlank() },
+            )
+        }
     }
 }
 
 /** Under the video: title, "18:45 – 20:30 · Horror · 2026 · FSK 16" with the time left at the end, progress, next and later. */
 @Composable
-private fun ProgrammeBlock(now: XtEpgEntry, details: EpgDetails?, next: XtEpgEntry?, later: XtEpgEntry?, nowMs: Long) {
+private fun ProgrammeBlock(
+    now: XtEpgEntry,
+    details: EpgDetails?,
+    next: XtEpgEntry?,
+    later: XtEpgEntry?,
+    nowMs: Long,
+    titleSize: Float,
+    plot: String?,
+) {
     val palette = LocalStagePalette.current
     val accent = stageAccent.accent
     val locales = LocalConfiguration.current.locales
@@ -150,13 +171,14 @@ private fun ProgrammeBlock(now: XtEpgEntry, details: EpgDetails?, next: XtEpgEnt
             listOfNotNull(details?.year?.toString(), details?.rating, length)
         ).joinToString(sep)
     Column(Modifier.fillMaxWidth().padding(start = 2.dp, end = 2.dp, top = 12.dp, bottom = 4.dp)) {
-        Text(now.title, style = stageText(20f, 800), color = palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(now.title, style = stageText(titleSize, 800), color = palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Row(Modifier.padding(top = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(line, style = stageText(12f, 400), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             Text(timeLeftText(((now.stopMs - nowMs).coerceAtLeast(0) + 59_999) / 60_000), style = stageText(12f, 400), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         val span = (now.stopMs - now.startMs).coerceAtLeast(1)
         StageProgress((nowMs - now.startMs).toFloat() / span, Modifier.padding(top = 8.dp))
+        plot?.let { Text(it, style = stageText(13f, 500, lineHeight = 1.5f), color = palette.body, modifier = Modifier.padding(top = 10.dp)) }
         if (next != null) {
             Text(
                 buildAnnotatedString {

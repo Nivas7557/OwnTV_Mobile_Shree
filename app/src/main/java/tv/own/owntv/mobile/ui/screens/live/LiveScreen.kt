@@ -49,12 +49,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -98,7 +99,6 @@ import tv.own.owntv.mobile.ui.theme.MobileDimens
 @Composable
 fun LiveScreen(
     scrollToTop: SharedFlow<String>,
-    onOpenChannel: (channelId: Long, openCatchup: Boolean) -> Unit,
     onOpenPlayer: () -> Unit,
     modifier: Modifier = Modifier,
     vm: LiveViewModel = koinViewModel(),
@@ -133,8 +133,8 @@ fun LiveScreen(
     var restoreFor by remember { mutableStateOf<LiveCategory?>(null) }
     var catchupFor by remember { mutableStateOf<ChannelEntity?>(null) }
     var jumpBackOpen by remember { mutableStateOf(false) }
-    // Survives a rotation, so turning a tablet keeps the channel you were watching beside the list.
-    var previewing by rememberSaveable { mutableStateOf<Long?>(null) }
+    // Wide (M12-01/03): the list on the left, the preview and its programme on the right — the same preview
+    // the phone draws on top, so a tap plays and a second tap is full screen there too.
     val twoPane = isExpandedWidth()
 
     // While the pane is showing the channel, the picture is already on screen, so the shell must not
@@ -143,13 +143,12 @@ fun LiveScreen(
     val streamOnScreen = LocalStreamOnScreen.current
     val playing by tuner.channel.collectAsStateWithLifecycle()
     val playingNowNext by tuner.nowNext.collectAsStateWithLifecycle()
-    // M3-02: on a phone a tap plays the channel in a preview on top of Live TV, instead of opening a
-    // channel page.
-    val inlinePreview = !twoPane
+    // M3-02: a tap plays the channel in a preview (on top of Live TV on a phone, beside it when wide), instead
+    // of opening a channel page.
     // Settings › Live TV › Live preview: off, a tap opens the channel full screen with no preview first.
     val previewOn by koinInject<tv.own.owntv.core.settings.SettingsRepository>().livePreviewEnabled.collectAsStateWithLifecycle(true)
-    val showPreview = inlinePreview && playing != null
-    val paneHasChannel = (twoPane && previewing != null) || showPreview
+    val showPreview = playing != null
+    val paneHasChannel = showPreview
     DisposableEffect(paneHasChannel) {
         streamOnScreen.value = paneHasChannel
         onDispose { streamOnScreen.value = false }
@@ -158,13 +157,11 @@ fun LiveScreen(
     // two ways out meant to keep it: full screen, and the player's own mini-player button.
     val miniRequested = LocalMiniRequested.current
     var toFullscreen by remember { mutableStateOf(false) }
-    if (inlinePreview) {
-        DisposableEffect(Unit) {
-            onDispose { if (!toFullscreen && !miniRequested.value) tuner.stop() }
-        }
-        // Back closes the preview first, and stops the stream with it.
-        BackHandler(enabled = showPreview) { tuner.stop() }
+    DisposableEffect(Unit) {
+        onDispose { if (!toFullscreen && !miniRequested.value) tuner.stop() }
     }
+    // Back closes the preview first, and stops the stream with it.
+    BackHandler(enabled = showPreview) { tuner.stop() }
     val openFullscreen = {
         toFullscreen = true
         // A preview becomes a watched channel only here (History, the media session).
@@ -207,7 +204,7 @@ fun LiveScreen(
     val listPane = @Composable {
     Column(Modifier.fillMaxSize()) {
         val current = playing
-        if (showPreview && current != null) {
+        if (!twoPane && showPreview && current != null) {
             LivePreview(
                 tuner = tuner,
                 channel = current,
@@ -310,12 +307,10 @@ fun LiveScreen(
                                             tuner.selectWithoutPlaying(channel)
                                             onOpenPlayer()
                                         }
-                                        twoPane -> previewing = channel.id
                                         // The second tap on the playing channel is full screen.
-                                        inlinePreview && channel.id == playing?.id -> openFullscreen()
-                                        inlinePreview && !previewOn -> { tuner.tune(channel.id); openFullscreen() }
-                                        inlinePreview -> tuner.preview(channel.id)
-                                        else -> onOpenChannel(channel.id, false)
+                                        channel.id == playing?.id -> openFullscreen()
+                                        !previewOn -> { tuner.tune(channel.id); openFullscreen() }
+                                        else -> tuner.preview(channel.id)
                                     }
                                 },
                                 onLongClick = { menuFor = channel },
@@ -332,20 +327,26 @@ fun LiveScreen(
         TwoPane(
             list = listPane,
             detail = {
-                val channelId = previewing
-                if (channelId == null) {
+                val current = playing
+                if (current == null) {
                     SelectAChannel()
                 } else {
-                    ChannelDetailScreen(
-                        channelId = channelId,
-                        openCatchup = false,
-                        onFullscreen = onOpenPlayer,
-                        // Back here empties the pane rather than leaving Live TV: the list is still
-                        // on screen, so the thing the user is finished with is the channel.
-                        onBack = { previewing = null },
+                    // The video at 16:9 across the pane (210 dp sideways, 345 on a tablet), the programme
+                    // under it; a short screen scrolls the pane rather than cutting the programme off.
+                    LivePreview(
+                        tuner = tuner,
+                        channel = current,
+                        nowNext = playingNowNext,
+                        nowMs = nowMs,
+                        onFullscreen = openFullscreen,
+                        wide = true,
+                        tablet = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp >= 600,
+                        modifier = Modifier.verticalScroll(rememberScrollState()).padding(top = TOOLS_TOP),
                     )
                 }
             },
+            // Half and half, as M12-01 draws it (list 390 of 791 dp).
+            listShare = 0.5f,
             modifier = modifier,
         )
     } else {
@@ -362,12 +363,8 @@ fun LiveScreen(
             vm = vm,
             // On a phone the archive opens here, over the preview, as the channel page used to open it.
             onOpenCatchup = {
-                if (inlinePreview) {
-                    tuner.tune(channel.id)
-                    catchupFor = channel
-                } else {
-                    onOpenChannel(channel.id, true)
-                }
+                tuner.tune(channel.id)
+                catchupFor = channel
             },
             onDismiss = { menuFor = null },
         )

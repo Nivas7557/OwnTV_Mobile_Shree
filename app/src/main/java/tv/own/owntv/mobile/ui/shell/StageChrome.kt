@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -150,6 +153,8 @@ data class PageCrumb(
     val owner: Any? = null,
     /** A line the page styles itself, drawn instead of accent · rest (Downloads: "USB drive · **57.6 GB free** of 57.7 GB"). */
     val styled: androidx.compose.ui.text.AnnotatedString? = null,
+    /** The back stack entry of the page that set it ([ProvidePageCrumb] fills it in). */
+    val entryId: String? = null,
     val onClick: () -> Unit,
 )
 
@@ -162,11 +167,30 @@ data class PageCrumb(
 fun ProvidePageCrumb(crumb: (owner: Any) -> PageCrumb) {
     val holder = LocalPageCrumb.current
     val owner = remember { Any() }
-    androidx.compose.runtime.SideEffect { holder.value = crumb(owner) }
+    // A place being left keeps its crumb until it is disposed, after the next page is already on screen;
+    // the entry is what lets the shell show it on its own page only (Home showed Live TV's, then jumped).
+    val entryId = (androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner.current as? androidx.navigation.NavBackStackEntry)?.id
+    androidx.compose.runtime.SideEffect { holder.value = crumb(owner).copy(entryId = entryId) }
     androidx.compose.runtime.DisposableEffect(Unit) { onDispose { if (holder.value?.owner === owner) holder.value = null } }
 }
 
 val LocalPageCrumb = staticCompositionLocalOf<MutableState<PageCrumb?>> { mutableStateOf(null) }
+
+/** Where the shell hears that a page is drawn ([ReportShownPage]); its header follows that page. */
+val LocalShownEntry = staticCompositionLocalOf<(androidx.navigation.NavBackStackEntry, Boolean) -> Unit> { { _, _ -> } }
+
+/**
+ * Tell the shell [entry]'s page is drawn — once, when it arrives, so a page leaving never claims the header back —
+ * and that it is gone, when it leaves the screen.
+ */
+@Composable
+fun ReportShownPage(entry: androidx.navigation.NavBackStackEntry) {
+    val report = LocalShownEntry.current
+    androidx.compose.runtime.DisposableEffect(entry.id) {
+        report(entry, true)
+        onDispose { report(entry, false) }
+    }
+}
 
 /**
  * `.bdrop`: the picture across the top, cropped at 62% / 30%, dissolving into the page from 45% up (light
@@ -295,6 +319,68 @@ fun StageNavBar(
 }
 
 /**
+ * The rail (`railH`, M12): a floating glass column 58 dp wide on a 29 dp radius, 12 dp from the left edge and
+ * centred on the screen, its items 40 dp wide on a 14 dp radius — the current place in the accent on a 14% tile.
+ * [compact] (a phone held sideways): 34 dp items, nothing but the places, set 12 dp below the centre. A tablet's
+ * has the app's mark on top, Search first, 40 dp items and the avatar at the bottom.
+ */
+@Composable
+fun StageRail(
+    destinations: List<MobileDestination>,
+    current: MobileDestination?,
+    compact: Boolean,
+    profile: ProfileEntity?,
+    onClick: (MobileDestination) -> Unit,
+    onSearch: () -> Unit,
+    onAvatar: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val palette = LocalStagePalette.current
+    val accent = stageAccent.accent
+    val itemHeight = if (compact) 34.dp else 40.dp
+    @Composable
+    fun Item(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, on: Boolean, onTap: () -> Unit) {
+        val interaction = remember { MutableInteractionSource() }
+        Box(
+            Modifier
+                .size(40.dp, itemHeight)
+                .clip(RoundedCornerShape(14.dp))
+                .then(if (on) Modifier.background(accent.copy(alpha = 0.14f)) else Modifier)
+                .stageClickable(interaction, onTap, null, Role.Tab)
+                .semantics {
+                    selected = on
+                    contentDescription = label
+                },
+            contentAlignment = Alignment.Center,
+        ) { StageIcon(icon, 19.dp, if (on) accent else palette.navText) }
+    }
+    Column(
+        modifier
+            .padding(start = 12.dp, top = if (compact) 24.dp else 0.dp)
+            .width(58.dp)
+            .stageGlass(RoundedCornerShape(29.dp))
+            // A big display size can make even the compact rail taller than a sideways phone: it scrolls then.
+            .verticalScroll(rememberScrollState())
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        if (!compact) {
+            tv.own.owntv.mobile.ui.components.BrandMark(tv.own.owntv.mobile.ui.components.rememberAppliedIcon(), 30.dp, Modifier.padding(bottom = 6.dp))
+            Item(MobileIcons.Search, stringResource(R.string.common_nav_search), false, onSearch)
+        }
+        destinations.forEach { destination ->
+            Item(destination.railIcon, stringResource(destination.labelRes), destination == current) { onClick(destination) }
+        }
+        if (!compact) Box(Modifier.padding(top = 6.dp)) { ShellAvatar(profile, onAvatar) }
+    }
+}
+
+/** More is the four tiles on the rail (the mockup's `more`); everything else keeps its own icon. */
+private val MobileDestination.railIcon
+    get() = if (this == MobileDestination.MORE) MobileIcons.Tiles else icon
+
+/**
  * The page header (`.hdr`): the page's own title (28 / 800) with the top-right [cluster] beside it, and
  * under it the crumb — "‹ where you came from" on a pushed page, which goes back when tapped (F24: the
  * title names the page, the crumb says where from). Home has no title, only its [heading] once scrolled;
@@ -310,6 +396,8 @@ fun StagePageHeader(
     heading: HomeHeading? = null,
     crumb: PageCrumb? = null,
     backPill: Boolean = false,
+    titleSize: Float = 28f,
+    inlineCrumb: Boolean = false,
     cluster: @Composable () -> Unit,
 ) {
     val palette = LocalStagePalette.current
@@ -352,15 +440,18 @@ fun StagePageHeader(
                 if (heading != null) {
                     HomeHeadingText(heading)
                 } else if (title != null) {
-                    BasicText(
-                        title,
-                        style = stageText(28f, 800, (-0.6f / 28f).em, lineHeight = 1.05f).copy(color = palette.text),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        autoSize = TextAutoSize.StepBased(minFontSize = 13.sp, maxFontSize = 28.sp, stepSize = 0.5.sp),
-                        // The cluster is 36 dp tall; a one-line title sits on its centre line.
-                        modifier = Modifier.padding(top = 2.dp),
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        BasicText(
+                            title,
+                            style = stageText(titleSize, 800, (-0.6f / 28f).em, lineHeight = 1.05f).copy(color = palette.text),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            autoSize = TextAutoSize.StepBased(minFontSize = 13.sp, maxFontSize = titleSize.sp, stepSize = 0.5.sp),
+                            // The cluster is 36 dp tall; a one-line title sits on its centre line.
+                            modifier = Modifier.padding(top = 2.dp).weight(1f, fill = false),
+                        )
+                        if (inlineCrumb && crumb != null) PageCrumbRow(crumb, Modifier.weight(1f, fill = false))
+                    }
                 }
             }
             if (heading != null) {
@@ -369,28 +460,31 @@ fun StagePageHeader(
                 cluster()
             }
         }
-        if (crumb != null) {
-            val interaction = remember { MutableInteractionSource() }
-            Row(
-                Modifier
-                    .padding(top = 5.dp)
-                    .stageClickable(interaction, crumb.onClick, null),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                // The TV Guide's crumb has none (M4-01): it is a place, not a way back.
-                if (crumb.chevron) StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
-                crumb.styled?.let {
-                    Text(it, style = stageText(13f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    return@Row
-                }
-                Text(
-                    crumb.accent, style = stageText(13f, 700), color = stageAccent.accent,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
-                )
-                crumb.rest?.let { Text(stringResource(R.string.content_epg_bits_separator).trimStart() + it, style = stageText(13f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-            }
+        if (crumb != null && !(inlineCrumb && title != null && heading == null)) PageCrumbRow(crumb, Modifier.padding(top = 5.dp))
+    }
+}
+
+/** The crumb line (`.crumb`): ‹, the accent part, then the muted rest — under the title, or beside it sideways. */
+@Composable
+private fun PageCrumbRow(crumb: PageCrumb, modifier: Modifier = Modifier) {
+    val palette = LocalStagePalette.current
+    val interaction = remember { MutableInteractionSource() }
+    Row(
+        modifier.stageClickable(interaction, crumb.onClick, null),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // The TV Guide's crumb has none (M4-01): it is a place, not a way back.
+        if (crumb.chevron) StageIcon(MobileIcons.ArrowBack, 13.dp, palette.muted)
+        crumb.styled?.let {
+            Text(it, style = stageText(13f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            return@Row
         }
+        Text(
+            crumb.accent, style = stageText(13f, 700), color = stageAccent.accent,
+            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false),
+        )
+        crumb.rest?.let { Text(stringResource(R.string.content_epg_bits_separator).trimStart() + it, style = stageText(13f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis) }
     }
 }
 

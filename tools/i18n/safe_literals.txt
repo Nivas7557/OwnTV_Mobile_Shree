@@ -193,6 +193,7 @@
 6	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/home/TrendingHero.kt	·
 1	file-path	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/DetailViewModel.kt	${StorageAccess.sanitize(film.name)}.
 1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/LibraryScreen.kt	★
+1	technical	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/LibraryTitleCard.kt	card
 3	empty	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/LibraryViewModel.kt	\0
 1	file-path	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/LibraryViewModel.kt	$stem.${containerExt ?: StorageAccess.extOf(streamUrl)}
 1	file-path	app/src/main/java/tv/own/owntv/mobile/ui/screens/library/LibraryViewModel.kt	${StorageAccess.sanitize(movie.name)}.

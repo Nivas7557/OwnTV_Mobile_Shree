@@ -47,13 +47,11 @@ enum class MobileDestination(
         val bottomBar: List<MobileDestination> = listOf(HOME, LIVE, GUIDE, MOVIES, SERIES)
 
         /**
-         * The rail, in order. Until the tablet phase (M12) it keeps More as its last item.
-         *
-         * **Downloads and Settings are deliberately not on it.** They are not browse sections — they
-         * are what More is for, on every width.
+         * The rail (M12, the mockup's `railH`), in order: the five places, Downloads, then More as the last
+         * item. Settings is not on it — it is what More is for, on every width.
          */
         val rail: List<MobileDestination> =
-            listOf(HOME, LIVE, GUIDE, MOVIES, SERIES, MORE)
+            listOf(HOME, LIVE, GUIDE, MOVIES, SERIES, DOWNLOADS, MORE)
 
         /**
          * Filters a bar or rail to what the active playlist actually offers. A destination with no

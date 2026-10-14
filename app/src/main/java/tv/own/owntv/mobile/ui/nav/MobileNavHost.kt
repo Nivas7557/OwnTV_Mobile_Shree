@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.snap
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -12,6 +13,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.compose.animation.AnimatedContentScope
+import tv.own.owntv.mobile.ui.shell.ReportShownPage
 import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.SharedFlow
 import tv.own.owntv.mobile.BuildConfig
@@ -72,10 +78,12 @@ fun MobileNavHost(
         navController = navController,
         startDestination = MobileDestination.HOME.route,
         enterTransition = { fadeIn(fade) },
-        exitTransition = { fadeOut(fade) },
+        // The page leaving goes at once: the shell's header is already the next page's, and a page fading
+        // out under a header of another height was seen moving (More → Settings, and back).
+        exitTransition = { fadeOut(snap()) },
     ) {
         MobileDestination.entries.forEach { destination ->
-            composable(destination.route) {
+            page(destination.route) {
                 CompositionLocalProvider(LocalNavAnimatedScope provides this) {
                 when (destination) {
                     MobileDestination.MORE -> MoreScreen(
@@ -113,9 +121,6 @@ fun MobileNavHost(
                     )
                     MobileDestination.LIVE -> LiveScreen(
                         scrollToTop = scrollToTop,
-                        onOpenChannel = { channelId, openCatchup ->
-                            navController.navigate(channelRoute(destination, channelId, openCatchup))
-                        },
                         onOpenPlayer = { navController.navigate(PLAYER_ROUTE) },
                     )
                     MobileDestination.DOWNLOADS -> DownloadsScreen(
@@ -140,15 +145,15 @@ fun MobileNavHost(
         // A film or a show sits under the tab it was opened from, so the bar keeps that tab selected
         // — the same reason the channel screen lives under Live.
         LIBRARY_PARENTS.forEach { parent ->
-            composable(
+            page(
                 route = "${parent.route}/{$ARG_TAB}/{$ARG_ITEM_ID}",
                 arguments = listOf(
                     navArgument(ARG_TAB) { type = NavType.StringType },
                     navArgument(ARG_ITEM_ID) { type = NavType.LongType },
                 ),
             ) { entry ->
-                val tab = entry.arguments?.getString(ARG_TAB) ?: return@composable
-                val itemId = entry.arguments?.getLong(ARG_ITEM_ID) ?: return@composable
+                val tab = entry.arguments?.getString(ARG_TAB) ?: return@page
+                val itemId = entry.arguments?.getLong(ARG_ITEM_ID) ?: return@page
                 CompositionLocalProvider(LocalNavAnimatedScope provides this) {
                     DetailScreen(
                         tab = LibraryTab.valueOf(tab),
@@ -162,7 +167,7 @@ fun MobileNavHost(
             }
         }
         CHANNEL_PARENTS.forEach { parent ->
-            composable(
+            page(
                 route = "${parent.route}/$CHANNEL_SEGMENT/{$ARG_CHANNEL_ID}/{$ARG_CATCHUP}",
                 arguments = listOf(
                     navArgument(ARG_CHANNEL_ID) { type = NavType.LongType },
@@ -170,14 +175,14 @@ fun MobileNavHost(
                 ),
             ) { entry ->
                 ChannelDetailScreen(
-                    channelId = entry.arguments?.getLong(ARG_CHANNEL_ID) ?: return@composable,
+                    channelId = entry.arguments?.getLong(ARG_CHANNEL_ID) ?: return@page,
                     openCatchup = entry.arguments?.getBoolean(ARG_CATCHUP) == true,
                     onFullscreen = { navController.navigate(PLAYER_ROUTE) },
                     onBack = { navController.popBackStack() },
                 )
             }
         }
-        composable(
+        page(
             route = SEARCH_ROUTE_PATTERN,
             arguments = listOf(navArgument(ARG_QUERY) { type = NavType.StringType; defaultValue = "" }),
         ) { entry ->
@@ -198,12 +203,12 @@ fun MobileNavHost(
         // system back gesture is what closes it; a row that opens a page navigates through LocalSettingsNav.
         val openRoute: (String) -> Unit = { navController.navigate(it) { launchSingleTop = true } }
         SettingsGroup.entries.forEach { group ->
-            composable(group.route) {
+            page(group.route) {
                 CompositionLocalProvider(LocalSettingsNav provides openRoute) { SettingsGroupScreen(group) }
             }
         }
         SettingsLeaf.entries.forEach { leaf ->
-            composable(leaf.route) {
+            page(leaf.route) {
                 CompositionLocalProvider(LocalSettingsNav provides openRoute) {
                     SettingsLeafPage(leaf, onSetup = { navController.navigate(setupRoute(it)) })
                 }
@@ -212,7 +217,7 @@ fun MobileNavHost(
         // The More pages. Separate routes from the settings ones on purpose: what left Settings has
         // left, so nothing under `settings/` can reach them and the settings search cannot see them.
         MoreLeaf.entries.forEach { leaf ->
-            composable(leaf.route) {
+            page(leaf.route) {
                 CompositionLocalProvider(LocalNavAnimatedScope provides this) {
                     MoreLeafPage(
                         leaf = leaf,
@@ -232,7 +237,7 @@ fun MobileNavHost(
                 }
             }
         }
-        composable(PLAYER_ROUTE) {
+        page(PLAYER_ROUTE) {
             // `onExit` is only ever the mini-player button, the swipe down and Sound only — the three
             // ways of saying "keep it playing". Back has its own path and stops the stream, so it
             // never reaches here and never raises the flag.
@@ -244,7 +249,7 @@ fun MobileNavHost(
                 },
             )
         }
-        composable(
+        page(
             route = SETUP_ROUTE_PATTERN,
             arguments = listOf(navArgument(ARG_ENTRY) { type = NavType.StringType; defaultValue = SetupEntry.ADD_CONTENT.name }),
         ) { entry ->
@@ -255,11 +260,21 @@ fun MobileNavHost(
             )
         }
         if (BuildConfig.DEV_TOOLS) {
-            composable(DevRoute.GALLERY.route) { ThemeGalleryScreen() }
+            page(DevRoute.GALLERY.route) { ThemeGalleryScreen() }
         }
     }
         }
     }
+}
+
+/** Every route, reporting to the shell when its page is drawn (the header follows it). */
+private fun NavGraphBuilder.page(
+    route: String,
+    arguments: List<NamedNavArgument> = emptyList(),
+    content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit,
+) = composable(route = route, arguments = arguments) { entry ->
+    ReportShownPage(entry)
+    content(entry)
 }
 
 /**

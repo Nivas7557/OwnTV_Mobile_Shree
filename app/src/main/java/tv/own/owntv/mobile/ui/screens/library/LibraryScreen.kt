@@ -64,7 +64,6 @@ import tv.own.owntv.core.theme.AnimationLevel
 import tv.own.owntv.core.ui.stage.PlaylistMark
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.screens.home.groupedCountText
-import tv.own.owntv.mobile.ui.components.GRID_LIST_SHARE
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import tv.own.owntv.mobile.ui.components.TwoPane
@@ -162,7 +161,8 @@ fun LibraryScreen(
     var lastOpened by rememberSaveable { mutableStateOf<Long?>(null) }
     val open = { item: VodItem ->
         lastOpened = item.id
-        if (twoPane) tappedItem = item.id else onOpenItem(tab, item.id)
+        // Wide (M12-02): a tap picks the title for the card, a second tap on it opens its page.
+        if (twoPane && item.id != openItem) tappedItem = item.id else onOpenItem(tab, item.id)
     }
 
     // A new selection's scroll position has nothing to do with the old one's, and neither does the
@@ -193,7 +193,9 @@ fun LibraryScreen(
     BoxWithConstraints(Modifier.fillMaxSize()) {
     // Roughly one poster per 110 dp of width, which is three on a phone and eight on a tablet in
     // landscape. The user's own number wins whenever they have set one.
-    val columns = chosenColumns.takeIf { it > 0 } ?: (maxWidth.value.toInt() / COLUMN_WIDTH_DP).coerceIn(MIN_COLUMNS, MAX_COLUMNS)
+    // Beside the card the posters are the mockup's six across 520 dp (M12-02).
+    val columns = chosenColumns.takeIf { it > 0 }
+        ?: (maxWidth.value.toInt() / (if (twoPane) WIDE_COLUMN_WIDTH_DP else COLUMN_WIDTH_DP)).coerceIn(MIN_COLUMNS, MAX_COLUMNS)
 
     Column(Modifier.fillMaxSize()) {
         // `.tools`: the search field takes the room, then the order and Grid | List at the right. No categories
@@ -273,7 +275,7 @@ fun LibraryScreen(
                             mark = marks[item.sourceId],
                             watched = item.id in watched,
                             progress = progressOf(item.id),
-                            selected = item.id == lastOpened,
+                            selected = item.id == (if (twoPane) openItem else lastOpened),
                             onClick = { open(item) },
                             onLongClick = { menuFor = item },
                         )
@@ -303,11 +305,12 @@ fun LibraryScreen(
             list = listPane,
             detail = {
                 openItem?.let { id ->
-                    DetailScreen(tab = tab, itemId = id, onPlay = onPlay)
+                    LibraryTitleCard(tab = tab, itemId = id, onPlay = onPlay, onOpen = { onOpenItem(tab, id) })
                 }
             },
             modifier = modifier,
-            listShare = GRID_LIST_SHARE,
+            // The grid 520 of 791 dp (M12-02).
+            listShare = WIDE_GRID_SHARE,
         )
     } else {
         Box(modifier) { listPane() }
@@ -574,6 +577,8 @@ private val TOOLS_TOP = 26.dp
 private val RatingGold = Color(0xFFFFCC4D)
 
 private const val COLUMN_WIDTH_DP = 110
+private const val WIDE_COLUMN_WIDTH_DP = 86
+private const val WIDE_GRID_SHARE = 0.66f
 private const val MIN_COLUMNS = 2
 private const val MAX_COLUMNS = 8
 private const val PINCH_OUT = 1.25f

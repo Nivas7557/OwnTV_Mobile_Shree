@@ -31,12 +31,8 @@ import tv.own.owntv.core.model.SourceType
 import kotlinx.coroutines.delay
 import tv.own.owntv.core.update.UpdateManager
 import tv.own.owntv.mobile.ui.screens.settings.UpdateSheet
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import tv.own.owntv.mobile.ui.components.MobileIcons
 import tv.own.owntv.mobile.ui.stage.StagePill
@@ -51,11 +47,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -65,14 +56,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.koin.androidx.compose.koinViewModel
@@ -80,7 +72,6 @@ import org.koin.compose.koinInject
 import kotlinx.coroutines.launch
 import tv.own.owntv.core.metadata.MetadataBudget
 import tv.own.owntv.core.settings.SettingsRepository
-import tv.own.owntv.core.theme.GlassSurface
 import tv.own.owntv.mobile.ui.nav.MobileDestination
 import tv.own.owntv.mobile.ui.nav.MobileDestination.Companion.visible
 import tv.own.owntv.mobile.ui.nav.MobileNavHost
@@ -108,9 +99,6 @@ import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import tv.own.owntv.mobile.ui.screens.morePageTitleRes
 import tv.own.owntv.mobile.ui.screens.settings.settingsPageTitleRes
 import tv.own.owntv.mobile.ui.screens.settings.isSettingsPage
-import tv.own.owntv.mobile.ui.theme.MobileDimens
-import tv.own.owntv.mobile.ui.theme.MobileNavShape
-import tv.own.owntv.mobile.ui.theme.glassSurface
 
 /**
  * The frame every screen sits in (Stage, plan M1): the Stage page background, the page header with the
@@ -213,6 +201,8 @@ fun MobileShell(
 
     // 600dp is Material's compact/medium boundary: below it a rail would eat the content.
     val useRail = windowWidthDp >= 600
+    // A phone held sideways (409 dp tall) gets the compact rail and the one-line header (M12-01/02).
+    val compactRail = LocalConfiguration.current.screenHeightDp < 600
     val destinations =
         (if (useRail) MobileDestination.rail else MobileDestination.bottomBar).visible(sections)
     // A detail route ("live/42/false") keeps its tab selected and its tab's title: on a phone the
@@ -326,8 +316,23 @@ fun MobileShell(
     val homeChrome = remember { HomeChrome() }
     val titleChrome = remember { HomeChrome() }
     val pageCrumb = remember { mutableStateOf<PageCrumb?>(null) }
-    val onHome = currentRoute == MobileDestination.HOME.route
-    val onTitlePage = isTitleRoute(currentRoute)
+    // The header (and Home's picture) follows the page actually drawn, not the one just tapped: a page
+    // slow to compose the first time (Settings) left the previous page on screen under its header.
+    // The drawn page and the route under it (its crumb's "‹ where from"), taken when it reports in. A page
+    // leaving the screen while it still holds the header gives it back to the current one.
+    var shown by remember { mutableStateOf<Pair<NavBackStackEntry, String?>?>(null) }
+    val reportShown: (NavBackStackEntry, Boolean) -> Unit = { entry, arrived ->
+        if (arrived) {
+            shown = entry to navController.previousBackStackEntry?.destination?.route?.takeIf { entry == navController.currentBackStackEntry }
+        } else if (shown?.first == entry) {
+            shown = null
+        }
+    }
+    val shownPage = shown
+    val headerEntry = shownPage?.first ?: backStackEntry
+    val headerRoute = headerEntry?.destination?.route
+    val onHome = headerRoute == MobileDestination.HOME.route
+    val onTitlePage = isTitleRoute(headerRoute)
     val navLabels by settings.phoneNavLabels.collectAsStateWithLifecycle(true)
     val hideOnScroll by settings.phoneNavHideOnScroll.collectAsStateWithLifecycle(true)
     chrome.hideBottomOnScroll = hideOnScroll && !useRail
@@ -388,19 +393,19 @@ fun MobileShell(
     // The header (F24): the page names itself; a page pushed on top of another says where it came from
     // in the crumb, and that crumb is the way back. A tab, Home and More are places, not pages, so they
     // carry no crumb; a detail page (a film, a channel) draws its own title and keeps only the crumb.
-    val topLevel = currentRoute == MobileDestination.MORE.route ||
-        MobileDestination.rail.any { it.route == currentRoute }
+    val topLevel = headerRoute == MobileDestination.MORE.route ||
+        MobileDestination.rail.any { it.route == headerRoute }
     // About names itself with the wordmark (M8-07): its header is the crumb alone.
-    val titleRes = if (currentRoute == MobileDestination.HOME.route || currentRoute == MoreLeaf.ABOUT.route) null else pageTitleRes(currentRoute)
-    val previousRoute = navController.previousBackStackEntry?.destination?.route
+    val titleRes = if (headerRoute == MobileDestination.HOME.route || headerRoute == MoreLeaf.ABOUT.route) null else pageTitleRes(headerRoute)
+    val previousRoute = if (shownPage != null) shownPage.second else navController.previousBackStackEntry?.destination?.route
     // Downloads says where its files are instead of where it came from (M7-01): its crumb is the storage line.
     // Search's crumb is the query and its count (M8-09).
-    val ownCrumb = topLevel || currentRoute == MobileDestination.DOWNLOADS.route || currentRoute == SEARCH_ROUTE_PATTERN
-    val settingsPage = isSettingsPage(currentRoute)
+    val ownCrumb = topLevel || headerRoute == MobileDestination.DOWNLOADS.route || headerRoute == SEARCH_ROUTE_PATTERN
+    val settingsPage = isSettingsPage(headerRoute)
     val backLabel = if (ownCrumb || settingsPage || previousRoute == null) null else stringResource(anyTitleRes(previousRoute))
     // Settings draws "‹ More" above its title and its hint below (M9-01); a settings page has only its crumb,
     // "‹ Settings · 13 settings" (M9-03 …).
-    val showCrumb = ownCrumb || settingsPage || currentRoute == MobileDestination.SETTINGS.route
+    val showCrumb = ownCrumb || settingsPage || headerRoute == MobileDestination.SETTINGS.route
 
     // The playlist pill belongs to the browse places: in full on Live TV, Guide, Movies, Series and Downloads
     // (M7-01), as the layers icon on Home (its hero needs the width). Settings and More pages leave it out.
@@ -408,13 +413,13 @@ fun MobileShell(
     val activeIndex = playlists.indexOf(activePlaylist)
     val clusterPlaylist = if (playlists.isEmpty()) null else when {
         // A title page has Home's layers pill (M5-06).
-        currentRoute == MobileDestination.HOME.route || onTitlePage -> ClusterPlaylist(
+        headerRoute == MobileDestination.HOME.route || onTitlePage -> ClusterPlaylist(
             label = stringResource(tv.own.owntv.mobile.R.string.content_playlist_picker_title),
             mark = null,
             switchable = playlists.size > 1,
             iconOnly = true,
         )
-        currentRoute in listOf(
+        headerRoute in listOf(
             MobileDestination.LIVE.route, MobileDestination.GUIDE.route,
             MobileDestination.MOVIES.route, MobileDestination.SERIES.route,
             MobileDestination.DOWNLOADS.route, SEARCH_ROUTE_PATTERN,
@@ -455,41 +460,58 @@ fun MobileShell(
         modifier
             .fillMaxSize()
             .stageBackground()
-            // The sides' safe room (a camera strip, a gesture edge held sideways) is the shell's; the
-            // player owns every pixel, camera strip included.
-            .then(
-                if (fullscreen) {
-                    Modifier
-                } else {
-                    Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
-                },
-            )
             .nestedScroll(chrome.connection),
     ) {
+        // Home's and a title page's picture run under the camera strip to the screen's edge (M12: held
+        // sideways the strip is on a side); everything else keeps clear of it.
         if (onHome && !fullscreen) HomeBackdrop(homeChrome)
         if (onTitlePage && !fullscreen) HomeBackdrop(titleChrome)
+        // The sides' safe room (a camera strip, a gesture edge held sideways) is the shell's; the player owns
+        // every pixel, camera strip included.
+        Box(
+            if (fullscreen) Modifier.fillMaxSize() else Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)),
+        ) {
+        // ≥ 600 dp wide (M12): the floating glass rail on the left, full height, with the header and the page
+        // beside it — compact on a phone held sideways, with the mark, Search and the avatar on a tablet.
+        val railRoom = if (useRail && !fullscreen) (if (compactRail) 70.dp else 84.dp) else 0.dp
+        if (useRail && !fullscreen) {
+            StageRail(
+                destinations = destinations,
+                current = current,
+                compact = compactRail,
+                profile = loadedProfiles.firstOrNull { it.id == activeId },
+                onClick = { navController.onNavClick(it, current, shellViewModel) },
+                onSearch = { navController.navigate(SEARCH_ROUTE) { launchSingleTop = true } },
+                onAvatar = { navController.navigate(MobileDestination.MORE.route) { launchSingleTop = true } },
+                modifier = Modifier.align(Alignment.CenterStart),
+            )
+        }
         ShellLayout(
             chrome = chrome,
             fullscreen = fullscreen,
+            startInset = railRoom,
             header = {
                 StagePageHeader(
                     title = titleRes?.let { stringResource(it) },
                     backLabel = backLabel,
                     onBack = { navController.popBackStack() },
                     heading = homeChrome.heading.takeIf { onHome },
-                    crumb = pageCrumb.value.takeIf { showCrumb },
+                    crumb = pageCrumb.value.takeIf { showCrumb && it?.entryId == headerEntry?.id },
                     backPill = onTitlePage,
+                    // Sideways the title is 24 with its crumb beside it (M12-01); a tablet's is 34 (M12-03).
+                    titleSize = if (!useRail) 28f else if (compactRail) 24f else 34f,
+                    inlineCrumb = useRail && compactRail,
                 ) {
                     // More draws no cluster (M8-01), nor does About (M8-07); the other More pages keep only
                     // the avatar (M8-02 … M8-06).
-                    val moreLeaf = MoreLeaf.entries.firstOrNull { it.route == currentRoute }
-                    if (currentRoute == MobileDestination.MORE.route || moreLeaf == MoreLeaf.ABOUT) return@StagePageHeader
+                    val moreLeaf = MoreLeaf.entries.firstOrNull { it.route == headerRoute }
+                    if (headerRoute == MobileDestination.MORE.route || moreLeaf == MoreLeaf.ABOUT) return@StagePageHeader
                     ShellCluster(
                         playlist = clusterPlaylist,
                         profile = activeProfile,
                         // The TV Guide has Search among its own tools (M4-01), so the cluster leaves it out; a
                         // title page has none either (M5-06).
-                        showSearch = currentRoute != SEARCH_ROUTE_PATTERN && currentRoute != MobileDestination.GUIDE.route &&
+                        showSearch = headerRoute != SEARCH_ROUTE_PATTERN && headerRoute != MobileDestination.GUIDE.route &&
                             !onTitlePage && moreLeaf == null,
                         onPlaylist = { if (playlists.size > 1) playlistSheet = true },
                         onSearch = { navController.navigate(SEARCH_ROUTE) { launchSingleTop = true } },
@@ -551,46 +573,6 @@ fun MobileShell(
             },
         ) {
             Row(Modifier.fillMaxSize()) {
-                if (useRail && !fullscreen) {
-                    // The tablet rail is restyled with the landscape phase (M12); until then it is the
-                    // existing rail, without the page panel the content no longer sits in.
-                    NavigationRail(
-                        containerColor = Color.Transparent,
-                        windowInsets = WindowInsets(0, 0, 0, 0),
-                        modifier = Modifier
-                            .padding(start = MobileDimens.ShellInset, bottom = MobileDimens.ShellInset)
-                            .glassSurface(GlassSurface.SIDEBAR, MobileNavShape)
-                            .clip(MobileNavShape),
-                    ) {
-                        // Centred and scrollable at once: a large display size or a big font turns the
-                        // rail into a list that must scroll down the short side of a phone held sideways.
-                        BoxWithConstraints(Modifier.weight(1f)) {
-                            Column(
-                                modifier = Modifier
-                                    .verticalScroll(rememberScrollState())
-                                    .heightIn(min = maxHeight),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                destinations.forEach { destination ->
-                                    NavigationRailItem(
-                                        selected = destination == current,
-                                        onClick = { navController.onNavClick(destination, current, shellViewModel) },
-                                        icon = { Icon(destination.icon, contentDescription = null) },
-                                        label = {
-                                            Text(
-                                                stringResource(destination.labelRes),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                            )
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
                 Box(Modifier.fillMaxSize()) {
                     CompositionLocalProvider(
                         LocalStreamOnScreen provides streamOnScreen,
@@ -598,6 +580,7 @@ fun MobileShell(
                         LocalHomeChrome provides homeChrome,
                         LocalTitleChrome provides titleChrome,
                         LocalPageCrumb provides pageCrumb,
+                        LocalShownEntry provides reportShown,
                     ) {
                         MobileNavHost(
                             navController = navController,
@@ -639,6 +622,7 @@ fun MobileShell(
                     }
                 }
             }
+        }
         }
     }
 
@@ -710,6 +694,7 @@ fun MobileShell(
 private fun ShellLayout(
     chrome: ShellChromeState,
     fullscreen: Boolean,
+    startInset: Dp,
     header: @Composable () -> Unit,
     bottom: @Composable () -> Unit,
     content: @Composable () -> Unit,
@@ -746,18 +731,20 @@ private fun ShellLayout(
             },
         ),
     ) { (headerM, contentM, bottomM), constraints ->
-        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val inset = startInset.roundToPx()
+        val width = (constraints.maxWidth - inset).coerceAtLeast(0)
+        val loose = constraints.copy(minWidth = 0, minHeight = 0, maxWidth = width)
         val top = topInset.roundToPx()
         val headerP = headerM.first().measure(loose)
         val bottomP = bottomM.first().measure(loose)
         val shown = (bottomP.height - chrome.bottomOffset.roundToInt()).coerceIn(0, bottomP.height)
         val contentTop = top + headerP.height
         val contentH = (constraints.maxHeight - contentTop - shown).coerceAtLeast(0)
-        val contentP = contentM.first().measure(Constraints.fixed(constraints.maxWidth, contentH))
+        val contentP = contentM.first().measure(Constraints.fixed(width, contentH))
         layout(constraints.maxWidth, constraints.maxHeight) {
-            contentP.place(0, contentTop)
-            headerP.place(0, top)
-            bottomP.place(0, constraints.maxHeight - shown)
+            contentP.place(inset, contentTop)
+            headerP.place(inset, top)
+            bottomP.place(inset, constraints.maxHeight - shown)
         }
     }
 }
