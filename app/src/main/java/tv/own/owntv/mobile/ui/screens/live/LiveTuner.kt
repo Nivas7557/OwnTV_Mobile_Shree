@@ -39,6 +39,7 @@ import tv.own.owntv.core.customize.railCategories
 import tv.own.owntv.core.live.LiveKey
 import tv.own.owntv.core.model.MediaType
 import tv.own.owntv.core.player.AudioOnlyStore
+import tv.own.owntv.core.player.catchupPinKey
 import tv.own.owntv.core.player.enginePinKey
 import tv.own.owntv.core.repository.ActiveProfileSources
 import tv.own.owntv.core.repository.activeProfileSources
@@ -964,6 +965,10 @@ class LiveTuner(
                     isArchive = true,
                     userAgent = source?.userAgent,
                     httpHeaders = SourceOverrides.headersWithReferer(channel.httpHeaders, source),
+                    // Keyed on the channel's archive, not the time-specific URL (L5); a Stalker archive
+                    // gets a fresh create_link on Retry (L4).
+                    contentKey = catchupPinKey(channel),
+                    reconnectProvider = archiveUrls.reconnectFor(channel, programme),
                 )
                 publishToSystem()
             }
@@ -1085,10 +1090,11 @@ class LiveTuner(
 
     /**
      * Turn one point in the archive into a playing stream — the "URL out" half of [LiveTimeshift].
-     * False when no archive URL can be built, or the user reached live while it was being resolved.
+     * Returns the instant the archive really starts at (on the minute for Xtream), or null when no
+     * archive URL can be built, or the user reached live while it was being resolved.
      */
-    private suspend fun loadArchiveStream(ch: ChannelEntity, startMs: Long, offsetSec: Int): Boolean {
-        val (url, source) = withContext(Dispatchers.IO) {
+    private suspend fun loadArchiveStream(ch: ChannelEntity, startMs: Long, offsetSec: Int): Long? {
+        val (archive, source) = withContext(Dispatchers.IO) {
             val source = sourceDao.getById(ch.sourceId) ?: return@withContext null
             val tz = settings.resolveCatchupTimeZone(source)
             archiveUrls.forTimeshift(ch, source, startMs, offsetSec, tz)?.let { it to source }
@@ -1096,9 +1102,9 @@ class LiveTuner(
             // The timeshift hands back to the live edge from here, which on its own is indistinguishable
             // from "Go back to…" doing nothing at all.
             catchupUnavailable()
-            return false
+            return null
         }
-        if (timeshift.offsetSec.value == null) return false // user jumped back to live meanwhile
+        if (timeshift.offsetSec.value == null) return null // user jumped back to live meanwhile
         // The rewind plays out of the archive on mpv, so the live ExoPlayer engine stops first. This
         // is the one that cost two connections and made two sounds: drag the bar back ten minutes and
         // the live stream went on playing behind the archive. A live tune still in flight is cancelled
@@ -1106,16 +1112,18 @@ class LiveTuner(
         live.cancelTune()
         live.releaseForArchive()
         player.play(
-            url = url,
+            url = archive.url,
             title = ch.name,
             logoUrl = ch.displayLogoUrl,
             isArchive = true,
             userAgent = source.userAgent,
             httpHeaders = SourceOverrides.headersWithReferer(ch.httpHeaders, source),
-            rewindStartMs = startMs,
+            rewindStartMs = archive.startMs,
+            contentKey = catchupPinKey(ch),
+            reconnectProvider = archive.reconnect,
         )
         publishToSystem()
-        return true
+        return archive.startMs
     }
 
     /** Stop playing altogether — the mini player's swipe-down, and nothing else. */

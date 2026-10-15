@@ -159,10 +159,14 @@ private fun sourcesSections(vm: SettingsViewModel): List<SettingSection> {
     val reminderMode = s.reminderMode.pref(SettingsRepository.ReminderMode.ASK)
     val lead = s.reminderLeadMinutes.pref(ReminderSchedule.DEFAULT_LEAD_MINUTES)
     val guideDays = s.guideDaysToKeep.pref(GuideRetention.DEFAULT_DAYS)
-    val tz = s.catchupTimezone.pref(SettingsRepository.CatchupTimezone.DEVICE)
+    val tz = s.catchupTimezone.pref(SettingsRepository.CatchupTimezone.AUTOMATIC)
     val tzOffset = s.catchupOffsetMinutes.pref(0)
 
-    val catchupValue = if (tz == SettingsRepository.CatchupTimezone.DEVICE) stringResource(R.string.settings_catchup_timezone_device) else utcOffsetLabel(tzOffset)
+    val catchupValue = when (tz) {
+        SettingsRepository.CatchupTimezone.AUTOMATIC -> stringResource(R.string.settings_catchup_timezone_automatic)
+        SettingsRepository.CatchupTimezone.DEVICE -> stringResource(R.string.settings_catchup_timezone_device)
+        SettingsRepository.CatchupTimezone.MANUAL -> utcOffsetLabel(tzOffset)
+    }
     return listOfNotNull(
         SettingSection(
             stringResource(R.string.settings_sources_title),
@@ -228,22 +232,29 @@ private fun sourcesSections(vm: SettingsViewModel): List<SettingSection> {
 private fun offsetOrOff(minutes: Int): String = if (minutes == 0) stringResource(R.string.common_off) else utcOffsetLabel(minutes)
 
 /**
- * Catch-up: the zone the archives run on (the phone's own, or a fixed offset) and which player opens a programme
- * from the past — two questions of one setting, in one sheet.
+ * Catch-up: the zone the archives run on (the one the provider reports, the phone's own, or a fixed offset) and
+ * which player opens a programme from the past — two questions of one setting, in one sheet.
  */
 @Composable
 private fun CatchupSheet(vm: SettingsViewModel, onDismiss: () -> Unit) {
     val s = vm.settings
-    val tz = s.catchupTimezone.pref(SettingsRepository.CatchupTimezone.DEVICE)
+    val tz = s.catchupTimezone.pref(SettingsRepository.CatchupTimezone.AUTOMATIC)
     val offset = s.catchupOffsetMinutes.pref(0)
     val player = s.catchupPlayer.pref(SettingsRepository.CatchupPlayer.INTERNAL)
     val manual = tz == SettingsRepository.CatchupTimezone.MANUAL
     MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
         StageSheetHeader(stringResource(R.string.settings_catchup), eyebrow = stringResource(SettingsGroup.SOURCES.titleRes))
-        SheetText(stringResource(R.string.settings_catchup_description))
+        SheetText(stringResource(R.string.settings_catchup_timezone_description))
         Column(Modifier.sheetScroll()) {
             StageGroupLabel(stringResource(R.string.settings_catchup_timezone_label))
-            ChoiceRow(stringResource(R.string.settings_catchup_timezone_device), !manual, recommended = true) {
+            ChoiceRow(
+                stringResource(R.string.settings_catchup_timezone_automatic),
+                tz == SettingsRepository.CatchupTimezone.AUTOMATIC,
+                recommended = true,
+            ) {
+                vm.edit { setCatchupTimezone(SettingsRepository.CatchupTimezone.AUTOMATIC) }
+            }
+            ChoiceRow(stringResource(R.string.settings_catchup_timezone_device), tz == SettingsRepository.CatchupTimezone.DEVICE) {
                 vm.edit { setCatchupTimezone(SettingsRepository.CatchupTimezone.DEVICE) }
             }
             s.catchupOffsetChoicesMinutes.forEach { m ->

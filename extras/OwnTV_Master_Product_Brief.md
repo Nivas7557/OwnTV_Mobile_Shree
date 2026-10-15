@@ -74,6 +74,7 @@ The same two engines as the television, behind the same `PlaybackEngine` interfa
 - **Track memory** — the audio and subtitle language picked in the player is remembered per
   channel, film and series (per profile).
 - **Per-playlist provider quirks** — catch-up time zone, "give up after" time and an HTTP Referer.
+  The catch-up time zone defaults to **Automatic**: the Xtream panel's own zone, read at every sync.
 - **Per-channel compatibility mode** — the **⇄** button pins a channel to mpv and remembers it,
   using the same store the television uses, so a pin syncs between the two devices.
 - **The fallback ladder** — core's `LiveLadder`: up to four rungs, each tried once,

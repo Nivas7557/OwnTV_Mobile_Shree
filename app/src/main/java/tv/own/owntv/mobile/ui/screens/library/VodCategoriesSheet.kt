@@ -53,7 +53,7 @@ internal fun VodCategoriesSheet(
     val labels = fixed.associateWith { it.label(tab) }
     val q = query.trim()
     val shownFixed = fixed.filter { q.isEmpty() || labels.getValue(it).contains(q, ignoreCase = true) }
-    val shownGroups = groups.filter { q.isEmpty() || parsed.getValue(it).name.contains(q, ignoreCase = true) }
+    val shownGroups = groups.filter { q.isEmpty() || ProviderTags.groupLabel(parsed.getValue(it), headingCountry = null).contains(q, ignoreCase = true) }
     fun pick(key: LiveKey) {
         onSelect(key)
         onDismiss()
@@ -92,7 +92,7 @@ internal fun VodCategoriesSheet(
             items(shownGroups, key = { it.key.toString() }) { c ->
                 val name = parsed.getValue(c)
                 StageMenuItem(
-                    label = name.name,
+                    label = ProviderTags.groupLabel(name, headingCountry = null),
                     onClick = { pick(c.key) },
                     onLongClick = { onHold(c) },
                     filled = c.key == selected,

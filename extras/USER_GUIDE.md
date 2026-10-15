@@ -464,7 +464,8 @@ Six font families for the interface and for popups, and interface zoom.
 ### 🗂️ Customize
 **Where:** Settings → Content & metadata → **Customize categories & items**
 Hide, rename, reorder and regroup categories and items, with **bulk rename** (rules, automatic
-cleanup, a review step and restore-originals), **custom categories**, span selection, and an optional
+cleanup, a review step and restore-originals — for category names too, from the categories page),
+**custom categories**, span selection, and an optional
 **PIN lock**.
 
 ### 🏠 Home & layout
@@ -485,6 +486,7 @@ finds any setting by its name, and **Quick** holds the rows you pin yourself by 
 | **Live TV player** (+ per playlist) | Player | Which engine opens a channel |
 | **Give up after** (+ per playlist) | Live TV | Bounds how long a dead channel can spin |
 | **Movies & Series player** (+ per playlist) | Player | Which engine opens films and episodes |
+| **Catch-up time zone** | Sources & guide | **Automatic** (default) uses the Xtream panel's own zone; Device or a fixed offset otherwise |
 | **Catch-up time zone per playlist** | Sources & guide | One provider's archive on a different clock (quarter-hour zones included) |
 | **Live latency** (+ per playlist) | Live TV | Closer to live, or steadier |
 | **Pre-buffer** (+ per playlist) | Live TV | Collect a few seconds first on a flaky provider |

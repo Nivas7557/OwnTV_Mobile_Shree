@@ -58,7 +58,7 @@ fun CategoryPickerSheet(
                 itemsIndexed(matches, key = { _, (index, _) -> index }) { _, (index, label) ->
                     val name = remember(label) { tv.own.owntv.core.live.ProviderTags.parse(label) }
                     tv.own.owntv.mobile.ui.stage.StageMenuItem(
-                        label = name.name,
+                        label = tv.own.owntv.core.live.ProviderTags.groupLabel(name, headingCountry = null),
                         onClick = {
                             onSelect(index)
                             if (dismissOnSelect) onDismiss()

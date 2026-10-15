@@ -71,7 +71,7 @@ internal fun LiveCategoriesSheet(
     val labels = fixed.associateWith { it.label() }
     val q = query.trim()
     val shownFixed = fixed.filter { q.isEmpty() || labels.getValue(it).contains(q, ignoreCase = true) }
-    val shownGroups = groups.filter { q.isEmpty() || parsed.getValue(it).name.contains(q, ignoreCase = true) }
+    val shownGroups = groups.filter { q.isEmpty() || ProviderTags.groupLabel(parsed.getValue(it), country).contains(q, ignoreCase = true) }
     fun pick(key: LiveKey) {
         onSelect(key)
         onDismiss()
@@ -102,7 +102,7 @@ internal fun LiveCategoriesSheet(
             items(shownGroups, key = { it.key.toString() }) { c ->
                 val name = parsed.getValue(c)
                 StageMenuItem(
-                    label = name.name,
+                    label = ProviderTags.groupLabel(name, country),
                     onClick = { pick(c.key) },
                     onLongClick = { onHold(c) },
                     filled = c.key == selected,

@@ -112,6 +112,9 @@ fun CustomizeCategoriesPane(
                     label = plainLabel(stringResource(R.string.settings_customize_filter_button, stringResource(visibilityFilter.labelRes()))),
                 )
                 StageTool(onClick = { creatingCategory = true }, icon = MobileIcons.Add, contentDescription = stringResource(R.string.settings_customize_new_category))
+                // Bulk rename over every listed category, as the items page has it (the long-press span stays).
+                StageTool(onClick = { vm.bulkRenameAll(autocleanup = false) }, label = stringResource(R.string.settings_bulk_rename_title))
+                StageTool(onClick = { vm.bulkRenameAll(autocleanup = true) }, label = stringResource(R.string.settings_bulk_rename_auto_cleanup))
             }
         }
         if (anchorKey != null) {
