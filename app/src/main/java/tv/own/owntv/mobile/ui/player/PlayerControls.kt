@@ -587,6 +587,8 @@ private fun ToolBar(
             PlayerControl.PREVIOUS_CHANNEL -> if (onPreviousChannel != null) {
                 CtrlButton(MobileIcons.History, stringResource(R.string.player_previous_channel), onPreviousChannel)
             }
+            // Sports Hub: the phone's player tools arrive with its match player (PLAN 4.7).
+            PlayerControl.OTHER_CHANNELS, PlayerControl.MATCH -> Unit
             // L3 - live has two engines now, so the button is real there too. It is NOT the VOD
             // toggle: on live it is the television's "compatibility mode", pinned per channel, so a
             // channel only mpv can play opens on mpv next time without being asked again. Null means

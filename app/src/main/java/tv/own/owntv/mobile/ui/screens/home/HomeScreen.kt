@@ -346,6 +346,8 @@ fun HomeScreen(
                         onPlay = { item -> resumeGate(item.positionMs) { vm.playEpisode(item.targetItemId, it, onPlayerOpened) } },
                         onMenu = { menuFor = it },
                     )
+                    // Sports Hub: the phone's Live sports row arrives in Phase 4; hasContent keeps it undrawn.
+                    HomeRow.LIVE_SPORTS -> Unit
                 }
             }
         }
@@ -411,6 +413,7 @@ private fun HomeFeed.hasContent(row: HomeRow): Boolean = when (row) {
     HomeRow.FAVORITE_SERIES -> favoriteSeries.isNotEmpty()
     HomeRow.CONTINUE_MOVIES -> continueMovies.isNotEmpty()
     HomeRow.CONTINUE_SERIES -> continueSeries.isNotEmpty()
+    HomeRow.LIVE_SPORTS -> false
 }
 
 /** A half-watched episode's menu is its show's: the show is what can be favourited or hidden. */
