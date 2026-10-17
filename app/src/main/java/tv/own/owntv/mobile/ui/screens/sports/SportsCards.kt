@@ -47,8 +47,8 @@ import tv.own.owntv.mobile.ui.stage.stageText
 private val LINE_SCORE_SPORTS = setOf(Sport.TENNIS, Sport.CRICKET, Sport.GOLF, Sport.RACING)
 
 /**
- * `.pmc`: a match card (P1) — league line and LIVE · minute or kick-off on top, both sides with crest
- * and score, then the venue and a Reminder tag or the followed star. No channels (R1): a tap opens the
+ * `.pmc`: a match card — league line and LIVE · minute or kick-off on top, both sides with crest
+ * and score, then the venue and a Reminder tag or the followed star. No channels: a tap opens the
  * match page, where they are found; a long press follows or reminds.
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -172,7 +172,7 @@ internal fun FollowRemindSheet(
                 onClick = { onFollow(team); onDismiss() },
             )
         }
-        // Without a found channel the phone still reminds: a notification at the lead time (P7).
+        // Without a found channel the phone still reminds: a notification at the lead time.
         if (match.state == MatchState.PRE && match.startMs > System.currentTimeMillis()) {
             StageMenuItem(
                 label = stringResource(R.string.content_remind_me),

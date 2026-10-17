@@ -65,12 +65,12 @@ import tv.own.owntv.mobile.ui.stage.stageBackground
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /**
- * Where an "Add a source" from Settings enters the flow (M9-19 picks the way there itself): the form ("Type it
+ * Where an "Add a source" from Settings enters the flow (Add a source picks the way there itself): the form ("Type it
  * here", pre-filled when Remote sent one), the backup picker, or another profile's playlists.
  */
 enum class SetupEntry { ADD_CONTENT, FORM, IMPORT, EXISTING }
 
-/** What the finished wizard leaves for the shell (the TV's `PendingShellRequest`): W9's Add a TV guide. */
+/** What the finished wizard leaves for the shell (the TV's `PendingShellRequest`): the last step's Add a TV guide. */
 object SetupHandoff {
     var addEpg by mutableStateOf(false)
         private set
@@ -88,7 +88,7 @@ private enum class Step {
 /**
  * Getting content onto the phone: type a playlist in, or bring everything back from a backup.
  *
- * **The first run is the television's wizard** (M10-W1 … W9), in its order and with its words — Welcome, Display,
+ * **The first run is the television's wizard**, in its order and with its words — Welcome, Display,
  * the disclaimer, start-fresh-or-restore, the profile, then where the content comes from, Importing and All set.
  * Opening the same flow later from Settings' Add a source starts at the way that page chose instead.
  */
@@ -112,7 +112,7 @@ fun SetupFlow(
         else -> Step.ADD_CONTENT
     }
     var step by rememberSaveable(firstRun) { mutableStateOf(entryStep) }
-    // A submission from Remote (M9-19 / W7), read once by the form it pre-fills.
+    // A submission from Remote, read once by the form it pre-fills.
     val remotePayload by vm.remotePayload.collectAsStateWithLifecycle()
     val remoteInitial = remember(remotePayload) { remotePayload?.toFormValues() }
     // Refreshed on every arrival at Add content, because restoring a backup on the way here can
@@ -125,7 +125,7 @@ fun SetupFlow(
     }
     // Where "Try again" and "Cancel" return to: the form for a new playlist, the list for a shared one.
     var importOrigin by rememberSaveable { mutableStateOf(Step.FORM) }
-    // The playlist being imported, for "Importing <name>" (W8); null when linking existing playlists.
+    // The playlist being imported, for "Importing <name>"; null when linking existing playlists.
     var importName by rememberSaveable { mutableStateOf<String?>(null) }
     // Where Back from the backup picker returns to — the first-run choice, or Add content.
     var backupOrigin by rememberSaveable { mutableStateOf(Step.ADD_CONTENT) }
@@ -239,7 +239,7 @@ fun SetupFlow(
                 onBack = { if (entryStep == Step.EXISTING) leave() else step = Step.ADD_CONTENT },
             )
             Step.FORM -> Column(Modifier.fillMaxSize().then(if (firstRun) Modifier.stageBackground() else Modifier).statusBarsPadding()) {
-                // "Type it here", from the wizard or Settings' Add a source (M9-20): the page's own title and the way back.
+                // "Type it here", from the wizard or Settings' Add a source: the page's own title and the way back.
                 FormHeader(firstRun = firstRun, onBack = backFromForm)
                 AddSourceForm(
                     // Remote's submission fills the form; the user still presses Start import.
@@ -302,7 +302,7 @@ fun SetupFlow(
 }
 
 /**
- * W8 / W9: "Importing <name>" with the sweeping bar and a row for each part of the catalogue as it arrives, Cancel
+ * "Importing <name>" with the sweeping bar and a row for each part of the catalogue as it arrives, Cancel
  * and Run in background; then "All set!" with what arrived and Add a TV guide; or the failure with Back and Try
  * again. The rows say what is known — counts so far, and Done once a part has finished — never a total.
  */
@@ -566,7 +566,7 @@ private fun tv.own.owntv.core.companion.CompanionPayload.toFormValues(): SourceF
 )
 
 /**
- * The add form's header (M9-20): its title (28 / 800), then the muted way back — "‹ Playlists · Add a source" from
+ * The add form's header: its title (28 / 800), then the muted way back — "‹ Playlists · Add a source" from
  * Settings, "‹ Add a playlist" in the wizard.
  */
 @Composable

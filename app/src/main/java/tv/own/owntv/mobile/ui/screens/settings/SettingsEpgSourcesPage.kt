@@ -76,7 +76,7 @@ fun SettingsEpgSourcesPage(
     var manualDaysFor by remember { mutableStateOf<EpgSource?>(null) }
     var confirmDelete by remember { mutableStateOf<EpgSource?>(null) }
 
-    // M9-21: "‹ Settings · Sources & guide · 2 feeds", + Add EPG, the feeds, then the note on addresses (F2).
+    // "‹ Settings · Sources & guide · 2 feeds", + Add EPG, the feeds, then the note on addresses (F2).
     SettingsCrumb(pluralStringResource(R.plurals.settings_epg_feed_count, sources.size, sources.size), SettingsGroup.SOURCES)
     SettingsStagePage(modifier) {
         item(key = "add") {
@@ -214,7 +214,7 @@ private fun EpgRow(
     }
     val res = LocalContext.current.resources
     val active = syncState as? EpgSyncState.Syncing
-    // "245 channels · 9,076 programs · catch-up on 1,404" (M9-21): counts grouped, one short line.
+    // "245 channels · 9,076 programs · catch-up on 1,404": counts grouped, one short line.
     val sep = stringResource(R.string.content_epg_bits_separator)
     val channelsText = @Composable { n: Int -> pluralStringResource(R.plurals.sync_count_channels, n, tv.own.owntv.mobile.ui.screens.home.formatCount(n)) }
     val programmesText = @Composable { n: Int -> pluralStringResource(R.plurals.settings_epg_line_programmes, n, tv.own.owntv.mobile.ui.screens.home.formatCount(n)) }

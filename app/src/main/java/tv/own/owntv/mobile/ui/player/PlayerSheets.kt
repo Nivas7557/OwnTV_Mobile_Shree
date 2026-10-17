@@ -106,7 +106,7 @@ fun PlayerSheetHost(
     onDismiss: () -> Unit,
     /** When the programme on air ends, for the sleep timer's "End of programme"; null offers no such row. */
     programmeEndMs: Long? = null,
-    /** The category the channel list shows, for its header (M3-10); null names it "Channels". */
+    /** The category the channel list shows, for its header; null names it "Channels". */
     channelsTitle: String? = null,
 ) {
     when (sheet) {
@@ -452,7 +452,7 @@ private fun ChannelSheet(
     onPick: (ChannelEntity) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    // M3-10 (the TV's Phase D): the category · count · Live TV, "Now playing · 256 · name", then Live TV's
+    // The category · count · Live TV, "Now playing · 256 · name", then Live TV's
     // own rows with what is on now; the playing channel carries the accent bar.
     val tuner: LiveTuner = koinInject()
     val playing by tuner.channel.collectAsStateWithLifecycle()
@@ -462,7 +462,7 @@ private fun ChannelSheet(
     val heading = title?.let { ProviderTags.parse(it).name } ?: stringResource(R.string.content_channel_overlay_title)
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val body: @Composable (Boolean) -> Unit = { side -> ChannelSheetBody(heading, channels, playing, now, nowMs, sep, side, onTuneToNumber, onPick, onDismiss) }
-    // Held sideways (M3-10): a glass panel down the left of the picture, over a wash from that side, instead of
+    // Held sideways: a glass panel down the left of the picture, over a wash from that side, instead of
     // a sheet that would cover the whole short screen.
     if (configuration.screenWidthDp > configuration.screenHeightDp) {
         androidx.activity.compose.BackHandler(onBack = onDismiss)

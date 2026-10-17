@@ -84,7 +84,7 @@ fun SettingsLocalSyncPage(
     val paired by vm.paired.collectAsStateWithLifecycle()
     val hosting by vm.hosting.collectAsStateWithLifecycle()
     val palette = LocalStagePalette.current
-    // The paired device a tap picked: its row takes the `.fx` look and shows Sync now · Unpair (M8-05).
+    // The paired device a tap picked: its row takes the `.fx` look and shows Sync now · Unpair.
     var picked by remember { mutableStateOf<String?>(null) }
 
     // The listener runs only while this page is on screen. That, and the PIN, is the whole of the

@@ -90,7 +90,7 @@ private enum class DownloadsTab(val labelRes: Int) {
 }
 
 /**
- * Downloads (M7-01, the TV's P7-01): the crumb is the volume and its free space, then the tabs Movies ·
+ * Downloads: the crumb is the volume and its free space, then the tabs Movies ·
  * Series · Recordings with their counts and the folder tool, the folder the open tab saves to, and the list
  * grouped DOWNLOADING (queue order, the running one first) / ON THIS PHONE, each row with its picture, its
  * line, where it got to and its file's folder. The Recordings card closes the list.
@@ -370,7 +370,7 @@ private fun DownloadItem(
                 // `.prog` at 3 dp: the accent → focus sweep, a little thinner than the default.
                 StageProgress(if (total > 0) (got.toFloat() / total).coerceIn(0f, 1f) else 0f, Modifier.padding(top = 6.dp).height(3.dp))
             }
-            // A queued one has none (M7-01): its hold menu pauses or deletes it.
+            // A queued one has none: its hold menu pauses or deletes it.
             if (!done && d.status != DownloadStatus.QUEUED) {
                 Row(Modifier.padding(top = 7.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     when (d.status) {

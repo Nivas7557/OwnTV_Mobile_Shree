@@ -42,7 +42,7 @@ import tv.own.owntv.mobile.ui.stage.StageTag
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /**
- * The categories sheet (M3-03, the TV's P3-02): "Categories · Live TV", search, the fixed entries with
+ * The categories sheet: "Categories · Live TV", search, the fixed entries with
  * their icons — Favourites, Recently watched, Catch-up, All channels — then "GROUPS · DE" and the
  * provider groups by their parsed names, with tags, counts (Show counts) and playlist marks. The open
  * category is filled. A hold on a group opens its menu ([onHold]).
@@ -57,7 +57,7 @@ internal fun LiveCategoriesSheet(
     onSelect: (LiveKey) -> Unit,
     onHold: (LiveCategory) -> Unit,
     onDismiss: () -> Unit,
-    /** The TV Guide's "Guide category · Same list as Live TV" (M4-03); Live TV's own by default. */
+    /** The TV Guide's "Guide category · Same list as Live TV"; Live TV's own by default. */
     title: String = stringResource(R.string.content_category_browser_title),
     extra: String = stringResource(R.string.common_nav_live_tv),
 ) {
@@ -123,7 +123,7 @@ private fun LiveCategory.icon() = when (builtIn) {
 }
 
 /**
- * Hold a category (M3-09): move it through the list, hide it, or restore it to the playlist's default
+ * Hold a category: move it through the list, hide it, or restore it to the playlist's default
  * ("Restore to default" for a combined category) — the TV's menu. Restore asks first ([CategoryRestoreConfirm]).
  */
 @Composable
@@ -155,7 +155,7 @@ internal fun LiveCategoryMenu(
 }
 
 /**
- * The restore's confirmation (M3-09): the category, "This will:" and one line per change, then Restore
+ * The restore's confirmation: the category, "This will:" and one line per change, then Restore
  * (filled) and Cancel — or, with nothing to undo, the sentence saying it is already at the default.
  * [plan] is null while it is still being read.
  */

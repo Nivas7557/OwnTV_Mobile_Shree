@@ -102,7 +102,7 @@ class DetailViewModel(
     /**
      * What a title page shows beyond the catalogue row: TMDB's record (title art, genres, cast, trailer, its
      * plot and rating), whether TMDB wins a field, the category by its parsed name, and — on the movie page
-     * (M5-06) — a few more titles from that category. The series page (M6-01) uses the first three.
+     * — a few more titles from that category. The series page uses the first three.
      */
     data class TitlePage(
         val meta: MetadataCacheEntity? = null,
@@ -449,7 +449,7 @@ class DetailViewModel(
 
     /**
      * TMDB's record for every episode of the listed season, keyed by episode id — the titles, stills, plots
-     * and air dates of the rows (M6-01 / M6-02). The TV's flow: what is cached at once, and an incomplete
+     * and air dates of the rows. The TV's flow: what is cached at once, and an incomplete
      * season fetched in one request after [SEASON_DWELL_MS], so a show opened by mistake costs nothing and
      * leaving cancels the fetch.
      */
@@ -474,7 +474,7 @@ class DetailViewModel(
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    /** Episodes as stills two a row or as rows (M6-02 / M6-01) — the setting the TV's series page writes too. */
+    /** Episodes as stills two a row or as rows — the setting the TV's series page writes too. */
     val episodeViewMode: StateFlow<SettingsRepository.VodViewMode> = settings.episodeViewMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.VodViewMode.LIST)
 
@@ -513,7 +513,7 @@ class DetailViewModel(
     }
 }
 
-/** "More in Disney+ Kids Movies": one row of four (M5-06). */
+/** "More in Disney+ Kids Movies": one row of four. */
 private const val MORE_IN_CATEGORY = 4
 
 /** How long a season stays listed before its missing TMDB details are fetched — the TV's grid dwell. */

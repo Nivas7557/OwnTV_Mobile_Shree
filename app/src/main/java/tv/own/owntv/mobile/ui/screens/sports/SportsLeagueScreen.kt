@@ -38,10 +38,10 @@ import tv.own.owntv.mobile.ui.stage.StageRow
 import tv.own.owntv.mobile.ui.stage.StageTool
 import tv.own.owntv.mobile.ui.stage.stageText
 
-/** The league page's tabs. Top scorers is not offered: the feeds carry none (WORK O9). */
+/** The league page's tabs. Top scorers is not offered: the feeds carry none. */
 private enum class LeagueTab { TABLE, FIXTURES, RESULTS }
 
-/** A league (the television's T5): its name and Following, the table, and this matchday's matches; a tap opens a match. */
+/** A league: its name and Following, the table, and this matchday's matches; a tap opens a match. */
 @Composable
 fun SportsLeagueScreen(leagueKey: String, onOpenMatch: (Match) -> Unit, vm: SportsViewModel = koinViewModel()) {
     LaunchedEffect(leagueKey) { vm.openLeague(leagueKey) }

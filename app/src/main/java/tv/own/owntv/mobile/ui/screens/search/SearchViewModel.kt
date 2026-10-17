@@ -34,7 +34,7 @@ import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.core.ui.stage.PlaylistMark
 
 /**
- * Search (M8-09 … M8-11), the shipped television's: one field over channels, films, shows and the guide.
+ * Search, the shipped television's: one field over channels, films, shows and the guide.
  *
  * The searching itself is core's [SearchReader] — the same rules the television searches by, so a hidden
  * title stays hidden and a renamed channel keeps its new name on both. What is here is the phone's part:

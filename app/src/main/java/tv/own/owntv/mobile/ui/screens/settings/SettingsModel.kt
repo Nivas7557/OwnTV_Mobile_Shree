@@ -49,9 +49,9 @@ import tv.own.owntv.mobile.ui.stage.stageClickable
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /*
- * Stage Settings (M9): a group page is sections of rows (`.srow`). A row says on its right what it is set to
+ * Stage Settings: a group page is sections of rows (`.srow`). A row says on its right what it is set to
  * and what a tap does — a switch flips, a stepper steps, a segmented control picks, ▾ opens the choices in a
- * sheet with the TV panel's explanation (M9-15), › opens a page. Every row is one [SettingItem], so the group
+ * sheet with the TV panel's explanation, › opens a page. Every row is one [SettingItem], so the group
  * page, Quick, the root's counts and the settings search all read the same list.
  */
 
@@ -79,7 +79,7 @@ sealed interface SettingValue {
     class Action(val text: String) : SettingValue
     /** An accent tag (a profile's IN USE). */
     class Tag(val text: String) : SettingValue
-    /** Anything else the mockup draws there (the accent swatches). */
+    /** Anything else drawn there (the accent swatches). */
     class Custom(val content: @Composable () -> Unit) : SettingValue
 }
 
@@ -198,7 +198,7 @@ fun OpenSheetHost(open: androidx.compose.runtime.MutableState<SettingItem?>, sec
 }
 
 /**
- * The TV's context panel as a sheet (M9-15): the group as the eyebrow, the row's name, its explanation, then
+ * The TV's context panel as a sheet: the group as the eyebrow, the row's name, its explanation, then
  * CHOICES — a radio each, RECOMMENDED beside the default. A pick applies and closes.
  */
 @Composable
@@ -274,7 +274,7 @@ internal fun ChoiceItem(label: String, description: String?, on: Boolean, recomm
 }
 
 /**
- * A question before something is forgotten or switched on (M9-26's shape): the title, what will happen, then
+ * A question before something is forgotten or switched on: the title, what will happen, then
  * Cancel and the action side by side.
  */
 @Composable

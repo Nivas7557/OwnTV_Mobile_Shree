@@ -75,7 +75,7 @@ fun VideoStage(
      */
     zoomOverride: ZoomMode? = null,
     /**
-     * Settings → Auto frame rate, seamless switches only (M9, owner decision 7). Passed only by the full
+     * Settings → Auto frame rate, seamless switches only. Passed only by the full
      * screen player, as the setting's description says: the smaller views keep the screen's own rate,
      * and leaving full screen hands it back.
      */
@@ -213,7 +213,7 @@ private class MpvSurfaceView(context: Context, private val player: OwnTVPlayer) 
         holder.addCallback(this)
     }
 
-    /** Seamless-only frame-rate hint (M9); re-applied on each fps change and on a surface re-create. */
+    /** Seamless-only frame-rate hint; re-applied on each fps change and on a surface re-create. */
     fun applyVideoFrameRate(fps: Float) {
         pendingFps = fps
         val surface = holder.surface ?: return

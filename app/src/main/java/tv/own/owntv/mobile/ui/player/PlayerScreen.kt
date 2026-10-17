@@ -667,7 +667,7 @@ fun PlayerScreen(
             PlayerToast(Modifier.align(Alignment.Center)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp))
-                    // M3-11 (the TV's PR #237): a live channel that had been playing and has stalled for
+                    // As on the TV (PR #237), a live channel that had been playing and has stalled for
                     // 10 s says so under the spinner; gone as soon as the picture returns.
                     val stalledSince = stalledSinceMs
                     if (isLive && stalledSince != null) {
@@ -700,7 +700,7 @@ fun PlayerScreen(
             logoUrl = channel?.displayLogoUrl ?: film?.posterUrl,
             // Nothing is drawn over the picture in the little window: it is a thumbnail, and the
             // system draws its own buttons on top of it.
-            // Held sideways the channel list is a panel over the picture alone (M3-10): the controls step aside.
+            // Held sideways the channel list is a panel over the picture alone: the controls step aside.
             visible = controlsVisible && !inPip && !(sheet == PlayerSheet.CHANNELS && landscape),
             isLive = isLive,
             offsetSec = offsetSecState,

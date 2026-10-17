@@ -597,7 +597,7 @@ private fun ToolBar(
                 CtrlButton(MobileIcons.History, stringResource(R.string.player_previous_channel), onPreviousChannel)
             }
             // Sports Hub: the other channels showing the match this one was started from, once Find
-            // channels found them. No Match button on either app (C27); Back returns to the match page.
+            // channels found them. No Match button on either app; Back returns to the match page.
             PlayerControl.OTHER_CHANNELS -> if (onOtherChannels != null) {
                 CtrlButton(MobileIcons.Sports, stringResource(R.string.sports_other_channels), onOtherChannels)
             }
@@ -688,7 +688,7 @@ private fun ToolBar(
                     active = recordingThis,
                 )
             }
-            // N17 / M14 — the full-screen way to the sleep timer; the sound-only screen and the
+            // The full-screen way to the sleep timer; the sound-only screen and the
             // floating window already had one. Coloured while a countdown is running.
             PlayerControl.SLEEP_TIMER -> CtrlButton(
                 icon = MobileIcons.Bedtime,

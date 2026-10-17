@@ -112,7 +112,7 @@ class LiveTuner(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
 
-    // --- "Record what I'm watching" (Plan D, D3 mode b) -----------------------------------------
+    // --- "Record what I'm watching" --------------------------------------------------------------
 
 
     /**

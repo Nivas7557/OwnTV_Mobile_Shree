@@ -20,7 +20,7 @@ import tv.own.owntv.mobile.R
  * A playlist with hundreds of categories makes the horizontal rail useless on a phone — the one on
  * the television at least has a rail tall enough to page through. Picking one closes the sheet.
  *
- * Drawn as the player's lists are (M3-10): parsed names, their tags, the open category filled.
+ * Drawn as the player's lists are: parsed names, their tags, the open category filled.
  */
 @Composable
 fun CategoryPickerSheet(

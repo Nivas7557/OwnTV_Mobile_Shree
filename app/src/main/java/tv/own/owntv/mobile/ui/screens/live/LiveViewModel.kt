@@ -217,7 +217,7 @@ class LiveViewModel(
     val sheetCounts: StateFlow<Boolean> = settings.sheetCounts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
-    /** List or the guide grid (M3-06) — core's "Live TV opens in", remembered from the Guide view tool. */
+    /** List or the guide grid — core's "Live TV opens in", remembered from the Guide view tool. */
     val liveView: StateFlow<SettingsRepository.LiveView> = settings.liveView
         .stateIn(viewModelScope, SharingStarted.Eagerly, SettingsRepository.LiveView.LIST)
 

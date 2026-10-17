@@ -26,7 +26,7 @@ import tv.own.owntv.mobile.ui.stage.StageSheetHeader
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /**
- * The line under the channel name while the controls show (the TV's T4b): "● LIVE **Frankfurt 2–1 Köln** · 63'".
+ * The line under the channel name while the controls show: "● LIVE **Frankfurt 2–1 Köln** · 63'".
  * It asks for the score only while it is drawn. Spoiler-free shows the two teams without the score.
  */
 @Composable
@@ -49,7 +49,7 @@ fun MatchScoreLine(playback: SportsPlayback, match: Match, spoilerFree: Boolean)
     }
 }
 
-/** The other channels showing the match (the TV's T4c), as a sheet: the backup when a stream stalls. */
+/** The other channels showing the match, as a sheet: the backup when a stream stalls. */
 @Composable
 fun OtherChannelsSheet(session: SportsSession, playingId: Long?, onSwitch: (ChannelEntity) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current

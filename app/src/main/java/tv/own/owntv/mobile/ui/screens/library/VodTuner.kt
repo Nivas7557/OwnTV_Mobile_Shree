@@ -307,7 +307,7 @@ class VodTuner(
                         subtitle = episodeLabel(ep),
                         logoUrl = show.posterUrl,
                         contentKey = enginePinKey(show.sourceId, "EPISODE", ep.remoteId),
-                        // v44 — audio/subtitle choices are remembered per series (owner decision 11).
+                        // v44 — audio/subtitle choices are remembered per series.
                         trackKey = enginePinKey(show.sourceId, "SERIES", show.remoteId),
                         seasonNumber = ep.seasonNumber,
                         episodeNumber = ep.episodeNumber,

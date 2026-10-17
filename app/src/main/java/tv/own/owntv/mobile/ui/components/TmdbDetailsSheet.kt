@@ -58,7 +58,7 @@ data class MediaDetails(
 @Composable
 fun TmdbDetailsSheet(details: MediaDetails, onDismiss: () -> Unit) {
     val palette = LocalStagePalette.current
-    // Stage sheet, Home's ⓘ sheet shape (M2-05): the poster (or an episode's still) beside the title, its line,
+    // Stage sheet, Home's ⓘ sheet shape: the poster (or an episode's still) beside the title, its line,
     // the meta line and the genres in the accent; then OVERVIEW and the plot, CAST and the cast row.
     MobileBottomSheet(onDismissRequest = onDismiss, title = details.title) {
         Column(Modifier.heightIn(max = detailsHeight()).verticalScroll(rememberScrollState())) {

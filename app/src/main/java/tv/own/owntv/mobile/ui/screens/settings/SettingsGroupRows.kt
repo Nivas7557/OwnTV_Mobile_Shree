@@ -315,7 +315,7 @@ private fun appearanceSections(vm: SettingsViewModel): List<SettingSection> {
     val setPopup = { pct: Int -> vm.edit { setFontCustomization(fonts.copy(popupSizePercent = PopupSizeScale.clamp(pct))) } }
 
     val themes = ThemeMode.entries
-    // The presets' own (dark) colours in both themes, as the mockup draws them; only the colour in force follows the theme.
+    // The presets' own (dark) colours in both themes; only the colour in force follows the theme.
     val presets = AccentColor.entries.map { Color(it.roles(true).primary) }
     return listOf(
         SettingSection(
@@ -400,7 +400,7 @@ private fun AccentSwatches(presets: List<Color>, current: Color) {
     }
 }
 
-/** M9-16: the presets with their names and Yours, then the picker — Cancel or Use this colour. */
+/** The presets with their names and Yours, then the picker — Cancel or Use this colour. */
 @Composable
 private fun AccentSheet(vm: SettingsViewModel, isDark: Boolean, onDismiss: () -> Unit) {
     val custom = vm.settings.customAccent.pref("")
@@ -646,7 +646,7 @@ private fun appSections(vm: SettingsViewModel): List<SettingSection> {
         SettingSection(
             stringResource(R.string.common_nav_downloads),
             listOf(
-                // The folder is chosen on Downloads (M7's folder tool), where it is shown; this row goes there.
+                // The folder is chosen on Downloads (its folder tool), where it is shown; this row goes there.
                 SettingItem(
                     "download_folder", MobileIcons.Folder, stringResource(R.string.settings_download_folder),
                     stringResource(R.string.settings_line_download_folder_mobile), SettingValue.Opens(volume),

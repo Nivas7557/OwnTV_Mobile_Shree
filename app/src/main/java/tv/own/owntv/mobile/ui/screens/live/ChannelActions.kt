@@ -111,7 +111,7 @@ fun ChannelMenu(
 
     if (sheetOpen && multiviewSetting != null) {
         val canMove = vm.contextKeyOf(selected) != null
-        // Group ids = the TV's four groups, in its order (M3-04).
+        // Group ids = the TV's four groups, in its order.
         val watch = 0; val chan = 1; val guide = 2; val organise = 3
         val catchupValue = channel.catchupDays.takeIf { it > 0 }
             ?.let { pluralStringResource(R.plurals.settings_epg_guide_days_value, it, it) }

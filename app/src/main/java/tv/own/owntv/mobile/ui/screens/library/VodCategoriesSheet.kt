@@ -28,7 +28,7 @@ import tv.own.owntv.mobile.ui.stage.StageSheetHeader
 import tv.own.owntv.mobile.ui.stage.StageTag
 
 /**
- * The categories sheet of Movies and Series (M5-03, the TV's P5-04): "Categories · Movies", search, the fixed
+ * The categories sheet of Movies and Series: "Categories · Movies", search, the fixed
  * entries with their icons — Favourites, History, All movies — then PROVIDERS and the provider folders by their
  * parsed names, with tags, counts (Show counts) and playlist marks. The open category is filled. A hold on a
  * folder opens its menu ([onHold]).

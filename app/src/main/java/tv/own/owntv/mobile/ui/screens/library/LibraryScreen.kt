@@ -97,7 +97,7 @@ import tv.own.owntv.mobile.ui.stage.stageText
 import tv.own.owntv.mobile.ui.theme.LocalAnimations
 
 /**
- * Movies and Series (M5-01 … M5-08): each its own place on the bar, the same screen locked to its half.
+ * Movies and Series: each its own place on the bar, the same screen locked to its half.
  *
  * The header's crumb names the open category and its count ("‹ **Disney+ Kids Movies** · 136 titles"); a tap
  * opens the categories sheet. Under it the tool row — search inside the category, the sort order, the
@@ -105,7 +105,7 @@ import tv.own.owntv.mobile.ui.theme.LocalAnimations
  *
  * The grid decides its own column count from the width it was given, until the user pinches or moves Poster
  * size: from then on their number is kept and travels with their backup, like the TV's fixed grid setting.
- * On a tablet the title opens in a pane beside the grid (M12 restyles that).
+ * On a tablet the title opens in a pane beside the grid.
  */
 @Composable
 fun LibraryScreen(
@@ -172,7 +172,7 @@ fun LibraryScreen(
     var lastOpened by rememberSaveable { mutableStateOf<Long?>(null) }
     val open = { item: VodItem ->
         lastOpened = item.id
-        // Wide (M12-02): a tap picks the title for the card, a second tap on it opens its page.
+        // Wide: a tap picks the title for the card, a second tap on it opens its page.
         if (twoPane && item.id != openItem) tappedItem = item.id else onOpenItem(tab, item.id)
     }
 
@@ -184,7 +184,7 @@ fun LibraryScreen(
         tappedItem = null
     }
 
-    // The header's crumb (M5-01): "‹ Disney+ Kids Movies · 136 titles", a tap opens the categories.
+    // The header's crumb: "‹ Disney+ Kids Movies · 136 titles", a tap opens the categories.
     val categoryLabel = categories.firstOrNull { it.key == selected }?.label(tab).orEmpty()
     val countText = groupedCountText(if (movies) R.plurals.content_vod_title_count else R.plurals.content_vod_series_count, count)
     ProvidePageCrumb { owner -> PageCrumb(categoryLabel, countText, owner = owner) { categoriesOpen = true } }
@@ -204,7 +204,7 @@ fun LibraryScreen(
     BoxWithConstraints(Modifier.fillMaxSize()) {
     // Roughly one poster per 110 dp of width, which is three on a phone and eight on a tablet in
     // landscape. The user's own number wins whenever they have set one.
-    // Beside the card the posters are the mockup's six across 520 dp (M12-02).
+    // Beside the card the posters are six across 520 dp.
     val columns = chosenColumns.takeIf { it > 0 }
         ?: (maxWidth.value.toInt() / (if (twoPane) WIDE_COLUMN_WIDTH_DP else COLUMN_WIDTH_DP)).coerceIn(MIN_COLUMNS, MAX_COLUMNS)
 
@@ -329,7 +329,7 @@ fun LibraryScreen(
                 }
             },
             modifier = modifier,
-            // The grid 520 of 791 dp (M12-02).
+            // The grid 520 of 791 dp.
             listShare = WIDE_GRID_SHARE,
         )
     } else {
@@ -389,7 +389,7 @@ fun LibraryScreen(
 }
 
 /**
- * `.chrow` of the list view (M5-05): 92 dp — the poster 52 × 78 (radius 9), the title (14.5 / 700, two lines
+ * `.chrow` of the list view: 92 dp — the poster 52 × 78 (radius 9), the title (14.5 / 700, two lines
  * allowed), "2026 · ★ 8.4 · 1 h 30 min" (12 muted, the rating in gold) or a show's seasons, the progress
  * under it (140 wide); at the end ✓ when watched, else the playlist mark. [selected] = the title last opened.
  */
@@ -441,7 +441,7 @@ private fun VodListRow(
 }
 
 /**
- * Sort (M5-02): "Sort movies · Applies to every category in this section", the four orders — each with its
+ * Sort: "Sort movies · Applies to every category in this section", the four orders — each with its
  * line while it is not the current one, the current filled and ticked — then VIEW Grid | List and, on the
  * grid, POSTER SIZE (the number the pinch sets; to the right is bigger posters, fewer a row).
  */
@@ -593,7 +593,7 @@ private fun LazyPagingItems<VodItem>.peekFirstId(): Long? = itemSnapshotList.fir
 /** The room between the crumb and the tools (`.tools` at 128 under a 102 dp header), as on Live TV. */
 private val TOOLS_TOP = 26.dp
 
-/** The rating's gold, the mockup's `#ffcc4d` (the same on the poster chip). */
+/** The rating's gold, `#ffcc4d` (the same on the poster chip). */
 private val RatingGold = Color(0xFFFFCC4D)
 
 private const val COLUMN_WIDTH_DP = 110

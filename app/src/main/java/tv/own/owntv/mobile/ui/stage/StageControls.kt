@@ -70,10 +70,10 @@ import tv.own.owntv.mobile.ui.theme.LocalMobileMotion
  * Stage's small controls (`phone.css`): buttons, pills, tools, segmented, tags, the playlist mark, switch,
  * stepper, radio, the search field, progress, the LIVE badge and spec chips. Touch has no focus ladder:
  * idle = nothing, selected / on = accent, pressed = filled accent. Compose widens every tap target under
- * 48 dp by itself, so the drawn sizes stay the mockup's.
+ * 48 dp by itself, so the drawn sizes stay the design's.
  */
 
-/** A Stage glyph at a mockup icon size (`1em` of its element). */
+/** A Stage glyph at a design icon size (`1em` of its element). */
 @Composable
 fun StageIcon(icon: ImageVector, size: Dp, tint: Color, modifier: Modifier = Modifier) =
     Icon(icon, contentDescription = null, tint = tint, modifier = modifier.size(size))
@@ -272,7 +272,7 @@ fun StageSegmented(
     modifier: Modifier = Modifier,
     icons: List<ImageVector?> = emptyList(),
     iconOnly: Boolean = false,
-    /** Each option takes an equal share of the width (the add form's Xtream · M3U · Stalker, M9-20). */
+    /** Each option takes an equal share of the width (the add form's Xtream · M3U · Stalker). */
     fill: Boolean = false,
 ) {
     val palette = LocalStagePalette.current
@@ -501,10 +501,10 @@ fun StageSearchField(
     imeAction: ImeAction = ImeAction.Search,
     /** A backup password: masked, and the keyboard offers no suggestions. */
     password: Boolean = false,
-    /** Search's ✕ at the end while there is text (M8-09); [clearLabel] is its spoken name. */
+    /** Search's ✕ at the end while there is text; [clearLabel] is its spoken name. */
     onClear: (() -> Unit)? = null,
     clearLabel: String? = null,
-    /** At the end of the field, 11 dim: Settings search's "5 results" (M9-02). */
+    /** At the end of the field, 11 dim: Settings search's "5 results". */
     trailingText: String? = null,
     /** A danger ring: the value cannot be used as it is (a wrong PIN, a name already taken). */
     isError: Boolean = false,
@@ -714,7 +714,7 @@ fun StageEyebrow(text: String, modifier: Modifier = Modifier, icon: ImageVector 
 }
 
 /**
- * `.tabs` (Downloads M7-01, Search M8-09): each tab its label (14 / 800 open, 14 / 700 muted otherwise) and
+ * `.tabs` (Downloads, Search): each tab its label (14 / 800 open, 14 / 700 muted otherwise) and
  * count (11 dim), the 3 dp accent line under each one in [selected] (Downloads: the open tab; Search's filter
  * buttons: any number on), a 1 dp rule under them all; [trailing] at the end.
  */

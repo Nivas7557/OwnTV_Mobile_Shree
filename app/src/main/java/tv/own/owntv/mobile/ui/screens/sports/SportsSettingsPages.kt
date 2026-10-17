@@ -66,7 +66,7 @@ private enum class CodeSheet { LANGUAGES, COUNTRIES, PLAYLISTS, REMEMBERED }
 private fun <T> List<T>.step(current: T, d: Int): T = this[(indexOf(current).coerceAtLeast(0) + d).mod(size)]
 
 /**
- * Settings → Sports (P5, the television's page as built): What to show · Watching · While watching ·
+ * Settings → Sports (the television's page as built): What to show · Watching · While watching ·
  * Channels · Data. Languages, countries, playlists and remembered channels open as sheets; Sports and
  * leagues, My teams and Goal alerts are pages of their own.
  */
@@ -267,7 +267,7 @@ private fun rebuildLabel(mode: AutoRebuild): String = when (mode) {
 private class MoveList(val title: String, val names: List<String>, val start: Int, val commit: (List<Int>) -> Unit)
 
 /**
- * Sports and leagues (R1, phone layout): the sports, a tap opening that sport's leagues as switches, the
+ * Sports and leagues (phone layout): the sports, a tap opening that sport's leagues as switches, the
  * chosen ones first in the user's order. On a tablet both panes sit side by side, as on the TV. A long
  * press on a sport or a chosen league offers Move, which opens the phone's reorder sheet (Save / Cancel).
  */
@@ -392,7 +392,7 @@ fun SportsTeamsPage(vm: SportsSettingsViewModel = koinViewModel()) {
     }
 }
 
-/** Goal alerts on the phone (P8): on/off, when OwnTV is closed, what about, for whom, the live score card. */
+/** Goal alerts on the phone: on/off, when OwnTV is closed, what about, for whom, the live score card. */
 @Composable
 fun SportsAlertsPage(vm: SportsSettingsViewModel = koinViewModel()) {
     val c by vm.config.collectAsStateWithLifecycle()

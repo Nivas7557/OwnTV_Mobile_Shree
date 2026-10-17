@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import tv.own.owntv.mobile.R
 
 /**
- * A full page that a group row opens (M9B) — the second and last layer under a group: Settings → a group →
+ * A full page that a group row opens — the second and last layer under a group: Settings → a group →
  * a page. Registered once with its group and its title, so the route, the header's title and crumb and the
  * settings search all read the same list.
  */
@@ -44,7 +44,7 @@ enum class SettingsLeaf(
     PROXY(SettingsGroup.APP, "proxy", R.string.common_proxy),
     DNS(SettingsGroup.APP, "dns", R.string.settings_dns),
 
-    // Sports Hub (the TV's T6): one page in App, and the pages its rows open.
+    // Sports Hub: one page in App, and the pages its rows open.
     SPORTS(SettingsGroup.APP, "sports", R.string.sports_title),
     SPORTS_LEAGUES(SettingsGroup.APP, "sports/leagues", R.string.sports_leagues),
     SPORTS_TEAMS(SettingsGroup.APP, "sports/teams", R.string.sports_my_teams),

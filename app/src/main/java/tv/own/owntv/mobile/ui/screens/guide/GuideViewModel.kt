@@ -172,7 +172,7 @@ class GuideViewModel(
         .map { it.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
-    // The category list, its counts and its hold menu are Live TV's (M4-03: "Same list as Live TV"),
+    // The category list, its counts and its hold menu are Live TV's ("Same list as Live TV"),
     // read by the screen from a LiveViewModel; only which one the guide shows is kept here.
 
     private val _selected = MutableStateFlow<LiveKey>(LiveKey.All)
@@ -208,7 +208,7 @@ class GuideViewModel(
     private val _liveList = MutableStateFlow(false)
 
     /**
-     * Live TV's Guide view (M3-06) draws Live TV's own channels: the guide's order and its two filters
+     * Live TV's Guide view draws Live TV's own channels: the guide's order and its two filters
      * (Catch-up / Favorites, Channels without guide) are the TV Guide's choices, not Live TV's.
      */
     fun useLiveList() { _liveList.value = true }
@@ -304,7 +304,7 @@ class GuideViewModel(
         viewModelScope.launch { settings.setSortGuide(sort) }
     }
 
-    /** SHOW · Channels without guide (M4-04) — core's setting, the television's meaning. */
+    /** SHOW · Channels without guide — core's setting, the television's meaning. */
     val showEmpty: StateFlow<Boolean> = settings.guideShowEmpty
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
@@ -504,7 +504,7 @@ class GuideViewModel(
         return programme.startMs >= now - days * DAY_MS
     }
 
-    // --- Recording, from the guide (Plan D, Feature A). The television's own logic, phone-shaped. ---
+    // --- Recording, from the guide. The television's own logic, phone-shaped. ---
 
     /** This profile's recordings, so a programme sheet knows whether it is already spoken for. */
     val recordingRows: StateFlow<List<tv.own.owntv.core.database.entity.RecordingEntity>> =
@@ -721,7 +721,7 @@ class GuideViewModel(
         )
         // The phone loads guide rows one at a time (see [row]) — core's own guide_row line covers
         // those. What is only measurable here is the cold-open stats pass and how much the row cache
-        // is actually holding, which is what Phase 6's per-row work on the television is compared to.
+        // is actually holding, which is what the television's per-row reads are compared to.
         tv.own.owntv.core.CorePerf.log {
             "guide_stats programmes=$programmes guideChannels=$guideChannels " +
                 "sources=${ids.size} cachedRows=${synchronized(rowCache) { rowCache.size }} " +

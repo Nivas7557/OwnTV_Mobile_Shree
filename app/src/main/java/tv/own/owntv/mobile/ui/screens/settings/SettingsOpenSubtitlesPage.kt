@@ -273,7 +273,7 @@ private fun SignInDialog(
     var user by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
     var stay by remember { mutableStateOf(true) }
-    // A Stage sheet (M9B): what OpenSubtitles asks for, then Sign in / Cancel.
+    // A Stage sheet: what OpenSubtitles asks for, then Sign in / Cancel.
     tv.own.owntv.mobile.ui.components.MobileBottomSheet(onDismissRequest = onDismiss) {
         tv.own.owntv.mobile.ui.stage.StageSheetHeader(stringResource(R.string.player_subtitles_sign_in_title))
         SheetText(stringResource(R.string.player_subtitles_sign_in_to_use))

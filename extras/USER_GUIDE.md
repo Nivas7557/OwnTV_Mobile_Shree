@@ -62,7 +62,7 @@ to change category. Top right: the **playlist** button, **search** and **your av
 - **Tap the tab you are already on** — or long-press it — to jump that list back to the top.
 - **More** (tap your avatar) holds your profile and **Switch**, **Settings**, Downloads, Favourites,
   History, Backup, Local sync, the error log and About.
-- The **playlist chip** in the top bar switches which playlist the whole app is showing.
+- The **playlist button** at the top right switches which playlist the whole app is showing.
 
 ---
 
@@ -144,7 +144,7 @@ Choose per section whether Live, Movies and Series are fetched. A big import off
 background** so you can start using the app immediately; a status pill shows progress.
 
 ### 🗂️ Several playlists
-**Where:** the playlist chip in the top bar
+**Where:** the playlist button at the top right
 Show them all merged, or narrow the whole app to one. Rows carry the provider's name when more than
 one is loaded.
 
@@ -334,7 +334,7 @@ connection** so you can prove a key or a self-hosted server works.
 ## 🔎 Search · 🕐 History · ⭐ Favourites
 
 ### 🔎 Search
-**Where:** the magnifying glass in the top bar
+**Where:** the magnifying glass at the top right
 One field over channels, films and shows, grouped with a count for each. Once you type, filter
 chips — **Live TV / TV Shows / Movies / Series** — narrow the results; tap to turn one on or off,
 several at once, none for everything. Recent searches are kept,
@@ -426,7 +426,7 @@ channel. A **sleep timer** lives in the same menu — and on the full-screen pla
 
 ## 📺 Cast to a television
 
-**Where:** the cast button in the top bar or the player
+**Where:** the cast button at the top right or the player
 Appears only when there is a receiver on your network. The television plays the stream itself, so
 the phone's lock screen and notification then drive *it*.
 

@@ -31,7 +31,7 @@
 ---
 
 OwnTV Mobile is the phone and tablet member of the OwnTV family: a native Android IPTV **player**
-built with Kotlin and Jetpack Compose (Material 3), sharing its **entire engine** with
+built with Kotlin and Jetpack Compose, sharing its **entire engine** with
 [OwnTV for Android TV](https://github.com/ahXN00/OwnTV) through the
 [OwnTV core library](https://github.com/ahXN00/OwnTV_Core). Two interfaces, one database, one sync,
 one playback stack — a **dual playback engine** of **libmpv (FFmpeg)** for films and series and

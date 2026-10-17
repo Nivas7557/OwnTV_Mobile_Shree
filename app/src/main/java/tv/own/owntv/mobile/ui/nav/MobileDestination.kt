@@ -44,14 +44,14 @@ enum class MobileDestination(
 
     companion object {
         /**
-         * The bottom bar, in order — the TV rail's order (decision M2), with Movies and Series as one
+         * The bottom bar, in order — the TV rail's order, with Movies and Series as one
          * Library so Sports fits in five. More is not on it: the avatar at the top right opens it, as the
          * TV rail ends in the profile.
          */
         val bottomBar: List<MobileDestination> = listOf(HOME, LIVE, SPORTS, GUIDE, LIBRARY)
 
         /**
-         * The rail (M12, the mockup's `railH`), in order: the places, Downloads, then More as the last
+         * The rail (`railH`), in order: the places, Downloads, then More as the last
          * item. Settings is not on it — it is what More is for, on every width.
          */
         val rail: List<MobileDestination> =

@@ -89,10 +89,10 @@ import tv.own.owntv.mobile.ui.stage.stageClickable
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /**
- * Home, Stage (M2). The same rows as the television, in the same order, hidden by the same choices. With
+ * Home, Stage. The same rows as the television, in the same order, hidden by the same choices. With
  * Trending first and drawn as the hero, the top of the page is that title over its backdrop (the shell
  * draws the picture behind the header) and Keep watching sits under it in 16:9 stills; scrolled, the header
- * carries the hero's eyebrow and title instead (M2-02). A tap resumes rather than opens: a film goes
+ * carries the hero's eyebrow and title instead. A tap resumes rather than opens: a film goes
  * straight to the picture, a channel to its own screen. A long press is the item's sheet.
  */
 @Composable
@@ -217,10 +217,10 @@ fun HomeScreen(
         homeChrome?.backdropUrl = shownTrending?.let(::trendingBackdrop)
         homeChrome?.backdropHeight = if (posterHero) 300.dp else 470.dp
         homeChrome?.heading = heading
-        // The Resume pill belongs to the full hero (M2-01); the posters layout has none (M2-03).
+        // The Resume pill belongs to the full hero; the posters layout has none.
         homeChrome?.resume = resumeChip.takeIf { fullBleed }
     }
-    // The picture fades as the hero scrolls up, so the rows never sit over it (M2-02). Written straight
+    // The picture fades as the hero scrolls up, so the rows never sit over it. Written straight
     // to the shell's draw phase: scrolling never recomposes Home for it.
     val fadePx = with(density) { 360.dp.toPx() }
     LaunchedEffect(homeChrome, listState) {
@@ -353,7 +353,7 @@ fun HomeScreen(
                         onPlay = { item -> resumeGate(item.positionMs) { vm.playEpisode(item.targetItemId, it, onPlayerOpened) } },
                         onMenu = { menuFor = it },
                     )
-                    // Sports (the TV's T7, C26): followed matches live or within the hour, in the user's
+                    // Sports: followed matches live or within the hour, in the user's
                     // order; a tap opens the match, where its channels are found.
                     HomeRow.LIVE_SPORTS -> Column {
                         Text(
@@ -462,7 +462,7 @@ private fun RowHeading(title: String, count: Int? = null, mode: String? = null, 
 }
 
 /**
- * Keep watching (M2-01, M2-02): 190 dp 16:9 stills with the watch progress, the title (12.5 / 700) and its
+ * Keep watching: 190 dp 16:9 stills with the watch progress, the title (12.5 / 700) and its
  * line. The still is the best picture there is (G12); a channel is its logo on the dark card, no white tile.
  */
 @Composable
@@ -524,7 +524,7 @@ private fun KeepWatchingRow(
 private data class HomePoster(val target: ContentTarget, val posterUrl: String?, val rating: Double?, val progress: Float?)
 
 /**
- * Favourite films or shows (M2-02): 104 dp posters with the rating, the watch progress and ✓ once watched
+ * Favourite films or shows: 104 dp posters with the rating, the watch progress and ✓ once watched
  * to the end (for a show, the episode watched last). A tap opens the title's page.
  */
 @Composable
@@ -583,7 +583,7 @@ private fun ContinueRow(
 }
 
 /**
- * A channel row in either of the setting's two shapes: what is on now (M2-02's cards) or the logos to
+ * A channel row in either of the setting's two shapes: what is on now (cards) or the logos to
  * pick from. The dim word after the heading names the shape and switches it — stored where the TV reads it.
  */
 @Composable
@@ -713,7 +713,7 @@ private fun HomeSkeleton(modifier: Modifier = Modifier) {
 /** The route this screen answers a "scroll back to the top" tap for. */
 private const val MobileHomeRoute = "home"
 
-/** Where the hero's eyebrow sits from the top of the screen (M2-01), and the posters layout's (M2-03). */
+/** Where the hero's eyebrow sits from the top of the screen, and the posters layout's. */
 private val HeroTop = 262.dp
 private val PostersTop = 170.dp
 

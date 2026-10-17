@@ -61,8 +61,7 @@ import tv.own.owntv.mobile.ui.theme.LocalMobileMotion
  *
  * The `when` below is exhaustive over [MobileDestination] and deliberately has no `else`: a
  * destination added without a screen is then a compile error rather than a blank page at runtime.
- * It carried one until Plan 4 finished, along with a `PlaceholderScreen` to fill it; every
- * destination has had a real screen for some time, so both are gone.
+ * Every destination has a real screen, so there is no placeholder.
  */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -188,7 +187,7 @@ fun MobileNavHost(
                 }
             }
         }
-        // Sports Hub: a match and a league, pushed over the hub, so Back from the player lands on the match (C24).
+        // Sports Hub: a match and a league, pushed over the hub, so Back from the player lands on the match.
         page(SPORTS_MATCH_PATTERN, arguments = listOf(navArgument(ARG_KEY) { type = NavType.StringType })) { entry ->
             SportsMatchScreen(
                 matchKey = entry.arguments?.getString(ARG_KEY).orEmpty(),
@@ -227,7 +226,7 @@ fun MobileNavHost(
                 },
             )
         }
-        // The twelve group pages and the full pages under them (M9, M9B). Each is a route, so the
+        // The twelve group pages and the full pages under them. Each is a route, so the
         // system back gesture is what closes it; a row that opens a page navigates through LocalSettingsNav.
         val openRoute: (String) -> Unit = { navController.navigate(it) { launchSingleTop = true } }
         SettingsGroup.entries.forEach { group ->
@@ -320,7 +319,7 @@ private val LibraryTab.parent: MobileDestination
 private fun detailRoute(parentRoute: String, tab: LibraryTab, itemId: Long) =
     "$parentRoute/${tab.name}/$itemId"
 
-/** A film's or a show's own page — the shell gives it the title-page header (M5-06). */
+/** A film's or a show's own page — the shell gives it the title-page header. */
 fun isTitleRoute(route: String?): Boolean = route?.endsWith("/{$ARG_TAB}/{$ARG_ITEM_ID}") == true
 
 private const val ARG_TAB = "tab"
@@ -349,7 +348,7 @@ const val SETUP_ROUTE = "setup"
 private const val ARG_ENTRY = "entry"
 const val SETUP_ROUTE_PATTERN = "$SETUP_ROUTE?$ARG_ENTRY={$ARG_ENTRY}"
 
-/** The setup flow entered at [entry] (Settings' Add a source, M9-19). */
+/** The setup flow entered at [entry] (Settings' Add a source). */
 fun setupRoute(entry: SetupEntry): String = "$SETUP_ROUTE?$ARG_ENTRY=${entry.name}"
 
 /**

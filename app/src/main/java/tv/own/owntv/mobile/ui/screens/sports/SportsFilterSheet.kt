@@ -26,7 +26,7 @@ import tv.own.owntv.mobile.ui.stage.StageSwitch
 import tv.own.owntv.mobile.ui.stage.StageTool
 
 /**
- * Filter channels (P3, the television's T3 panel): every choice with the number of channels it covers,
+ * Filter channels (the television's filter panel): every choice with the number of channels it covers,
  * the list behind changing as soon as a choice does. The choices apply to this match only, unless
  * "Remember for every match" is on; Strict filtering decides whether the others are hidden or listed below.
  */

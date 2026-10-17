@@ -61,7 +61,7 @@ import tv.own.owntv.mobile.ui.stage.stageText
 import tv.own.owntv.player.PlaybackErrorLog
 
 /**
- * More (M8-01), opened from the avatar: the profile card with **Switch**, then Settings and Downloads, YOUR
+ * More, opened from the avatar: the profile card with **Switch**, then Settings and Downloads, YOUR
  * THINGS (Favourites, History), KEEP IT SAFE (Backup & Restore, Local sync) and APP (Error log, About) — each
  * row with what it holds before you go and look. Two layers: More, then a page.
  *
@@ -73,7 +73,7 @@ fun MoreScreen(
     scrollToTop: SharedFlow<String>,
     onNavigate: (MobileDestination) -> Unit,
     onOpenLeaf: (MoreLeaf) -> Unit,
-    /** The profile card opens Settings › Profile (M9-04). */
+    /** The profile card opens Settings › Profile. */
     onOpenProfiles: () -> Unit,
     onSwitchProfile: () -> Unit,
     modifier: Modifier = Modifier,
@@ -201,7 +201,7 @@ private fun relativeShort(at: Long): String =
 /**
  * The television's "Rebuild Now Trending", on the phone.
  *
- * Trending is read-only on mobile by Plan 4's own rule — the row shows what core last stored, and the
+ * Trending is read-only on mobile — the row shows what core last stored, and the
  * refresh is scheduled a few days apart. That timer is the problem when a trending bug is being
  * chased: reproducing it means waiting days, or driving the television. This forces the download for
  * every playlist on the active profile, right now, ignoring the timer.

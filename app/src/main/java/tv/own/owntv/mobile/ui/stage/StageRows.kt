@@ -71,7 +71,7 @@ internal fun Modifier.stageClickable(
 
 /**
  * A Stage list row (16 dp corners, 12 dp sides): channel rows, setting rows, result rows. [current] is
- * the open / playing item (`.fx`), [selected] the left accent bar (`.selbar`). The mockup draws no filled
+ * the open / playing item (`.fx`), [selected] the left accent bar (`.selbar`). There is no filled
  * press on a row (`.f` is for menu items), so a pressed row takes the fx look while the finger is down.
  */
 @Composable
@@ -123,7 +123,7 @@ fun StageSettingRow(
     minHeight: Dp = 60.dp,
     /** Drawn in the icon's 34 dp place instead (a profile's avatar, a playlist's mark). */
     leading: (@Composable () -> Unit)? = null,
-    /** Above the title, 11.5 muted: a search result's path (M9-02). */
+    /** Above the title, 11.5 muted: a search result's path. */
     overline: String? = null,
     /** The title as styled text (a search result with its match in the accent). */
     styledTitle: androidx.compose.ui.text.AnnotatedString? = null,
@@ -285,7 +285,7 @@ fun StageMenuItem(
     tags: (@Composable RowScope.() -> Unit)? = null,
     mark: tv.own.owntv.core.ui.stage.PlaylistMark? = null,
     onLongClick: (() -> Unit)? = null,
-    /** More's rows (M8-01) are 48 high and end in a dim 13 dp chevron. */
+    /** More's rows are 48 high and end in a dim 13 dp chevron. */
     height: Dp = 46.dp,
     chevron: Boolean = false,
 ) {
@@ -307,7 +307,7 @@ fun StageMenuItem(
         modifier
             .fillMaxWidth()
             .height(height)
-            // Not available here (no trailer, not in history): the whole row at 45%, as the mockup dims it.
+            // Not available here (no trailer, not in history): the whole row at 45%.
             .then(if (enabled) Modifier else Modifier.alpha(0.45f))
             .clip(shape)
             .then(if (pressed) Modifier.background(accent.accent) else Modifier)
@@ -345,7 +345,7 @@ fun StageMenuItem(
 }
 
 /**
- * A form field as a row (M9-20): the field's name, under it what is typed (or the example, dim), and a tap opens
+ * A form field as a row: the field's name, under it what is typed (or the example, dim), and a tap opens
  * a sheet with the field — Save keeps it. [password] shows dots in the row and masks the field.
  */
 @Composable

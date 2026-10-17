@@ -69,14 +69,14 @@ import tv.own.owntv.mobile.ui.stage.StageTool
 import tv.own.owntv.mobile.ui.stage.stageAccent
 import tv.own.owntv.mobile.ui.stage.stageText
 
-/** The match page's tabs: Watch live first (P2), then the television's details (Form in Head to head's place, WORK O9). */
+/** The match page's tabs: Watch live first, then the television's details (Form in Head to head's place). */
 private enum class MatchTab { WATCH, TIMELINE, STATS, LINEUPS, TABLE, FORM, BROADCASTS }
 
 /**
- * A match (P2, the television's match page as built). The league line and Following, the score box
+ * A match (the television's match page as built). The league line and Following, the score box
  * (time · round · venue, scorers; spoiler-free until a tap), then the tabs. *Watch live* finds the
- * channels only when asked, within its window (WORK C21); a tap on a channel plays it full screen and
- * Back returns here (C24); a long press remembers it for the competition; *Filter channels* opens the
+ * channels only when asked, within its window; a tap on a channel plays it full screen and
+ * Back returns here; a long press remembers it for the competition; *Filter channels* opens the
  * sheet. The details come from the stored board.
  */
 @Composable
@@ -109,7 +109,7 @@ fun SportsMatchScreen(
             (it != MatchTab.FORM || !state.summary?.form.isNullOrEmpty())
     }
     // Items above the channel list (crumb, score, tabs, the list's head), so Back from the player can
-    // scroll to the channel that was playing (C24).
+    // scroll to the channel that was playing.
     val rowsStart = 3 + WATCH_HEAD_ITEMS
     LaunchedEffect(shown.isNotEmpty(), tab) {
         val i = shown.indexOfFirst { it.channel.id == vm.lastPlayedChannelId }
@@ -130,7 +130,7 @@ fun SportsMatchScreen(
         }
         item(key = "score") {
             ScoreBox(m, state.summary, hidden = state.config.spoilerFree && !revealed, onReveal = { revealed = true })
-            // The live score card (P7): only on the phone, while the match is still to be decided.
+            // The live score card: only on the phone, while the match is still to be decided.
             if (MatchAlertHost.backgroundAllowed && state.config.alerts.liveCard && (m.isLive || m.state == MatchState.PRE)) {
                 StageTool(
                     onClick = { MatchAlertHost.requestNotificationPermission?.invoke(); tv.own.owntv.core.sports.LiveMatchCardService.start(context, m) },
@@ -181,7 +181,7 @@ private val MatchTab.label: Int get() = when (this) {
     MatchTab.BROADCASTS -> R.string.sports_tab_broadcasts
 }
 
-/** *Watch live*: no playlist (P9), outside the window, Find channels, or the ranked list with its filter chips. */
+/** *Watch live*: no playlist, outside the window, Find channels, or the ranked list with its filter chips. */
 private fun LazyListScope.watchLive(
     state: MatchPageState,
     sep: String,
@@ -277,7 +277,7 @@ private fun FindChannels(busy: Boolean, searching: Boolean, onFind: () -> Unit) 
     }
 }
 
-/** Find channels outside its window (WORK C21): when it opens, or that the match is over. */
+/** Find channels outside its window: when it opens, or that the match is over. */
 @Composable
 private fun ClosedNote(window: WatchWindow) {
     Note(
@@ -288,7 +288,7 @@ private fun ClosedNote(window: WatchWindow) {
     )
 }
 
-/** No playlist on this profile (P9): scores, tables and alerts work; channels need one. */
+/** No playlist on this profile: scores, tables and alerts work; channels need one. */
 @Composable
 private fun NoPlaylistNote(onAddPlaylist: () -> Unit) {
     val palette = LocalStagePalette.current
@@ -301,7 +301,7 @@ private fun NoPlaylistNote(onAddPlaylist: () -> Unit) {
 }
 
 /**
- * The score box: crest and name each side, the score, LIVE · minute; then time · round · venue (C22) and
+ * The score box: crest and name each side, the score, LIVE · minute; then time · round · venue and
  * each side's scorers. Spoiler-free: the score is a dash until a tap.
  */
 @Composable
@@ -502,7 +502,7 @@ private fun Form(m: Match, summary: MatchSummary?) {
 }
 
 /**
- * Who shows the match (C23): the channels Find channels found in the user's guide — one per row, under
+ * Who shows the match: the channels Find channels found in the user's guide — one per row, under
  * their country, countries and names in order, any without a country last — then the broadcasters ESPN
  * lists (United States services only). The page scrolls, so a long list scrolls with it.
  */

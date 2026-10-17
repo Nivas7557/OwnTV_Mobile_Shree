@@ -57,7 +57,7 @@ import tv.own.owntv.mobile.ui.stage.stageText
 import java.io.File
 
 /**
- * Glass & background (M9-23 / M9-24, the TV's GB page): the live preview, then BACKGROUND — Stage / Picture /
+ * Glass & background (the TV's GB page): the live preview, then BACKGROUND — Stage / Picture /
  * Plain, the picture, its look (Sharp / Soft / Dark), Darken and Blur while a picture shows, Accent light — and
  * GLASS: frosted bars and sheets, their opacity, and Reset. Every value is core's, so a TV backup brings the same
  * look; every change shows at once, on the preview and on the page itself.
@@ -240,7 +240,7 @@ private fun PercentRow(icon: androidx.compose.ui.graphics.vector.ImageVector, ti
 }
 
 /**
- * The live preview (M9-23): "Live TV" over the current background — the picture with its look, the Stage colours or
+ * The live preview: "Live TV" over the current background — the picture with its look, the Stage colours or
  * Plain — and a glass bottom bar, Live TV lit. It reads the same settings the app is drawn with, so it follows
  * every change on this page at once.
  */

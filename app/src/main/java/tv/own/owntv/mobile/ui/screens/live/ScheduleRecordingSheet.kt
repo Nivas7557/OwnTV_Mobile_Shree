@@ -59,7 +59,7 @@ import tv.own.owntv.mobile.ui.stage.stageAccent
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /**
- * "Schedule recording…" from a channel's menu (M3-08): the channel on top, the hint, day tools from Today
+ * "Schedule recording…" from a channel's menu: the channel on top, the hint, day tools from Today
  * to [DAYS_AHEAD] days out, Start and End as two big typed clocks, "next day" when End is at or before
  * Start, the clash or already-passed note in warn, then Cancel · Record. A clash warns, never blocks; a
  * window already under way records from now.

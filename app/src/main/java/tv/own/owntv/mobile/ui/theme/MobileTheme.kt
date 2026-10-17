@@ -33,7 +33,7 @@ import tv.own.owntv.mobile.ui.stage.StagePalette
  * The app's theme, driven entirely by the settings the user already has.
  *
  * Every value is core's, so the choices made on the TV app — dark or light, the accent, the zoom,
- * the font, the Glass Effect — come across with a backup restore and apply here unchanged.
+ * the font, Glass & background — come across with a backup restore and apply here unchanged.
  */
 @Composable
 fun MobileTheme(content: @Composable () -> Unit) {
@@ -94,7 +94,7 @@ fun MobileTheme(
         LocalAnimations provides animations,
         LocalAccentOnVideo provides accentOnVideo(accent, customAccent),
         LocalMobileMotion provides remember(animations) { MobileMotion(animations) },
-        // Stage (the redesign's look): its palette follows the same resolved theme; the focus highlight and
+        // Stage: its palette follows the same resolved theme; the focus highlight and
         // Glass & background are core's, so a TV backup brings them across unchanged.
         LocalStagePalette provides if (isDark) StagePalette.Dark else StagePalette.Light,
         LocalFocusHighlight provides remember(focusHighlight) { parseAccentHex(focusHighlight)?.let { Color(it) } },

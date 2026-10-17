@@ -8,7 +8,7 @@
 <h1 align="center">OwnTV Mobile — Master Product Brief</h1>
 
 <p align="center">
-  <b>Native Android IPTV player for phones and tablets · dual playback engine · Material 3</b><br>
+  <b>Native Android IPTV player for phones and tablets · dual playback engine · Stage design</b><br>
   <sub>Bring your own M3U, Xtream or Stalker/Ministra portal sources</sub>
 </p>
 
@@ -17,7 +17,7 @@
 ## 1. Overview
 
 OwnTV Mobile is the phone and tablet member of the OwnTV family: a native Android IPTV player written
-in Kotlin with Jetpack Compose and Material 3, sharing its **entire engine** with
+in Kotlin with Jetpack Compose, sharing its **entire engine** with
 [OwnTV for Android TV](https://github.com/ahXN00/OwnTV) through the
 [OwnTV core library](https://github.com/ahXN00/OwnTV_Core).
 
@@ -35,7 +35,7 @@ Stalker/Ministra portal.
 |---|---|
 | **Player only** | No bundled content, no subscriptions, no paywalls |
 | **Touch-first** | Gestures, a document picker, the share sheet, rotation, a keyboard that covers half the screen |
-| **Not the TV app relaid out** | Material 3 components, not a ten-foot focus ladder |
+| **Not the TV app relaid out** | Touch-sized Stage parts, not a ten-foot focus ladder |
 | **One engine, two shells** | A behaviour fixed here is fixed on the television, and the reverse |
 | **Language-first** | 26 packaged interface languages, chosen before anything else |
 | **Open source** | GPLv3, original code, built with the help of AI |
@@ -341,7 +341,7 @@ app/src/main/java/tv/own/owntv/mobile/
 ├── ui/player/       the full-screen player, gestures, sheets, mini players
 ├── ui/stage/        the Stage parts every screen is built from — buttons, rows, fields, glass
 ├── ui/components/   the sheet host, icons, logos and the shared menus and pickers
-├── ui/shell/        the bar/rail shell, the top bar, the sync pill
+├── ui/shell/        the bar/rail shell, the page header, the sync pill
 ├── playback/        the foreground service, PiP, the data-saver gate (the sleep timer is core's)
 ├── cast/            the Google Cast sender
 └── di/              Koin modules

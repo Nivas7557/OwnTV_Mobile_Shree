@@ -366,7 +366,7 @@ class CustomizeItemsViewModel(
         }
     }
 
-    /** Rename an item (Live TV channels only — Movies/Series use bulk rename in Phase 2). */
+    /** Rename an item (Live TV channels only — Movies/Series use bulk rename). */
     fun renameItem(row: CustomizeItemRow, name: String?) {
         val ci = _catInfo.value ?: return
         viewModelScope.launch {

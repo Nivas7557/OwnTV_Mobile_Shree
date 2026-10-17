@@ -180,7 +180,7 @@ class LibraryViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     // Eagerly: nothing collects it, it is only read as `.value` (the pager, Move, restore) — shared
-    // "while subscribed" it stayed empty and Move was never offered in a folder (Live TV's M3 fix).
+    // "while subscribed" it stayed empty and Move was never offered in a folder (Live TV had the same fix).
     private val folderContextKeys: StateFlow<Map<Long, String>> = vodCategories
         .map { cats -> cats.associateBy({ it.id }, { CustomizeKeys.category(it) }) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
@@ -223,7 +223,7 @@ class LibraryViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    /** Every entry's count for the categories sheet (M5-03) — read only while the sheet is open. */
+    /** Every entry's count for the categories sheet — read only while the sheet is open. */
     val categoryCounts: StateFlow<Map<LiveKey, Int>> = combine(ctx, mediaType, hiddenCategoryIds, categories, ::CountArgs)
         .flatMapLatest { (c, type, hidden, items) ->
             if (c.profileId < 0) return@flatMapLatest flowOf(emptyMap())
@@ -465,8 +465,8 @@ class LibraryViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /**
-     * The ✓ of a poster or row: a film watched to the end, or a show whose latest episode was (Home's rule,
-     * M2 — core has no "whole series finished").
+     * The ✓ of a poster or row: a film watched to the end, or a show whose latest episode was (Home's rule;
+     * core has no "whole series finished").
      */
     val watchedIds: StateFlow<Set<Long>> = combine(_tab, movieProgress, latestEpisodes) { tab, movies, episodes ->
         if (tab == LibraryTab.MOVIES) {
@@ -575,7 +575,7 @@ class LibraryViewModel(
             if (movies) settings.setLastMoviesCategory(key.serialize())
             else settings.setLastSeriesCategory(key.serialize())
             // Core fills a lazily-added Stalker catalogue in the provider's own order; tell it the
-            // user is here so this category is served next (core's N1c). A no-op for a playlist that
+            // user is here so this category is served next. A no-op for a playlist that
             // was not lazily added, and for a category that is already complete.
             if (key is LiveKey.Folder) {
                 runCatching { catalogPriority.requestFirst(key.id) }

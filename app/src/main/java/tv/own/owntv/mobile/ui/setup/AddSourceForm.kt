@@ -180,7 +180,7 @@ fun AddSourceForm(
         preferHls = preferHls,
     )
 
-    // M9-20: the type as a segmented control, the fields as rows (a tap opens the field), OPTIONAL, Start import.
+    // The type as a segmented control, the fields as rows (a tap opens the field), OPTIONAL, Start import.
     val palette = LocalStagePalette.current
     LazyColumn(
         modifier = modifier.fillMaxSize().imePadding(),

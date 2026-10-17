@@ -71,7 +71,7 @@ object MobileIcons {
     val Folder: ImageVector by lazy { stage(StageGlyph.FOLDER) }
     /** Playlists (the top cluster's playlist pill, the playlist sheet's All playlists). */
     val Layers: ImageVector by lazy { stage(StageGlyph.LAYERS) }
-    /** The TV Guide place (the mockup's `guide`). */
+    /** The TV Guide place (`guide`). */
     val Guide: ImageVector by lazy { stage(StageGlyph.EPG) }
     /** The order tool (`sort`). */
     val Sort: ImageVector by lazy { stage(StageGlyph.SORT) }
@@ -82,13 +82,13 @@ object MobileIcons {
     val Warning: ImageVector by lazy { stage(StageGlyph.WARNING) }
     val Multiview: ImageVector by lazy { stage(StageGlyph.MULTIVIEW) }
     val Move: ImageVector by lazy { stage(StageGlyph.MOVE) }
-    /** Home's trending eyebrow (the mockup's `trend`). */
+    /** Home's trending eyebrow (`trend`). */
     val Trend: ImageVector by lazy { stage(StageGlyph.TREND) }
-    /** The Series place (the mockup's `series`). */
+    /** The Series place (`series`). */
     val Series: ImageVector by lazy { stage(StageGlyph.SERIES) }
     /** The Sports place: the television's trophy. */
     val Sports: ImageVector by lazy { stage(StageGlyph.SPORTS) }
-    /** Four tiles (the mockup's `more`): Show counts. */
+    /** Four tiles (`more`): Show counts. */
     val Tiles: ImageVector by lazy { stage(StageGlyph.TILES) }
 
     // ---- Actions ------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ object MobileIcons {
     }
     val Person: ImageVector by lazy { stage(StageGlyph.PERSON) }
     val Phone: ImageVector by lazy { stage(StageGlyph.PHONE) }
-    // No Stage glyph: the profile chooser's 🔒 PIN tag (M8-08) — a body and its shackle.
+    // No Stage glyph: the profile chooser's 🔒 PIN tag — a body and its shackle.
     val Lock: ImageVector by lazy {
         glyph() {
             box(5f, 11f, 19f, 20.5f, 2f)
@@ -227,7 +227,7 @@ object MobileIcons {
     // ---- Player -------------------------------------------------------------------------------
 
     val PlayArrow: ImageVector by lazy { stage(StageGlyph.PLAY, filled = true) }
-    /** The outlined play of a sheet's menu items (the mockup's `mi('play')`). */
+    /** The outlined play of a sheet's menu items (`mi('play')`). */
     val PlayOutline: ImageVector by lazy { stage(StageGlyph.PLAY) }
     val PlayCircle: ImageVector by lazy { stage(StageGlyph.PLAY_CIRCLE) }
     val Pause: ImageVector by lazy { stage(StageGlyph.PAUSE) }
@@ -319,7 +319,7 @@ object MobileIcons {
 // The grid. Everything above is written in 24×24 units; everything below turns that into a vector.
 // -------------------------------------------------------------------------------------------------
 
-/** The Stage mockup's stroke (`.ph .ico`, 1.8 on the 24 grid), for its glyphs and the hand-drawn rest alike. */
+/** The Stage stroke (`.ph .ico`, 1.8 on the 24 grid), for its glyphs and the hand-drawn rest alike. */
 private const val W = 1.8f
 private val Ink = SolidColor(Color.Black)
 

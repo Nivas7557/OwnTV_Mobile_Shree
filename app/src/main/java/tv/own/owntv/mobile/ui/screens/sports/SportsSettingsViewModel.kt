@@ -26,7 +26,7 @@ import java.util.Locale
 
 /**
  * Settings → Sports — the television's settings view-model, for the phone, plus Goal alerts' "when OwnTV
- * is closed" (P8), which asks for notification permission through core. Every value is the active
+ * is closed", which asks for notification permission through core. Every value is the active
  * profile's `SportsConfig`, so it travels in backups and local sync with no extra work.
  */
 class SportsSettingsViewModel(

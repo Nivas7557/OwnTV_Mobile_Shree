@@ -165,7 +165,7 @@ fun AboutPage(onOpenLanguage: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 /**
- * More › Error log (M8-06): what it is, Export · Clear log, then the entries newest first — the kind as a tag
+ * More › Error log: what it is, Export · Clear log, then the entries newest first — the kind as a tag
  * (EVENT ink, ERROR danger, REPORT warn), what happened (13.5 / 700), the engine · Live or VOD · stream line
  * and when. A tap selects an entry (`.fx`) and shows the provider's own words and the device. Its own page,
  * not a dialog: this is the screen a user is asked to screenshot when they report a problem.

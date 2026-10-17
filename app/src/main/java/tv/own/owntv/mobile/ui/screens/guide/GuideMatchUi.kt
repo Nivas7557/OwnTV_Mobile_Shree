@@ -61,7 +61,7 @@ import tv.own.owntv.mobile.ui.screens.live.EpgOffsetDialog
 internal enum class GuideChannelDialog { MATCH_EPG, EPG_OFFSET }
 
 /**
- * What auto-matching left uncertain (M4-05): "✦ Auto-match EPG · 41 channels matched", "Review 3 matches",
+ * What auto-matching left uncertain: "✦ Auto-match EPG · 41 channels matched", "Review 3 matches",
  * the line under it, then one row per channel — logo, name, "→ guide channel · 82 %" (the score in the
  * accent), Accept and ✕ — and Skip all · Accept all · Done.
  *

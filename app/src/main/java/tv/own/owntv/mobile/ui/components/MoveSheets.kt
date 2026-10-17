@@ -176,7 +176,7 @@ fun NewCategoryDialog(onCreate: (String) -> Unit, onDismiss: () -> Unit) {
 }
 
 /**
- * How every one of these Stage sheets ends (the M3/M4 sheets' shape): the confirm as a filled menu item with ✓,
+ * How every one of these Stage sheets ends (the Live TV and Guide sheets' shape): the confirm as a filled menu item with ✓,
  * then Cancel with ✕. [onConfirm] is followed by [onDismiss].
  */
 @Composable

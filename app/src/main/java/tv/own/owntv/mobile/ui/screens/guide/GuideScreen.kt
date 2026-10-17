@@ -121,12 +121,12 @@ import java.util.Calendar
 import java.util.Date
 
 /**
- * The TV Guide (M4): the picked programme on top — a small live preview, its eyebrow, title, details,
+ * The TV Guide: the picked programme on top — a small live preview, its eyebrow, title, details,
  * Remind me and Record — then the tools (day · Now · category · order · search) and the grid. Or, by the
- * View choice in the order sheet, the On now list (M4-06) or one channel's Timeline.
+ * View choice in the order sheet, the On now list or one channel's Timeline.
  *
  * A tap on a cell picks it: the top block shows it and the preview plays its channel (Video preview on).
- * A tap on the picked cell, or a hold on any, opens the programme sheet (M4-02). The channel column plays
+ * A tap on the picked cell, or a hold on any, opens the programme sheet. The channel column plays
  * the channel; a hold there fixes its guide.
  */
 @Composable
@@ -136,7 +136,7 @@ fun GuideScreen(
     onAddEpg: () -> Unit,
     modifier: Modifier = Modifier,
     vm: GuideViewModel = koinViewModel(),
-    // The category list, its counts and its hold menu are Live TV's own (M4-03).
+    // The category list, its counts and its hold menu are Live TV's own.
     live: LiveViewModel = koinViewModel(),
 ) {
     val tuner: LiveTuner = koinInject()
@@ -178,7 +178,7 @@ fun GuideScreen(
     // A different category, day or search is a different list; the old scroll position means nothing.
     LaunchedEffect(selected, day, query, mode) { listState.scrollToItem(0) }
 
-    // The crumb (M4-01): "Sky Cinema · Today" (On now: "· On now"); a tap opens the categories.
+    // The crumb: "Sky Cinema · Today" (On now: "· On now"); a tap opens the categories.
     val categoryLabel = categories.firstOrNull { it.key == selected }?.label().orEmpty()
     val dayLabel = dayLabel(day)
     val crumbRest = if (mode == SettingsRepository.GuideView.ON_NOW) stringResource(R.string.home_row_on_now) else dayLabel
@@ -473,7 +473,7 @@ fun GuideScreen(
     }
 }
 
-/** Live TV in Guide view (M3-06): Today · Now · Guide view (on), over the guide's grid. */
+/** Live TV in Guide view: Today · Now · Guide view (on), over the guide's grid. */
 @Composable
 internal fun LiveGuideTools(guide: GuideViewModel, onGuideView: () -> Unit, modifier: Modifier = Modifier) {
     val day by guide.day.collectAsStateWithLifecycle()
@@ -557,7 +557,7 @@ private fun dayLabel(offset: Int): String {
     }
 }
 
-/** The tools (M4-01 / M4-06): Today ⌄ · Now · ≋ category ⌄ · order · search (not in On now). */
+/** The tools: Today ⌄ · Now · ≋ category ⌄ · order · search (not in On now). */
 @Composable
 private fun GuideTools(
     dayLabel: String,
@@ -595,7 +595,7 @@ private fun GuideTools(
 }
 
 /**
- * The top block (M4-01): the 132 × 88 preview (radius 14) with LIVE and "259 · Family" — the channel's
+ * The top block: the 132 × 88 preview (radius 14) with LIVE and "259 · Family" — the channel's
  * logo when Video preview is off or it is not playing — then the eyebrow "◷ Starts in 58 min · 20:05 –
  * 21:40 · 95 min", the title (21 / 800), the details (11 muted), and Remind me (accent tint) · Record.
  */
@@ -773,7 +773,7 @@ private fun programmeDetailsLine(p: EpgProgrammeEntity): String? {
 }
 
 /**
- * On now (M4-06): `.chrow` 70 dp — the logo, the programme (14.5 / 700), "255 · Sky Cinema Highlights ·
+ * On now: `.chrow` 70 dp — the logo, the programme (14.5 / 700), "255 · Sky Cinema Highlights ·
  * 2 h 3 min left", the progress at 70 %, and what is next with its time in the accent; ♥ for a favourite.
  */
 @Composable
@@ -858,7 +858,7 @@ private fun OnNowList(
 }
 
 /**
- * The programme sheet (M4-02): the title and "20:05 – 21:40 · 259 · Sky Cinema Family", the synopsis, then
+ * The programme sheet: the title and "20:05 – 21:40 · 259 · Sky Cinema Family", the synopsis, then
  * NEW Remind me (5 min before) · WATCH Watch channel, Watch from start ("after 20:05" until it can),
  * Play catch-up in… · RECORD Record, Record every showing, Record from catch-up · CHANNEL favourite, Pick
  * EPG manually, EPG time offset — the television's menu.
@@ -1018,7 +1018,7 @@ private fun GuideDaySheet(selected: Int, days: Int, onPick: (Int) -> Unit, onDis
 }
 
 /**
- * Order + view (M4-04): "Order channels by · Opens this way next time", the orders with ✓ on the current
+ * Order + view: "Order channels by · Opens this way next time", the orders with ✓ on the current
  * one; SHOW Channels without guide, Video preview; VIEW Grid · On now · Timeline; SIZE (grid); GUIDE DATA
  * Auto-match EPG with how many guide channels there are.
  */

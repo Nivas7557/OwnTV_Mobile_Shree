@@ -223,13 +223,13 @@ class CustomizeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsRepository.SortMode.PLAYLIST)
 
     /** The single playlist picked in the shell, or null for "All playlists" — what [restoreSectionDefaults]
-     *  covers, so the question (M9-26) can name it. */
+     *  covers, so the question can name it. */
     val restorePlaylistName: StateFlow<String?> = combine(ctx, settings.defaultSourceId) { c, id ->
         c.sources.firstOrNull { it.id == id && id > 0 }?.name
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /**
-     * ⋯ › Restore playlist defaults (M9-26, the TV's PR #235): puts the playlists this section shows back to what
+     * ⋯ › Restore playlist defaults (the TV's PR #235): puts the playlists this section shows back to what
      * they provide — hidden categories and items show again, renames and category order are cleared, items moved
      * out of their folders return and manual item orders are dropped. Other playlists, combined categories (and
      * what is in them), Favorites and guide matches are left alone. Keys are "<sourceId>:<id>", so a playlist's

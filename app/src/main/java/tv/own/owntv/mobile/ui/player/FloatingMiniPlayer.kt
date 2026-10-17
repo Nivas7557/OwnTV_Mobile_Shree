@@ -187,7 +187,7 @@ fun FloatingMiniPlayer(
                     windowWidth = it.width.toFloat()
                     windowHeight = it.height.toFloat()
                 }
-                // `.ph` floating window (M1-05): 16 dp corners, a deep shadow and a 1 dp light rim.
+                // `.ph` floating window: 16 dp corners, a deep shadow and a 1 dp light rim.
                 .stageShadow(Color.Black.copy(alpha = 0.6f), 40.dp, 18.dp, WindowShape)
                 .drawWithContent {
                     drawContent()
@@ -255,7 +255,7 @@ fun FloatingMiniPlayer(
                     Modifier
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.35f)),
-                    // The mockup's 14 dp between the icons; four buttons (a film) pack tighter so they
+                    // 14 dp between the icons; four buttons (a film) pack tighter so they
                     // still fit the smallest window.
                     horizontalArrangement = Arrangement.spacedBy(if (isLive) 4.dp else 0.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,

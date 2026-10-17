@@ -72,7 +72,7 @@ sealed interface HubChip {
 }
 
 /**
- * The Sports hub (P1, the television's hub as built): today's counts, two multi-select chip rows (sports
+ * The Sports hub (the television's hub as built): today's counts, two multi-select chip rows (sports
  * and My teams, then the chosen sports' leagues; none = All) ending in ⟳, *Live now* with the featured
  * first card, *Sport on your channels* from the guide, and *Starting soon*. A tap opens the match (its
  * channels are found there); a long press follows or reminds. With nothing followed, a note and a button
@@ -224,7 +224,7 @@ fun SportsScreen(
     }
 }
 
-/** "**Today** · 6 live · 41 matches · Scores: ESPN" (R1: no channel count — channels are found per match). */
+/** "**Today** · 6 live · 41 matches · Scores: ESPN" (no channel count — channels are found per match). */
 @Composable
 private fun HubSubtitle(today: List<Match>) {
     val palette = LocalStagePalette.current
@@ -244,7 +244,7 @@ private fun HubSubtitle(today: List<Match>) {
     )
 }
 
-/** The hub with nothing followed (R1): what to do, where, why to choose with care — and the way there. */
+/** The hub with nothing followed: what to do, where, why to choose with care — and the way there. */
 @Composable
 private fun NothingFollowedNote(onChooseSports: () -> Unit) {
     val palette = LocalStagePalette.current

@@ -93,7 +93,7 @@ internal fun SpanHideDialog(
     onShow: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    // A Stage sheet (M9B): how many are chosen, then Hide · Show · Cancel.
+    // A Stage sheet: how many are chosen, then Hide · Show · Cancel.
     tv.own.owntv.mobile.ui.components.MobileBottomSheet(onDismissRequest = onDismiss) {
         tv.own.owntv.mobile.ui.stage.StageSheetHeader(
             title,

@@ -62,7 +62,7 @@ private val HueSpectrum: List<Color> = (0..360 step 30).map {
 }
 
 /**
- * Pick a colour (M9-16): the presets as 38 dp swatches with their names (and "Yours", the colour being made),
+ * Pick a colour: the presets as 38 dp swatches with their names (and "Yours", the colour being made),
  * then a saturation/brightness square, the hue bar, the hex code, Cancel and Use this colour. The square and
  * the bar are dragged; a preset is one tap; a typed hex wins when it is valid.
  *

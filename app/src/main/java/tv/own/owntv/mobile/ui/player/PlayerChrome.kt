@@ -341,7 +341,7 @@ internal fun ChannelLogo(
  * A message over the picture — the volume readout, the speed, a failure.
  *
  * Its own surface, so a user who wants the chrome frosted but the messages plain (or the other way
- * about) can have that: *On-screen messages* is a separate switch on the Glass Effect screen.
+ * about) can have that: *On-screen messages* is a separate switch on the Glass & background page.
  */
 @Composable
 internal fun PlayerToast(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {

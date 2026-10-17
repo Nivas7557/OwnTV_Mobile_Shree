@@ -80,7 +80,7 @@ fun SettingsLanguagePage(
 
     SettingsPage(modifier) {
         item(key = "search") {
-            // The Settings search's field (M9-02), with its ✕.
+            // The Settings search's field, with its ✕.
             StageSearchField(
                 value = query,
                 onValueChange = { query = it },

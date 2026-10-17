@@ -51,9 +51,9 @@ import tv.own.owntv.core.sports.model.Sport
 import tv.own.owntv.core.sports.model.StandingsTable
 import java.util.Locale
 
-/** Where a match page's Find channels stands (R1: channels are searched only when asked). */
+/** Where a match page's Find channels stands (channels are searched only when asked). */
 sealed interface ChannelSearch {
-    /** The match is being fetched afresh to judge Find channels' window (WORK C21). */
+    /** The match is being fetched afresh to judge Find channels' window. */
     data object Checking : ChannelSearch
     data class Closed(val window: WatchWindow) : ChannelSearch
     data object NotSearched : ChannelSearch
@@ -84,7 +84,7 @@ data class LeaguePageState(
     val config: SportsConfig,
 )
 
-/** Everything the hub draws (P1, Redesign R1). No channels: those are found per match, on the match page. */
+/** Everything the hub draws. No channels: those are found per match, on the match page. */
 data class SportsHubState(
     val board: SportsBoard = SportsBoard(),
     val config: SportsConfig = SportsConfig(),
@@ -188,7 +188,7 @@ class SportsViewModel(
         val leagueKey = League.keyOf(m.sport, m.leagueSlug).takeIf { SportsCatalog.league(it) != null }
         val boards = if (leagueKey == null) repository.observe(Demand.MatchPage(m))
         else combine(repository.observe(Demand.MatchPage(m)), repository.observe(Demand.LeaguePage(leagueKey))) { a, _ -> a }
-        // Find channels' window is judged on the match fetched now, not the stored copy (WORK C21).
+        // Find channels' window is judged on the match fetched now, not the stored copy.
         val window = flow {
             emit(null)
             val fresh = repository.refetch(m) ?: m

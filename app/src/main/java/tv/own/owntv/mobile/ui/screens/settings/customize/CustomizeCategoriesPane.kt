@@ -82,7 +82,7 @@ fun CustomizeCategoriesPane(
     SettingsCrumb(tv.own.owntv.mobile.ui.screens.home.groupedCountText(R.plurals.settings_customize_categories_count, rows.size), SettingsGroup.CONTENT)
 
     SettingsStagePage(modifier) {
-        // M9-22: the sections as tools with ⋯ at the end, then Sort · Filter · +.
+        // The sections as tools with ⋯ at the end, then Sort · Filter · +.
         item(key = "sections") {
             Row(Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 SECTIONS.forEach { s -> StageTool(onClick = { vm.selectSection(s) }, label = stringResource(s.labelRes()), on = s == section) }
@@ -174,7 +174,7 @@ fun CustomizeCategoriesPane(
         item(key = "hold-note") { PageNote(stringResource(R.string.settings_customize_hold_note_mobile)) }
     }
 
-    // ⋯: what the TV's More popup holds — new categories, the PIN lock, and Restore playlist defaults (M9-26).
+    // ⋯: what the TV's More popup holds — new categories, the PIN lock, and Restore playlist defaults.
     if (moreMenu) {
         val close = { moreMenu = false }
         MobileBottomSheet(onDismissRequest = close) {
@@ -198,7 +198,7 @@ fun CustomizeCategoriesPane(
             StageMenuItem(stringResource(R.string.settings_customize_restore_defaults), onClick = { close(); restoring = true }, icon = MobileIcons.Refresh)
         }
     }
-    // M9-26: asks first, naming the section and the playlist(s) shown; combined categories are left alone.
+    // Asks first, naming the section and the playlist(s) shown; combined categories are left alone.
     if (restoring) {
         StageConfirmSheet(
             title = stringResource(

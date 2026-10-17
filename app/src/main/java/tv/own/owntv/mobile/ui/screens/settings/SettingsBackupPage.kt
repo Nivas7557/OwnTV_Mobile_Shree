@@ -86,7 +86,7 @@ private const val BACKUP_FILE_NAME = "owntv-backup.own"
 private enum class BackupTarget { FILE, REMOTE, SHARE }
 
 /**
- * More › Backup & Restore (M8-04): "Never backed up" (what lives only on this phone) or when the last backup
+ * More › Backup & Restore: "Never backed up" (what lives only on this phone) or when the last backup
  * was; **Back up now** to a file on this phone, by Remote to another device, or through the share sheet;
  * **Restore** from a file or by Remote; and what a backup holds.
  *

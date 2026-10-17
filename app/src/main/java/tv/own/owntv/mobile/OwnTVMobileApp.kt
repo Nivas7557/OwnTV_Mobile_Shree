@@ -78,7 +78,7 @@ class OwnTVMobileApp : Application(), androidx.work.Configuration.Provider {
         // app. Without it every Perf.stamp in core is a silent no-op — which mattered more than a
         // missing timeline: core's database-open stamp is the only thing that proves Room's onOpen
         // callback actually ran under a SQLiteDriver. That callback fails *silently* when it does
-        // not (core's plan §5.3), taking the PRAGMAs and the schema self-heal with it, so the phone
+        // not, taking the PRAGMAs and the schema self-heal with it, so the phone
         // had no way to detect the one failure mode that ships green.
         Perf.begin()
         // Core has its own BuildConfig and it carries none of this: a library gets no version at all,
@@ -146,7 +146,7 @@ class OwnTVMobileApp : Application(), androidx.work.Configuration.Provider {
             tv.own.owntv.player.LiveStreamQuirks::rememberSessionLimit
         // Which font file the engine hands to libass, so a subtitle is drawn in the face the user
         // chose. This used to be left unset, on the grounds that the app had no fonts of its own —
-        // true when the line was written, and untrue since Phase 1 shipped all six families as
+        // true when the line was written, and untrue since the app shipped all six families as
         // res/font files. The result was a Subtitle font setting that reached the app's own subtitle
         // layer and nothing else.
         tv.own.owntv.player.SubtitleFontAssets.resourceOf = { it.subtitleFontResource }

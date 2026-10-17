@@ -15,7 +15,7 @@ import tv.own.owntv.core.sports.model.Match
 data class SportsSession(val match: Match, val options: List<WatchOption>)
 
 /**
- * What the player knows about Sports (the television's T4): which match the playing channel was started
+ * What the player knows about Sports: which match the playing channel was started
  * from and its score while the controls show. Nothing here touches playback; with no session, or ESPN
  * unreachable, the player is exactly the plain Live player.
  */

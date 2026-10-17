@@ -114,7 +114,7 @@ private val supportsBackdropBlur: Boolean = Build.VERSION.SDK_INT >= Build.VERSI
  */
 @Composable
 fun GlassBackdropRoot(content: @Composable () -> Unit) {
-    // Glass & background (M11): the picture is Background › Picture's, not the glass's — Glass off keeps it, and
+    // Glass & background: the picture is Background › Picture's, not the glass's — Glass off keeps it, and
     // Stage or Plain hide it while the file stays for a return to Picture.
     val bg = tv.own.owntv.mobile.ui.stage.LocalStageBackground.current
     val bgImagePath = bg.imagePath

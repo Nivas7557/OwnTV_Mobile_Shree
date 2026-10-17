@@ -35,7 +35,7 @@ import tv.own.owntv.player.LiveLadder
 import tv.own.owntv.player.ZoomMode
 
 /*
- * The five groups that were the Video player level (decision M4): Player, Picture, Sound & subtitles, Live TV,
+ * The five groups that were the Video player level: Player, Picture, Sound & subtitles, Live TV,
  * Watching & recording. The stored values are core's, under the TV's keys, so a backup means the same thing on
  * both apps and a pin made on one is the same row on the other.
  */
@@ -603,10 +603,10 @@ internal fun watchingSections(vm: SettingsViewModel): List<SettingSection> {
 /** The paddings worth offering, all inside core's own 0..30 clamp. */
 private val ROLL_CHOICES = listOf(0, 1, 2, 3, 5, 10, 15, 30)
 
-// ---------------------------------------------------------------------------- Per-playlist pages (M9B)
+// ---------------------------------------------------------------------------- Per-playlist pages
 
 /**
- * One per-playlist override (M9B): each playlist with what it is set to; a tap opens the choices for that
+ * One per-playlist override: each playlist with what it is set to; a tap opens the choices for that
  * playlist — Follow the global setting first. Replaces the two stacked sheets of the old page.
  */
 @Composable
@@ -748,7 +748,7 @@ private fun sourceValue(leaf: SettingsLeaf, src: SourceEntity, follow: String): 
     else -> ""
 }
 
-/** Settings › Player › External player (M9B): which sections open in another app, one switch each. */
+/** Settings › Player › External player: which sections open in another app, one switch each. */
 @Composable
 fun ExternalPlayerPage(modifier: Modifier = Modifier, vm: SettingsViewModel = koinViewModel()) {
     val s = vm.settings
