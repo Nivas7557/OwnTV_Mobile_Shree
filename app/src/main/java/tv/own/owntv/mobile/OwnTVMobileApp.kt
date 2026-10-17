@@ -200,7 +200,6 @@ class OwnTVMobileApp : Application(), androidx.work.Configuration.Provider {
         appScope.launch {
             runCatching {
                 org.koin.core.context.GlobalContext.get().get<tv.own.owntv.core.settings.SettingsRepository>().applyPhoneStageDefaults(
-                    tv.own.owntv.core.theme.GlassConfig(scope = tv.own.owntv.core.theme.GlassSurface.entries.toSet()).toBitmask(),
                     tv.own.owntv.mobile.ui.screens.settings.PHONE_GLASS_DEFAULT_PCT,
                 )
             }

@@ -683,7 +683,7 @@ fun PerPlaylistPage(leaf: SettingsLeaf, modifier: Modifier = Modifier, vm: Setti
     sources.firstOrNull { it.id == customFor }?.let { s ->
         val secs = sourceCustomSecs(s)
         androidx.compose.runtime.key(s.id) {
-            tv.own.owntv.mobile.ui.components.MobileBottomSheet(onDismissRequest = { customFor = null }, stage = true) {
+            tv.own.owntv.mobile.ui.components.MobileBottomSheet(onDismissRequest = { customFor = null }) {
                 tv.own.owntv.mobile.ui.stage.StageSheetHeader(s.name, eyebrow = eyebrow)
                 StageSettingRowValue(stringResource(R.string.settings_live_latency_custom)) {
                     tv.own.owntv.mobile.ui.stage.StageStepper(

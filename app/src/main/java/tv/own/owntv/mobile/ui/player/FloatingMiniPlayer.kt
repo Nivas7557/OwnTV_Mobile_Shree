@@ -52,7 +52,7 @@ import org.koin.compose.koinInject
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
-import tv.own.owntv.mobile.ui.components.MobileListRow
+import tv.own.owntv.mobile.ui.stage.StageMenuItem
 import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import tv.own.owntv.player.OwnTVPlayer
 import tv.own.owntv.player.PlaybackEngine
@@ -407,48 +407,43 @@ fun FloatingWindowMenu(
     onDismiss: () -> Unit,
 ) {
     MobileBottomSheet(onDismissRequest = onDismiss) {
-        MobileListRow(
-            title = stringResource(
+        StageMenuItem(
+            stringResource(
                 if (isFavorite) R.string.content_remove_favourite else R.string.content_add_favourite,
             ),
-            leading = {
-                Icon(
-                    imageVector = if (isFavorite) MobileIcons.Star else MobileIcons.StarBorder,
-                    contentDescription = null,
-                )
-            },
+            icon = if (isFavorite) MobileIcons.Favorite else MobileIcons.FavoriteBorder,
             onClick = {
                 onToggleFavorite()
                 onDismiss()
             },
         )
-        MobileListRow(
-            title = stringResource(R.string.player_tool_audio_only),
-            leading = { Icon(MobileIcons.MusicNote, contentDescription = null) },
+        StageMenuItem(
+            stringResource(R.string.player_tool_audio_only),
+            icon = MobileIcons.MusicNote,
             onClick = {
                 onAudioOnly()
                 onDismiss()
             },
         )
-        MobileListRow(
-            title = stringResource(R.string.player_sleep_timer),
-            leading = { Icon(MobileIcons.Bedtime, contentDescription = null) },
+        StageMenuItem(
+            stringResource(R.string.player_sleep_timer),
+            icon = MobileIcons.Bedtime,
             onClick = {
                 onDismiss()
                 onSleepTimer()
             },
         )
-        MobileListRow(
-            title = stringResource(R.string.player_pip_expand),
-            leading = { Icon(MobileIcons.OpenInFull, contentDescription = null) },
+        StageMenuItem(
+            stringResource(R.string.player_pip_expand),
+            icon = MobileIcons.OpenInFull,
             onClick = {
                 onDismiss()
                 onExpand()
             },
         )
-        MobileListRow(
-            title = stringResource(R.string.content_close),
-            leading = { Icon(MobileIcons.Close, contentDescription = null) },
+        StageMenuItem(
+            stringResource(R.string.content_close),
+            icon = MobileIcons.Close,
             onClick = {
                 onDismiss()
                 onStop()

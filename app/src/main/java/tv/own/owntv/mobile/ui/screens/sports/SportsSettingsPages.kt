@@ -200,7 +200,7 @@ fun SportsSettingsPage(vm: SportsSettingsViewModel = koinViewModel()) {
         }
         CodeSheet.PLAYLISTS -> {
             val chosen = playlists.map { it.first }.filter { it in c.sourceIds }.toSet()
-            MobileBottomSheet(onDismissRequest = { sheet = null }, stage = true) {
+            MobileBottomSheet(onDismissRequest = { sheet = null }) {
                 StageSheetHeader(stringResource(R.string.settings_sort_playlist))
                 StageMenuItem(stringResource(R.string.sports_all_playlists), { vm.update { it.copy(sourceIds = emptySet()) } }, checked = chosen.isEmpty())
                 playlists.forEach { (id, name) ->
@@ -208,7 +208,7 @@ fun SportsSettingsPage(vm: SportsSettingsViewModel = koinViewModel()) {
                 }
             }
         }
-        CodeSheet.REMEMBERED -> MobileBottomSheet(onDismissRequest = { sheet = null }, stage = true) {
+        CodeSheet.REMEMBERED -> MobileBottomSheet(onDismissRequest = { sheet = null }) {
             StageSheetHeader(stringResource(R.string.sports_remembered_channels))
             c.rememberedChannels.forEach { (key, ch) ->
                 StageMenuItem(
@@ -236,7 +236,7 @@ private fun OpensRow(icon: androidx.compose.ui.graphics.vector.ImageVector, titl
 /** A list of codes, each ticked or not: the commentary languages or the countries. */
 @Composable
 private fun CodeListSheet(title: String, codes: List<Pair<String, String>>, chosen: Set<String>, onDismiss: () -> Unit, onToggle: (String) -> Unit) {
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(title)
         SheetScroll {
             codes.forEach { (code, label) -> StageMenuItem(label, { onToggle(code) }, value = code.takeIf { it != label }, checked = code in chosen) }
@@ -337,7 +337,7 @@ fun SportsLeaguesPage(vm: SportsSettingsViewModel = koinViewModel()) {
     }
 
     menu?.let { m ->
-        MobileBottomSheet(onDismissRequest = { menu = null }, stage = true) {
+        MobileBottomSheet(onDismissRequest = { menu = null }) {
             StageSheetHeader(m.title)
             StageMenuItem(stringResource(R.string.content_move), { menu = null; moving = m }, icon = MobileIcons.Move)
         }

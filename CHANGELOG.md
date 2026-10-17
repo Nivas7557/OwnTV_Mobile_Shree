@@ -84,6 +84,9 @@
 - **▶️ Play on a new show starts at Season 1 Episode 1; Specials come after the last season**
 - **🔤 M3U episodes named "Season 1 Episode 5" or "S2019E05" are recognised**
 - **💾 Big downloads to a FAT32 USB stick fail with a clear reason**
+- **🎨 Every sheet, button and field in the Stage design, the player's sheets included**
+- **🔑 Metadata page shows your saved TMDB key, so Save no longer clears it**
+- **🔢 PIN fields open the number pad**
 
 ## v1.0.3 — 2026-09-26
 

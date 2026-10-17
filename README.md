@@ -176,7 +176,8 @@ app/                     the phone & tablet UI: navigation, screens, player chro
   src/main/java/tv/own/owntv/mobile/
     ui/screens/          home · live · library · guide · search · downloads ·
                          recordings · multiview · settings
-    ui/components/       the shared surface language (buttons, rows, sheets, glass)
+    ui/stage/            the Stage parts every screen is built from (buttons, rows, fields, glass)
+    ui/components/       the sheet host, icons, logos and the shared menus and pickers
     di/                  Koin modules
 tools/i18n/              the locale catalogue and the consumer-side string checks
 extras/                  logos, credits artwork, and the TV parity checklist

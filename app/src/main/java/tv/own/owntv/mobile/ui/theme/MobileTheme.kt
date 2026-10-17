@@ -62,7 +62,7 @@ fun MobileTheme(content: @Composable () -> Unit) {
     )
 }
 
-/** The same theme with its inputs supplied directly — for previews and for the theme gallery. */
+/** The same theme with its inputs supplied directly. */
 @Composable
 fun MobileTheme(
     themeMode: ThemeMode,
@@ -93,7 +93,6 @@ fun MobileTheme(
         LocalGlass provides glass,
         LocalAnimations provides animations,
         LocalAccentOnVideo provides accentOnVideo(accent, customAccent),
-        LocalSurfaceTones provides mobileSurfaceTones(isDark),
         LocalMobileMotion provides remember(animations) { MobileMotion(animations) },
         // Stage (the redesign's look): its palette follows the same resolved theme; the focus highlight and
         // Glass & background are core's, so a TV backup brings them across unchanged.
@@ -128,11 +127,3 @@ val LocalAnimations = staticCompositionLocalOf { AnimationLevel.FULL }
  * a dark scene.
  */
 val LocalAccentOnVideo = staticCompositionLocalOf { Color(AccentColor.TEAL.roles(isDark = true).primary) }
-
-/**
- * What each glass material's surface is when the effect is off — see [MobileSurfaceTones].
- *
- * A composition local rather than a lookup on the colour scheme, because three of the four are the
- * shell's per-region fills and those are not M3 roles.
- */
-val LocalSurfaceTones = staticCompositionLocalOf { mobileSurfaceTones(isDark = true) }

@@ -159,7 +159,7 @@ fun SportsMatchScreen(
         SportsFilterSheet(state, onFilter = vm::setFilter, onRemember = vm::setRememberFilters, onDismiss = { filters = false })
     }
     rememberFor?.let { o ->
-        MobileBottomSheet(onDismissRequest = { rememberFor = null }, stage = true) {
+        MobileBottomSheet(onDismissRequest = { rememberFor = null }) {
             StageSheetHeader(o.facets.name, subtitle = leagueName(m))
             StageMenuItem(
                 label = stringResource(R.string.sports_always_use, leagueName(m)),
@@ -443,9 +443,9 @@ private fun StatRow(label: String, home: String, away: String) {
     val share = if (h + a > 0f) h / (h + a) else 0.5f
     Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 7.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(home, style = stageText(13.5f, 700), color = palette.text, maxLines = 1, modifier = Modifier.width(56.dp))
+            Text(home, style = stageText(13.5f, 700), color = palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.width(56.dp))
             Text(label, style = stageText(12f, 600), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
-            Text(away, style = stageText(13.5f, 700), color = palette.text, maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.width(56.dp))
+            Text(away, style = stageText(13.5f, 700), color = palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.width(56.dp))
         }
         Row(Modifier.fillMaxWidth().padding(top = 4.dp).height(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Box(Modifier.weight(share.coerceIn(0.01f, 0.99f)).fillMaxSize().background(stageAccent.accent, RoundedCornerShape(2.dp)))
@@ -489,11 +489,11 @@ private fun Form(m: Match, summary: MatchSummary?) {
                             else -> stringResource(R.string.sports_table_drawn) to palette.muted
                         }
                         Box(Modifier.size(22.dp).background(color.copy(alpha = 0.22f), RoundedCornerShape(6.dp)), contentAlignment = Alignment.Center) {
-                            Text(letter, style = stageText(11.5f, 800), color = color, maxLines = 1)
+                            Text(letter, style = stageText(11.5f, 800), color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         if (g.home) StageIcon(MobileIcons.Home, 14.dp, palette.muted) else Spacer(Modifier.size(14.dp))
                         Text(g.opponent, style = stageText(12.5f, 600), color = palette.body, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                        Text(g.score, style = stageText(12.5f, 700), color = palette.text, maxLines = 1)
+                        Text(g.score, style = stageText(12.5f, 700), color = palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -560,11 +560,11 @@ internal fun StandingsHeader() {
     val palette = LocalStagePalette.current
     Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Text("#", style = stageText(11f, 700), color = palette.dim, modifier = Modifier.width(24.dp))
-        Text(stringResource(R.string.sports_table_team), style = stageText(11f, 700), color = palette.dim, maxLines = 1, modifier = Modifier.weight(1f))
+        Text(stringResource(R.string.sports_table_team), style = stageText(11f, 700), color = palette.dim, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
         listOf(
             R.string.sports_table_played, R.string.sports_table_won, R.string.sports_table_drawn,
             R.string.sports_table_lost, R.string.sports_table_difference, R.string.sports_table_points,
-        ).forEach { Text(stringResource(it), style = stageText(11f, 700), color = palette.dim, maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.width(NumberColumn)) }
+        ).forEach { Text(stringResource(it), style = stageText(11f, 700), color = palette.dim, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.width(NumberColumn)) }
     }
 }
 
@@ -584,7 +584,7 @@ internal fun StandingsLine(row: StandingsRow, highlight: Boolean) {
             Text(row.team.shortName, style = stageText(12.5f, if (highlight) 800 else 600), color = palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         listOf(row.played.toString(), row.won.toString(), row.drawn.toString(), row.lost.toString(), row.difference, row.points.toString()).forEachIndexed { i, v ->
-            Text(v, style = stageText(12.5f, if (i == 5) 800 else 500), color = if (i == 5) palette.text else palette.body, maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.width(NumberColumn))
+            Text(v, style = stageText(12.5f, if (i == 5) 800 else 500), color = if (i == 5) palette.text else palette.body, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.width(NumberColumn))
         }
     }
 }

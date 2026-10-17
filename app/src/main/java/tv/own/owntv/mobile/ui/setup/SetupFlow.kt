@@ -416,7 +416,7 @@ private fun RestoreSectionsSheet(
     var sections by remember { mutableStateOf(allSections) }
     // Unticked: a backup of this very phone gets its hardware settings back regardless; this is about another device's.
     var deviceSettings by remember { mutableStateOf(false) }
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(stringResource(R.string.settings_backup_restore_title))
         Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
             StageGroupLabel(stringResource(R.string.settings_backup_what_restore))

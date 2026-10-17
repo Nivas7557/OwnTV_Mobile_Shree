@@ -159,7 +159,7 @@ internal fun FollowRemindSheet(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(MatchNotifications.pair(context, match), subtitle = leagueName(match))
         match.competitors.forEach { c ->
             val team = FollowedTeam(match.sport, c.team.id, c.team.name, c.team.abbreviation)

@@ -166,7 +166,7 @@ private fun MenuOrderSheet(vm: SettingsViewModel, menu: ContentMenu, onDismiss: 
     val key = menu.name.lowercase()
     val saved = remember(menu) { vm.settings.menuOrder(key) }.pref(emptyList())
     val actions = applyMenuOrder(catalogue(menu), saved) { it.key }
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(stringResource(menu.titleRes()), eyebrow = stringResource(R.string.settings_content_menus_title))
         androidx.compose.foundation.layout.Column(Modifier.sheetScroll()) {
             actions.forEachIndexed { index, action ->

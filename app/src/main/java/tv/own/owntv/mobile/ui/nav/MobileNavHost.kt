@@ -25,9 +25,6 @@ import tv.own.owntv.mobile.ui.screens.live.LiveTuner
 import tv.own.owntv.mobile.ui.shell.ReportShownPage
 import androidx.navigation.navArgument
 import kotlinx.coroutines.flow.SharedFlow
-import tv.own.owntv.mobile.BuildConfig
-import tv.own.owntv.mobile.dev.ThemeGalleryScreen
-import tv.own.owntv.mobile.ui.screens.DevRoute
 import tv.own.owntv.mobile.ui.screens.MoreLeaf
 import tv.own.owntv.mobile.ui.screens.MoreLeafPage
 import tv.own.owntv.mobile.ui.screens.MoreScreen
@@ -119,7 +116,6 @@ fun MobileNavHost(
                         onOpenLeaf = { navController.navigate(it.route) { launchSingleTop = true } },
                         onOpenProfiles = { navController.navigate(SettingsGroup.PROFILE.route) { launchSingleTop = true } },
                         onSwitchProfile = onSwitchProfile,
-                        onDevRoute = { navController.navigate(it.route) },
                     )
                     MobileDestination.HOME -> HomeScreen(
                         scrollToTop = scrollToTop,
@@ -286,9 +282,6 @@ fun MobileNavHost(
                 onCancel = { navController.popBackStack() },
                 entry = runCatching { SetupEntry.valueOf(entry.arguments?.getString(ARG_ENTRY).orEmpty()) }.getOrDefault(SetupEntry.ADD_CONTENT),
             )
-        }
-        if (BuildConfig.DEV_TOOLS) {
-            page(DevRoute.GALLERY.route) { ThemeGalleryScreen() }
         }
     }
         }

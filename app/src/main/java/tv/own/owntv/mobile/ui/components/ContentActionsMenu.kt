@@ -23,8 +23,8 @@ data class ContentTarget(val type: MediaType, val id: Long, val title: String, v
  * would normally sit in — reordering a folder from a Home rail has no folder to reorder.
  *
  * The keys are the ones the rest of the app uses, so the order the user arranged in Settings still
- * applies here. [stage] draws it as a Stage sheet: the item's picture on top, favourite and download
- * under LIBRARY, hide under ORGANIZE.
+ * applies here. The item's picture is on top, favourite and download under LIBRARY, hide under
+ * ORGANIZE.
  */
 @Composable
 fun ContentActionsMenu(
@@ -34,7 +34,6 @@ fun ContentActionsMenu(
     onDownload: () -> Unit,
     onHide: () -> Unit,
     onDismiss: () -> Unit,
-    stage: Boolean = false,
 ) {
     val actions = buildList {
         add(
@@ -43,11 +42,7 @@ fun ContentActionsMenu(
                 label = stringResource(
                     if (isFavorite) R.string.content_remove_favourite else R.string.content_add_favourite,
                 ),
-                icon = if (stage) {
-                    if (isFavorite) MobileIcons.Favorite else MobileIcons.FavoriteBorder
-                } else {
-                    if (isFavorite) MobileIcons.Star else MobileIcons.StarBorder
-                },
+                icon = if (isFavorite) MobileIcons.Favorite else MobileIcons.FavoriteBorder,
                 group = 0,
                 onClick = onToggleFavorite,
             ),
@@ -61,7 +56,7 @@ fun ContentActionsMenu(
                         else R.string.content_download_all_episodes,
                     ),
                     icon = MobileIcons.Download,
-                    group = if (stage) 0 else 1,
+                    group = 0,
                     onClick = onDownload,
                 ),
             )
@@ -74,7 +69,7 @@ fun ContentActionsMenu(
                 ),
                 icon = MobileIcons.VisibilityOff,
                 destructive = true,
-                group = if (stage) 1 else 2,
+                group = 1,
                 onClick = onHide,
             ),
         )
@@ -89,14 +84,11 @@ fun ContentActionsMenu(
         title = target.title,
         actions = actions,
         onDismiss = onDismiss,
-        stage = stage,
-        groupLabels = if (stage) {
-            mapOf(
-                0 to stringResource(R.string.content_menu_group_library),
-                1 to stringResource(R.string.content_menu_group_organise),
-            )
-        } else emptyMap(),
-        leading = if (stage) { { TargetArt(target) } } else null,
+        groupLabels = mapOf(
+            0 to stringResource(R.string.content_menu_group_library),
+            1 to stringResource(R.string.content_menu_group_organise),
+        ),
+        leading = { TargetArt(target) },
     )
 }
 

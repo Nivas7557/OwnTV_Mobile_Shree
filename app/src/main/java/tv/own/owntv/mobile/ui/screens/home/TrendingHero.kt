@@ -430,7 +430,7 @@ fun TrendingMenuSheet(
         action()
         onDismiss()
     }
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(
             title = title,
             subtitle = listOfNotNull(item.snapshot.year?.let { formatYear(it) }, trendingRank(item)).joinToString(" · "),
@@ -508,7 +508,7 @@ fun TrendingInfoSheet(
     val signals = ProviderVariantParser.displaySignals(snapshot.providerRawName)
     val tags = listOfNotNull(signals.quality.label) + signals.capabilities
 
-    MobileBottomSheet(onDismissRequest = onDismiss, title = snapshot.localizedTitle, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = snapshot.localizedTitle) {
         Column(Modifier.heightIn(max = (LocalConfiguration.current.screenHeightDp * 3 / 4).dp).verticalScroll(rememberScrollState())) {
             Row(Modifier.padding(start = 8.dp, end = 8.dp, bottom = 10.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AsyncImage(

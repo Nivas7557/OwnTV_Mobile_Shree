@@ -2,7 +2,6 @@ package tv.own.owntv.mobile.ui.screens.settings
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,6 +14,8 @@ import tv.own.owntv.core.theme.PopupSizeScale
 import tv.own.owntv.core.theme.UiFontScale
 import tv.own.owntv.mobile.R
 import tv.own.owntv.mobile.ui.theme.MobileDimens
+import tv.own.owntv.mobile.ui.stage.stageText
+import tv.own.owntv.mobile.ui.stage.stageAccent
 
 /**
  * The typefaces and the two sizes: the app's own text, and the text inside popups, which is set
@@ -34,8 +35,8 @@ fun SettingsFontsPage(
         item(key = "preview") {
             Text(
                 text = stringResource(R.string.settings_font_preview),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
+                style = stageText(20f, 600),
+                color = stageAccent.accent,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(

@@ -105,7 +105,7 @@ fun ColorPickerSheet(
         hexError = false
     }
 
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(title, eyebrow = eyebrow)
         Column(Modifier.heightIn(max = sheetListHeight()).verticalScroll(rememberScrollState(), enabled = !dragging)) {
             if (presets.isNotEmpty()) {

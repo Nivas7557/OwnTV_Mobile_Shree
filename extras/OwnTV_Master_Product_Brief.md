@@ -268,13 +268,13 @@ same thing on a television.
 ## 7. Surface language
 
 The app draws **every icon itself** on the same 24×24 grid as the television's set, so the two look
-like one product; nothing depends on the stock Material glyph set. Material 3 for everything
-touchable.
+like one product; nothing depends on the stock Material glyph set. Everything touchable is built from
+the Stage parts (`ui/stage/`): sheets, menu items, setting rows, buttons, fields and the size bar.
 
-**Glass** is rendered here rather than merely tinted: a RenderEffect backdrop blur (API 31+), a
-specular rim, layered depth, continuous corners, settling motion and a wallpaper-sampled tint, with
-**Aurora** as an additional preset. The stored model stays core's and unchanged, so a television user
-is unaffected.
+**Glass** is one switch and an opacity, stored by core and shared with the television. On, the bars
+and sheets frost what is behind them — a RenderEffect backdrop blur (API 31+) of the page and the
+picture — under a tint at the chosen opacity, with a top highlight and a rim. The player's controls
+over the video are their own black glass.
 
 The wallpaper and its blurred copy sit **outside** the shell, so the frost every panel samples is one
 image for the whole app rather than one per panel.
@@ -339,7 +339,8 @@ app/src/main/java/tv/own/owntv/mobile/
 ├── ui/screens/      home · live · library · guide · search · downloads ·
 │                    recordings · multiview · settings
 ├── ui/player/       the full-screen player, gestures, sheets, mini players
-├── ui/components/   the shared surface language — buttons, rows, sheets, glass, icons
+├── ui/stage/        the Stage parts every screen is built from — buttons, rows, fields, glass
+├── ui/components/   the sheet host, icons, logos and the shared menus and pickers
 ├── ui/shell/        the bar/rail shell, the top bar, the sync pill
 ├── playback/        the foreground service, PiP, the data-saver gate (the sleep timer is core's)
 ├── cast/            the Google Cast sender

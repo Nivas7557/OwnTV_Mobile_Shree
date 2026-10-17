@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -178,7 +177,7 @@ fun CustomizeCategoriesPane(
     // ⋯: what the TV's More popup holds — new categories, the PIN lock, and Restore playlist defaults (M9-26).
     if (moreMenu) {
         val close = { moreMenu = false }
-        MobileBottomSheet(onDismissRequest = close, stage = true) {
+        MobileBottomSheet(onDismissRequest = close) {
             StageSheetHeader(stringResource(R.string.settings_customize_title), eyebrow = stringResource(section.labelRes()))
             StageMenuItem(
                 plainLabel(
@@ -246,9 +245,12 @@ fun CustomizeCategoriesPane(
                 null
             } else {
                 {
-                    TextButton(onClick = { renaming = null; deleting = row }) {
-                        Text(stringResource(R.string.common_delete))
-                    }
+                    StageMenuItem(
+                        stringResource(R.string.common_delete),
+                        onClick = { renaming = null; deleting = row },
+                        icon = MobileIcons.Delete,
+                        danger = true,
+                    )
                 }
             },
         )

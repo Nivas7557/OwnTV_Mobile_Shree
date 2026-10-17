@@ -896,7 +896,7 @@ internal fun ProgrammeSheet(
     var subSheet by remember { mutableStateOf<GuideChannelDialog?>(null) }
 
     if (subSheet == null) {
-        MobileBottomSheet(onDismissRequest = onDismiss, title = programme.title, stage = true) {
+        MobileBottomSheet(onDismissRequest = onDismiss, title = programme.title) {
             StageSheetHeader(
                 title = programme.title,
                 subtitle = listOfNotNull(
@@ -1008,7 +1008,7 @@ internal fun reminderLeadText(minutes: Int): String =
 /** Today first, then the days the guide keeps. */
 @Composable
 private fun GuideDaySheet(selected: Int, days: Int, onPick: (Int) -> Unit, onDismiss: () -> Unit) {
-    MobileBottomSheet(onDismissRequest = onDismiss, title = stringResource(R.string.content_epg_today), stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = stringResource(R.string.content_epg_today)) {
         Column(Modifier.verticalScroll(rememberScrollState())) {
             repeat(days) { offset ->
                 StageMenuItem(dayLabel(offset), onClick = { onPick(offset); onDismiss() }, icon = MobileIcons.CalendarMonth, filled = offset == selected)
@@ -1042,7 +1042,7 @@ private fun GuideOrderSheet(
 ) {
     val locale = Locale.current.platformLocale
     val title = stringResource(R.string.content_epg_order_title)
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title, subtitle = stringResource(R.string.content_epg_order_hint))
         Column(Modifier.verticalScroll(rememberScrollState())) {
             // Provider is the playlist's order — the stored "Live TV" order is the same thing.

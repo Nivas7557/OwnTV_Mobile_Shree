@@ -640,7 +640,7 @@ private fun EpisodeOrderSheet(
 ) {
     val title = stringResource(R.string.content_episode_order)
     val choices = listOf(stringResource(R.string.content_oldest_first), stringResource(R.string.content_newest_first))
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title, subtitle = stringResource(R.string.content_episode_order_hint))
         StageGroupLabel(stringResource(R.string.content_seasons))
         StageChoiceRow(choices, if (order.seasonsDescending) 1 else 0, { onChange(it == 1, order.episodesDescending) })
@@ -766,7 +766,6 @@ private fun EpisodeOptions(
             title = title,
             actions = actions,
             onDismiss = { sheetOpen = false },
-            stage = true,
             groupLabels = mapOf(
                 GROUP_WATCH to stringResource(R.string.content_menu_group_watch),
                 GROUP_LIBRARY to stringResource(R.string.content_menu_group_library),

@@ -316,7 +316,6 @@ fun PlayerScreen(
         var rememberAnswer by remember(p) { mutableStateOf(false) }
         MobileBottomSheet(
             onDismissRequest = { downloadWatchGuard.answer(watch = true, remember = rememberAnswer) },
-            stage = true,
         ) {
             StageSheetHeader(stringResource(R.string.content_download_watch_title))
             SheetText(stringResource(R.string.content_download_watch_body, p.playlistName))
@@ -899,7 +898,6 @@ fun PlayerScreen(
                     onDismiss = { multiviewPickFor = null },
                     // Two steps: choosing a category opens its channels, it does not close the sheet.
                     dismissOnSelect = false,
-                    stage = true,
                 )
             } else {
                 PlayerSheetHost(
@@ -955,7 +953,6 @@ fun PlayerScreen(
             },
             onDismiss = { sheet = null },
             dismissOnSelect = false,
-            stage = true,
         )
     }
 

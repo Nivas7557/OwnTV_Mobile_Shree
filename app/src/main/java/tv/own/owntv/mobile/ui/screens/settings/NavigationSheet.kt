@@ -49,7 +49,7 @@ fun NavigationSheet(vm: SettingsViewModel, onDismiss: () -> Unit) {
     val title = stringResource(R.string.settings_navigation)
     val dynamic = mode == SettingsRepository.NavMenuMode.DYNAMIC
 
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(
             title = title,
             subtitle = stringResource(R.string.common_nav_settings) + " · " + stringResource(R.string.settings_group_layout),

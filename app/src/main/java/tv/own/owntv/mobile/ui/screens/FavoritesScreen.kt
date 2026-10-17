@@ -150,7 +150,7 @@ fun FavoritesScreen(
     }
 
     menu?.let { (type, id, name) ->
-        MobileBottomSheet(onDismissRequest = { menu = null }, title = name, stage = true) {
+        MobileBottomSheet(onDismissRequest = { menu = null }, title = name) {
             StageSheetHeader(title = name)
             StageMenuItem(
                 stringResource(R.string.content_remove_favourite),

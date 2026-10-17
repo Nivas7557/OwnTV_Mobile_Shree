@@ -242,7 +242,7 @@ private fun CatchupSheet(vm: SettingsViewModel, onDismiss: () -> Unit) {
     val offset = s.catchupOffsetMinutes.pref(0)
     val player = s.catchupPlayer.pref(SettingsRepository.CatchupPlayer.INTERNAL)
     val manual = tz == SettingsRepository.CatchupTimezone.MANUAL
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(stringResource(R.string.settings_catchup), eyebrow = stringResource(SettingsGroup.SOURCES.titleRes))
         SheetText(stringResource(R.string.settings_catchup_timezone_description))
         Column(Modifier.sheetScroll()) {
@@ -685,7 +685,7 @@ private fun StartupChannelSheet(vm: SettingsViewModel, onPick: (ChannelEntity) -
     var debounced by remember { mutableStateOf(query) }
     LaunchedEffect(Unit) { snapshotFlow { query }.debounce(300L).collect { debounced = it } }
     LaunchedEffect(debounced) { results = vm.searchChannels(debounced) }
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(stringResource(R.string.settings_startup_specific_channel), eyebrow = stringResource(R.string.settings_app_startup))
         StageSearchField(query, { query = it }, stringResource(R.string.common_search), Modifier.padding(horizontal = 6.dp))
         results.forEach { channel -> StageMenuItem(channel.name, onClick = { onPick(channel) }, icon = MobileIcons.LiveTv) }

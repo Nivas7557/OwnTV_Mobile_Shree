@@ -25,6 +25,7 @@ import tv.own.owntv.mobile.ui.stage.StageButton
 import tv.own.owntv.mobile.ui.stage.StageButtonStyle
 import tv.own.owntv.mobile.ui.stage.StageTool
 import tv.own.owntv.mobile.ui.stage.stageText
+import tv.own.owntv.mobile.ui.stage.StageTextRow
 
 /*
  * Settings › App › Proxy and DNS (M9B), the group-page pattern: a switch, the fields as rows, then Save and Test.

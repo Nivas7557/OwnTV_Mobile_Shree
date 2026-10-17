@@ -411,7 +411,6 @@ fun HomeScreen(
             onDownload = { vm.download(target.type, target.id) },
             onHide = { vm.hide(target.type, target.id) },
             onDismiss = { menuFor = null },
-            stage = true,
         )
     }
 }

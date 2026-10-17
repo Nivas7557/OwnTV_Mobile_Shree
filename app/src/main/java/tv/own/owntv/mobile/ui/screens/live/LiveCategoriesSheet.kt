@@ -78,7 +78,7 @@ internal fun LiveCategoriesSheet(
     }
     fun countOf(key: LiveKey) = counts[key]?.takeIf { showCounts }?.let(::formatCount)
 
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title, extra = extra)
         StageSearchField(
             value = query,
@@ -135,7 +135,7 @@ internal fun LiveCategoryMenu(
     onRestore: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title)
         listOf(
             Triple(R.string.settings_customize_move_top, MobileIcons.KeyboardDoubleArrowUp, MoveKind.TOP),
@@ -169,7 +169,7 @@ internal fun CategoryRestoreConfirm(
 ) {
     val palette = LocalStagePalette.current
     val lines = plan?.let { categoryRestoreSummary(it, LocalContext.current.resources) }
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title)
         if (lines != null && lines.isEmpty()) {
             Text(

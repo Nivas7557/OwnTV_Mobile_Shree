@@ -105,7 +105,7 @@ internal fun ScheduleRecordingSheet(
     val name = remember(channel.name) { ProviderTags.parse(channel.name).name }
     val title = stringResource(R.string.recording_schedule)
 
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(
             title = title,
             subtitle = listOfNotNull(channel.number?.takeIf { it > 0 }?.let(::formatYear), name).joinToString(sep),

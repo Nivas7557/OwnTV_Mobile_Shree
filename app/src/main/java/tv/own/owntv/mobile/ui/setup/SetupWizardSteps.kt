@@ -54,7 +54,7 @@ import tv.own.owntv.mobile.ui.screens.settings.RemoteSourceSheet
 import tv.own.owntv.mobile.ui.screens.settings.SettingsChoice
 import tv.own.owntv.mobile.ui.screens.settings.StageChoiceSheet
 import tv.own.owntv.mobile.ui.screens.settings.StageConfirmSheet
-import tv.own.owntv.mobile.ui.screens.settings.StageTextRow
+import tv.own.owntv.mobile.ui.stage.StageTextRow
 import tv.own.owntv.mobile.ui.stage.LocalStagePalette
 import tv.own.owntv.mobile.ui.stage.StageChevron
 import tv.own.owntv.mobile.ui.stage.StageRowValue
@@ -322,7 +322,7 @@ private fun AvatarStrip(chosen: Int) {
 @Composable
 private fun AvatarSheet(chosen: Int, onPick: (Int) -> Unit, onDismiss: () -> Unit) {
     val accent = stageAccent.accent
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(stringResource(R.string.setup_avatar))
         LazyVerticalGrid(
             columns = GridCells.Adaptive(64.dp),

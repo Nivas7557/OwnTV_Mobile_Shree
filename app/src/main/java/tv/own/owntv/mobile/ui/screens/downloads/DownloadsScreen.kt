@@ -204,7 +204,7 @@ fun DownloadsScreen(
         }
 
         if (tab == DownloadsTab.RECORDINGS) {
-            RecordingsScreen(onPlayerOpened = onPlayerOpened, embedded = true, modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp))
+            RecordingsScreen(onPlayerOpened = onPlayerOpened, modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp))
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(horizontal = 6.dp)) {
                 if (downloading.isEmpty() && onPhone.isEmpty()) {
@@ -505,7 +505,7 @@ private fun DownloadMenu(
     onSaveCopy: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title)
         fun act(block: () -> Unit) = { block(); onDismiss() }
         when (download.status) {
@@ -555,7 +555,7 @@ private fun DownloadOptionsSheet(
 ) {
     val palette = LocalStagePalette.current
     val title = stringResource(R.string.content_downloads_options)
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title)
         // Said before the list: the folder being unreachable is the reason the user is most likely here.
         if (folderLost) {

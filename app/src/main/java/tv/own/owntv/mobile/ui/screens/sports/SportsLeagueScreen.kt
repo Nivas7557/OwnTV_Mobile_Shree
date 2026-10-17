@@ -61,7 +61,7 @@ fun SportsLeagueScreen(leagueKey: String, onOpenMatch: (Match) -> Unit, vm: Spor
             Row(Modifier.fillMaxWidth().padding(start = 14.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(league?.let { leagueLabel(it) } ?: state.leagueKey, style = stageText(22f, 800), color = palette.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    league?.sport?.let { Text(sportLabel(it), style = stageText(12.5f, 500), color = palette.muted, maxLines = 1) }
+                    league?.sport?.let { Text(sportLabel(it), style = stageText(12.5f, 500), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
                 val following = vm.follows(state.config, state.leagueKey)
                 StageTool(

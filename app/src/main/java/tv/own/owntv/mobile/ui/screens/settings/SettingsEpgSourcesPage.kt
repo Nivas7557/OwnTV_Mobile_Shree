@@ -45,11 +45,12 @@ import tv.own.owntv.mobile.ui.stage.stageAccent
 import tv.own.owntv.mobile.ui.stage.stageText
 import tv.own.owntv.mobile.ui.components.MobileBottomSheet
 import tv.own.owntv.mobile.ui.components.sheetListHeight
-import tv.own.owntv.mobile.ui.components.MobileButton
-import tv.own.owntv.mobile.ui.components.MobileButtonStyle
-import tv.own.owntv.mobile.ui.components.MobileTextField
-import tv.own.owntv.mobile.ui.components.SettingRow
 import tv.own.owntv.mobile.ui.theme.MobileDimens
+import tv.own.owntv.mobile.ui.stage.StageRowValue
+import tv.own.owntv.mobile.ui.stage.StageChevron
+import androidx.compose.ui.semantics.Role
+import tv.own.owntv.mobile.ui.stage.StageButtonStyle
+import tv.own.owntv.mobile.ui.stage.StageField
 
 /**
  * The XMLTV feeds that fill the guide, each with what it actually holds: how many channels, how many
@@ -102,7 +103,7 @@ fun SettingsEpgSourcesPage(
     menuSource?.let { source ->
         val syncing = vm.observeSync(source.id).collectAsStateWithLifecycle(EpgSyncState.Idle).value.isActive
         val close = { menuSource = null }
-        MobileBottomSheet(onDismissRequest = close, stage = true) {
+        MobileBottomSheet(onDismissRequest = close) {
             StageSheetHeader(source.name, eyebrow = stringResource(R.string.settings_epg_sources))
             StageMenuItem(
                 stringResource(if (syncing) R.string.settings_sources_cancel else R.string.settings_sync_now),
@@ -288,7 +289,7 @@ private fun EpgSourceSheet(
     var showManualDays by remember { mutableStateOf(false) }
     var showPlaylists by remember { mutableStateOf(false) }
 
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         tv.own.owntv.mobile.ui.stage.StageSheetHeader(stringResource(
             if (initial == null) R.string.settings_epg_sources_add else R.string.settings_epg_sources_edit,
         ))
@@ -300,7 +301,7 @@ private fun EpgSourceSheet(
                 .padding(horizontal = MobileDimens.ScreenPaddingH),
             verticalArrangement = Arrangement.spacedBy(MobileDimens.GapSmall),
         ) {
-            MobileTextField(
+            StageField(
                 value = name,
                 onValueChange = { name = it },
                 label = stringResource(R.string.settings_epg_sources_name),
@@ -308,7 +309,7 @@ private fun EpgSourceSheet(
                 imeAction = ImeAction.Next,
                 modifier = Modifier.fillMaxWidth(),
             )
-            MobileTextField(
+            StageField(
                 value = url,
                 onValueChange = { url = it },
                 label = stringResource(R.string.settings_epg_sources_url),
@@ -317,13 +318,12 @@ private fun EpgSourceSheet(
                 imeAction = ImeAction.Next,
                 modifier = Modifier.fillMaxWidth(),
             )
-            MobileButton(
+            StageButton(
                 text = stringResource(R.string.settings_epg_sources_fill_playlist),
                 onClick = { showPlaylists = true },
-                style = MobileButtonStyle.SECONDARY,
                 modifier = Modifier.fillMaxWidth(),
             )
-            MobileTextField(
+            StageField(
                 value = agent,
                 onValueChange = { agent = it },
                 label = stringResource(R.string.settings_epg_sources_user_agent),
@@ -331,18 +331,17 @@ private fun EpgSourceSheet(
                 imeAction = ImeAction.Done,
                 modifier = Modifier.fillMaxWidth(),
             )
-            SettingRow(
+            StageSettingRow(
                 title = stringResource(R.string.settings_epg_sources_auto_refresh_title),
-                value = epgRefreshLabel(refresh),
                 onClick = { showRefresh = true },
-            )
-            SettingRow(
+            ) { StageRowValue(epgRefreshLabel(refresh), StageChevron.DOWN) }
+            StageSettingRow(
                 title = stringResource(R.string.settings_epg_sources_use_logos),
                 subtitle = stringResource(R.string.settings_epg_sources_logos_description),
-                checked = logos,
-                onCheckedChange = { logos = it },
-            )
-            MobileButton(
+                role = Role.Switch,
+                onClick = { logos = !logos },
+            ) { StageSwitch(logos) }
+            StageButton(
                 text = stringResource(
                     if (initial == null) R.string.settings_epg_sources_add_sync
                     else R.string.settings_epg_sources_save_sync,
@@ -350,6 +349,7 @@ private fun EpgSourceSheet(
                 onClick = { onSave(name.trim(), url.trim(), agent.trim().ifBlank { null }, refresh, logos) },
                 enabled = url.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
+                style = StageButtonStyle.PRIMARY,
             )
         }
     }
@@ -382,7 +382,7 @@ private fun EpgSourceSheet(
         val options by produceState<List<EpgSourcesViewModel.PlaylistEpg>?>(null) {
             value = runCatching { playlistOptions() }.getOrDefault(emptyList())
         }
-        MobileBottomSheet(onDismissRequest = { showPlaylists = false }, stage = true) {
+        MobileBottomSheet(onDismissRequest = { showPlaylists = false }) {
             tv.own.owntv.mobile.ui.stage.StageSheetHeader(stringResource(R.string.settings_epg_sources_fill_playlist))
             val list = options
             if (list != null && list.isEmpty()) {

@@ -24,8 +24,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -502,26 +506,49 @@ fun StageSearchField(
     clearLabel: String? = null,
     /** At the end of the field, 11 dim: Settings search's "5 results" (M9-02). */
     trailingText: String? = null,
+    /** A danger ring: the value cannot be used as it is (a wrong PIN, a name already taken). */
+    isError: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val palette = LocalStagePalette.current
     val accent = stageAccent
     var focused by remember { mutableStateOf(false) }
+    // Inside a scrolling sheet the keyboard can cover the field it opened for; focus brings it back into view.
+    val bringIntoView = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
     // The inline field (a tool row's) is 36 dp with 12.5 type, the page's 42 dp with 13.5.
     val style = stageText(if (inline) 12.5f else 13.5f, 500)
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         singleLine = true,
-        textStyle = style.copy(color = palette.text),
+        textStyle = style.copy(color = if (enabled) palette.text else palette.dim),
         cursorBrush = SolidColor(accent.accent),
-        keyboardOptions = KeyboardOptions(keyboardType = if (password) KeyboardType.Password else keyboardType, imeAction = imeAction),
+        // A password gets the password keyboard, unless it asks for its own (a PIN's number pad): the text
+        // keyboard auto-corrects and capitalises, which turns a correct password into a wrong one.
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (password && keyboardType == KeyboardType.Text) KeyboardType.Password else keyboardType,
+            imeAction = imeAction,
+            autoCorrectEnabled = if (password) false else null,
+        ),
         visualTransformation = if (password) androidx.compose.ui.text.input.PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
         keyboardActions = androidx.compose.foundation.text.KeyboardActions(
             onSearch = { onSearch?.invoke() },
             onDone = { onSearch?.invoke() },
         ),
-        modifier = modifier.onFocusChanged { focused = it.isFocused },
+        modifier = modifier
+            .bringIntoViewRequester(bringIntoView)
+            .onFocusChanged {
+                focused = it.isFocused
+                if (it.isFocused) scope.launch { runCatching { bringIntoView.bringIntoView() } }
+            },
         decorationBox = { field ->
+            val ring = when {
+                isError -> palette.danger
+                focused -> accent.focus
+                else -> null
+            }
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -529,8 +556,8 @@ fun StageSearchField(
                     .clip(RoundedCornerShape(StageRadii.Search))
                     .background(palette.controlFill)
                     .then(
-                        if (focused) {
-                            Modifier.drawBehind { drawInnerRing(accent.focus, 1.5.dp.toPx(), StageRadii.Search.toPx()) }
+                        if (ring != null) {
+                            Modifier.drawBehind { drawInnerRing(ring, 1.5.dp.toPx(), StageRadii.Search.toPx()) }
                         } else Modifier,
                     )
                     .padding(horizontal = 14.dp),
@@ -554,6 +581,60 @@ fun StageSearchField(
             }
         },
     )
+}
+
+/**
+ * A form field inside a sheet: the [label] above (11.5 / 600 muted), the 42 dp [StageSearchField] without its
+ * glyph, and [supportingText] under it — in the danger colour when [isError]. A field on a page is a
+ * `StageTextRow` instead. Done runs [onImeDone], then puts the keyboard away; Next moves to the next field.
+ */
+@Composable
+fun StageField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    password: Boolean = false,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Done,
+    isError: Boolean = false,
+    supportingText: String? = null,
+    enabled: Boolean = true,
+    onImeDone: (() -> Unit)? = null,
+) {
+    val palette = LocalStagePalette.current
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    Column(modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Text(label, style = stageText(11.5f, 600), color = palette.muted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+        StageSearchField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = placeholder,
+            icon = null,
+            password = password,
+            keyboardType = keyboardType,
+            imeAction = imeAction,
+            isError = isError,
+            enabled = enabled,
+            onSearch = {
+                onImeDone?.invoke()
+                keyboard?.hide()
+                focusManager.clearFocus()
+            },
+        )
+        supportingText?.let {
+            Text(
+                it,
+                style = stageText(11.5f, 500, lineHeight = 1.3f),
+                color = if (isError) palette.danger else palette.muted,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+            )
+        }
+    }
 }
 
 /**

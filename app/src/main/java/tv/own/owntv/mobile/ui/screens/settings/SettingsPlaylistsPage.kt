@@ -115,7 +115,7 @@ fun SettingsPlaylistsPage(
         val syncing = vm.syncState(source.id).collectAsStateWithLifecycle(CatalogSyncState.Idle).value.isActive
         val counts = vm.contentCounts(source.id).collectAsStateWithLifecycle(null).value
         val close = { menuSource = null }
-        MobileBottomSheet(onDismissRequest = close, stage = true) {
+        MobileBottomSheet(onDismissRequest = close) {
             StageSheetHeader(
                 source.displayName(),
                 subtitle = typeLine(source, counts?.breakdownText(LocalContext.current.resources)),
@@ -202,7 +202,7 @@ fun SettingsPlaylistsPage(
 
     test?.let { state ->
         val palette = LocalStagePalette.current
-        MobileBottomSheet(onDismissRequest = vm::dismissSourceTest, stage = true) {
+        MobileBottomSheet(onDismissRequest = vm::dismissSourceTest) {
             StageSheetHeader(state.sourceName, eyebrow = stringResource(R.string.settings_sources_test_title))
             Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 when (state) {

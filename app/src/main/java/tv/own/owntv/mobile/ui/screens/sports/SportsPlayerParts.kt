@@ -53,7 +53,7 @@ fun MatchScoreLine(playback: SportsPlayback, match: Match, spoilerFree: Boolean)
 @Composable
 fun OtherChannelsSheet(session: SportsSession, playingId: Long?, onSwitch: (ChannelEntity) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(MatchNotifications.pair(context, session.match), eyebrow = stringResource(R.string.sports_other_channels_title))
         SheetScroll {
             session.options.forEach { o ->

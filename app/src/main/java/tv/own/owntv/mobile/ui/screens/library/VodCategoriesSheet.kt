@@ -61,7 +61,7 @@ internal fun VodCategoriesSheet(
     fun countOf(key: LiveKey) = counts[key]?.takeIf { showCounts }?.let(::formatCount)
 
     val title = stringResource(R.string.content_category_browser_title)
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(
             title = title,
             extra = stringResource(if (tab == LibraryTab.MOVIES) R.string.common_nav_movies else R.string.common_nav_series),

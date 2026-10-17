@@ -36,7 +36,7 @@ fun SportsFilterSheet(state: MatchPageState, onFilter: (WatchFilter) -> Unit, on
     val f = state.filter
     val list = state.list
     val sep = stringResource(R.string.content_epg_bits_separator)
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(stringResource(R.string.sports_filter_title), extra = stringResource(R.string.sports_showing_of, list.shown.size, list.total))
         SheetScroll {
             // Language: every language present (and the preferred ones, at 0), Unknown last.

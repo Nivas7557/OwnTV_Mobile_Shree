@@ -55,7 +55,7 @@ fun PlaylistSheet(
         onDismiss()
     }
 
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title, subtitle = stringResource(R.string.content_playlist_picker_subtitle))
         StageMenuItem(
             label = stringResource(R.string.content_all_playlists),

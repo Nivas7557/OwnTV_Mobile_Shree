@@ -457,7 +457,7 @@ private fun VodSortSheet(
     onDismiss: () -> Unit,
 ) {
     val title = stringResource(if (tab == LibraryTab.MOVIES) R.string.content_sort_movies_title else R.string.content_sort_series_title)
-    MobileBottomSheet(onDismissRequest = onDismiss, title = title, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss, title = title) {
         StageSheetHeader(title = title, subtitle = stringResource(R.string.content_sort_applies_hint))
         listOf(
             Triple(SettingsRepository.SortMode.PLAYLIST, MobileIcons.Layers, R.string.content_sort_provider_order_hint),

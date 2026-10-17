@@ -52,7 +52,7 @@ fun AppIconSheet(chosen: AppIcon, onPick: (AppIcon) -> Unit, onDismiss: () -> Un
     restartFor?.let { AppIconRestartSheet(it, onDismiss); return }
     val palette = LocalStagePalette.current
     val accent = stageAccent
-    MobileBottomSheet(onDismissRequest = onDismiss, stage = true) {
+    MobileBottomSheet(onDismissRequest = onDismiss) {
         StageSheetHeader(stringResource(R.string.settings_app_icon), eyebrow = stringResource(R.string.settings_group_app))
         SheetText(stringResource(R.string.settings_app_icon_sheet_mobile))
         SheetOrder.chunked(3).forEach { row ->
