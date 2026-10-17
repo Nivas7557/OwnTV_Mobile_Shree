@@ -140,9 +140,7 @@ val LocalStageBackground = staticCompositionLocalOf { BackgroundConfig() }
 object StageRadii {
     val BottomBar = 26.dp
     val Sheet = 28.dp
-    val Wizard = 26.dp
     val Video = 20.dp
-    val Card = 18.dp
     val Row = 16.dp
     val Button = 16.dp
     val Search = 14.dp

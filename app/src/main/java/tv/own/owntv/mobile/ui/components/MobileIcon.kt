@@ -174,7 +174,6 @@ object MobileIcons {
         }
     }
     val FormatListBulleted: ImageVector by lazy { stage(StageGlyph.LIST) }
-    val ViewList: ImageVector by lazy { stage(StageGlyph.LIST) }
     val SwapVert: ImageVector by lazy {
         glyph() {
             line(8f, 20f, 8f, 4f); line(4.8f, 7.2f, 8f, 4f, 11.2f, 7.2f)
