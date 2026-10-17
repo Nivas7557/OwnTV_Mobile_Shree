@@ -157,7 +157,7 @@ Quality button, and experimental tunneled playback — all core's, all shared.
 ### 3.1 Shell & navigation
 
 The **Stage** design, shared with the television: a glass capsule bottom bar on a phone (Home · Live
-TV · TV Guide · Movies · Series) and the TV's floating rail from **600 dp**, chosen by **window
+TV · Sports · TV Guide · Library — Movies | Series inside) and the TV's floating rail from **600 dp**, chosen by **window
 width** rather than device type — so a phone in landscape and a tablet in split screen are treated as
 what they are. Sideways, Live TV draws its list and preview side by side, and Movies and Series a
 glass card for the picked title beside the grid.
@@ -179,6 +179,10 @@ top. Predictive back is on.
   **muted preview** on top (beside the list when wide), not watched until a second tap opens it full
   screen — the television's preview. A channel on Home, in Favourites or History plays full screen;
   one from Search opens in Live TV's preview.
+- **Sports** — the television's Sports section as built: ESPN scores for followed leagues, match
+  pages with Find channels (searched only on request), a filter sheet, Broadcasts, a Home row, the
+  score and Other channels in the player, and — phone only — goal alerts and a live score card that
+  work with the app closed (core's `MatchAlertHost.backgroundAllowed`).
 - **Movies & Series** — two tabs with search, sort, Grid | List and **pinch to resize** the
   grid, progress bars on part-watched films and shows, and a detail page with backdrop, chips, resume,
   favourite, download, season chips and episode progress. The page's title drops a leading provider

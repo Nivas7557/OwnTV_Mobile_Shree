@@ -594,6 +594,10 @@ private fun appSections(vm: SettingsViewModel): List<SettingSection> {
             stringResource(R.string.settings_app_group),
             listOf(
                 pageItem(
+                    "tab_SPORTS", MobileIcons.Sports, stringResource(R.string.sports_title), stringResource(R.string.sports_leagues),
+                    null, SettingsLeaf.SPORTS.route,
+                ),
+                pageItem(
                     "tab_LANGUAGE", MobileIcons.Translate, stringResource(R.string.settings_language), stringResource(R.string.settings_language_description),
                     localeLabel(tag), SettingsLeaf.LANGUAGE.route,
                 ),

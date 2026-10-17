@@ -51,7 +51,7 @@ More → [Local sync](#-local-sync-with-your-tv).
 
 ## 🧭 Getting around
 
-**On a phone** — a bottom bar: Home · Live TV · TV Guide · Movies · Series.
+**On a phone** — a bottom bar: Home · Live TV · Sports · TV Guide · Library (Movies | Series at its top).
 **On a tablet, or a phone held sideways** — the bar becomes a floating rail down the left (with
 Downloads and More too), Live TV puts the preview beside the list, and Movies and Series show the
 picked title on a card beside the posters.
@@ -83,6 +83,34 @@ to change category. Top right: the **playlist** button, **search** and **your av
 
 **Too sensitive?** **Settings → Watching & recording → Gesture sensitivity** changes how far a value
 moves per centimetre of finger, without changing how far you must travel to start a gesture.
+
+---
+
+## 🏆 Sports
+
+**Where:** the **Sports** tab. Nothing is followed at first: tap **Sports and leagues** (or go to
+**Settings → App → Sports → Sports and leagues**), tap a sport and switch on its leagues.
+**Sport buttons → All sports** fetches every league instead, which takes longer.
+
+- **The Sports page** — two rows of buttons filter it: sports (and ★ My teams), then that sport's
+  leagues; **⟳** at the end rebuilds the sports data (the status pill says **Rebuilding sports…**).
+  Rows: **Live now**, **Sport on your channels** (from your guide) and **Starting soon**.
+  Tap a match to open it; **long-press** to follow a side or set a reminder.
+- **A match** — score, venue, and the tabs **Watch live · Timeline · Stats · Line-ups · Table · Form ·
+  Broadcasts**. In **Watch live**, **Find channels** lists the channels in your guide that show it, from
+  30 minutes before kick-off. **Filter channels** narrows them by language, country, picture and
+  playlist; **Strict filtering** hides the rest, and **Remember for every match** keeps the choice.
+  Tap a channel to watch full screen; **Back** returns to the match. **Long-press** a channel for
+  **Always use for …**. **Broadcasts** lists the channels found, one per row by country.
+- **Live score card** on a match keeps its score in your notifications until full time.
+- **In the player** — the score shows under the channel name while the controls are up, and
+  **Other channels** switches to another channel showing the same match.
+- **Your own order** — in Sports and leagues, **long-press** a sport or a switched-on league →
+  **Move**, then the arrows and **Save**. The Sports page and the Home row follow it.
+- **Settings → App → Sports** — auto rebuild, live refresh, filters, My teams, **Goal alerts** (also
+  when OwnTV is closed: goals, kick-off and full time, half time, red cards; for My teams or every
+  followed league) and match reminders. A reminder with a channel found shows OwnTV's own prompt while
+  the app is open.
 
 ---
 

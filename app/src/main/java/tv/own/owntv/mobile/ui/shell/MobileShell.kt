@@ -73,6 +73,7 @@ import kotlinx.coroutines.launch
 import tv.own.owntv.core.metadata.MetadataBudget
 import tv.own.owntv.core.settings.SettingsRepository
 import tv.own.owntv.mobile.ui.nav.MobileDestination
+import tv.own.owntv.mobile.ui.nav.MobileDestination.Companion.standingFor
 import tv.own.owntv.mobile.ui.nav.MobileDestination.Companion.visible
 import tv.own.owntv.mobile.ui.nav.MobileNavHost
 import tv.own.owntv.mobile.playback.PipController
@@ -207,6 +208,7 @@ fun MobileShell(
     // channel you opened is still Live TV, and the bottom bar must not go blank while you watch it.
     val current = destinations.firstOrNull { it.route == currentRoute }
         ?: destinations.firstOrNull { currentRoute?.startsWith("${it.route}/") == true }
+        ?: destinations.standingFor(currentRoute)
 
     // The full screen player is the one destination that owns the whole display: no bars, no rail,
     // and no mini player, because the thing the mini player would be showing is already on screen.
@@ -393,7 +395,7 @@ fun MobileShell(
     // in the crumb, and that crumb is the way back. A tab, Home and More are places, not pages, so they
     // carry no crumb; a detail page (a film, a channel) draws its own title and keeps only the crumb.
     val topLevel = headerRoute == MobileDestination.MORE.route ||
-        MobileDestination.rail.any { it.route == headerRoute }
+        (MobileDestination.rail + MobileDestination.bottomBar).any { it.route == headerRoute }
     // About names itself with the wordmark (M8-07): its header is the crumb alone.
     val titleRes = if (headerRoute == MobileDestination.HOME.route || headerRoute == MoreLeaf.ABOUT.route) null else pageTitleRes(headerRoute)
     val previousRoute = if (shownPage != null) shownPage.second else navController.previousBackStackEntry?.destination?.route
@@ -420,7 +422,7 @@ fun MobileShell(
         )
         headerRoute in listOf(
             MobileDestination.LIVE.route, MobileDestination.GUIDE.route,
-            MobileDestination.MOVIES.route, MobileDestination.SERIES.route,
+            MobileDestination.MOVIES.route, MobileDestination.SERIES.route, MobileDestination.LIBRARY.route,
             MobileDestination.DOWNLOADS.route, SEARCH_ROUTE_PATTERN,
         ) -> ClusterPlaylist(
             label = when {
@@ -789,8 +791,9 @@ private fun NavHostController.onNavClick(
     when {
         // A film or a channel opened under this tab: back to the tab's own list first (only the list
         // itself scrolls to the top).
+        // A film lit under Library but opened from Search is not on Library's stack: go to Library then.
         destination == current && currentDestination?.route != destination.route ->
-            popBackStack(destination.route, inclusive = false)
+            if (!popBackStack(destination.route, inclusive = false)) navigateToTab(destination)
         destination == current -> shell.requestScrollToTop(destination.route)
         // A More or Settings page pushed on top of this tab: back down to the tab itself. Restoring the
         // tab's saved stack instead restored the very page on screen, so the tap did nothing.

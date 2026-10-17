@@ -86,6 +86,9 @@ import tv.own.owntv.mobile.ui.stage.StageProgress
 import tv.own.owntv.mobile.ui.stage.StageRow
 import tv.own.owntv.mobile.ui.stage.StageSearchField
 import tv.own.owntv.mobile.ui.stage.StageSegmented
+import org.koin.compose.koinInject
+import tv.own.owntv.core.nav.MainSection
+import tv.own.owntv.core.nav.NavVisibility
 import tv.own.owntv.mobile.ui.stage.StageSheetHeader
 import tv.own.owntv.mobile.ui.stage.StageSizeBar
 import tv.own.owntv.mobile.ui.stage.StageTool
@@ -117,6 +120,15 @@ fun LibraryScreen(
     LaunchedEffect(fixedTab) { fixedTab?.let { vm.select(it) } }
 
     val tab by vm.tab.collectAsStateWithLifecycle()
+    // Library (no fixed tab) offers Movies | Series — only the halves the playlist has; with one, it is that one.
+    val navVisibility: NavVisibility = koinInject()
+    val sections by remember(navVisibility) { navVisibility.visibleSections() }
+        .collectAsStateWithLifecycle(MainSection.allBrowse)
+    val switchTabs = if (fixedTab != null) emptyList() else buildList {
+        if (MainSection.MOVIES in sections) add(LibraryTab.MOVIES)
+        if (MainSection.SERIES in sections) add(LibraryTab.SERIES)
+    }
+    LaunchedEffect(switchTabs) { switchTabs.singleOrNull()?.let { vm.select(it) } }
     val categories by vm.categories.collectAsStateWithLifecycle()
     val selected by vm.selected.collectAsStateWithLifecycle()
     val count by vm.count.collectAsStateWithLifecycle()
@@ -197,6 +209,15 @@ fun LibraryScreen(
         ?: (maxWidth.value.toInt() / (if (twoPane) WIDE_COLUMN_WIDTH_DP else COLUMN_WIDTH_DP)).coerceIn(MIN_COLUMNS, MAX_COLUMNS)
 
     Column(Modifier.fillMaxSize()) {
+        if (switchTabs.size > 1) {
+            StageSegmented(
+                options = switchTabs.map { stringResource(if (it == LibraryTab.MOVIES) R.string.common_nav_movies else R.string.common_nav_series) },
+                selected = switchTabs.indexOf(tab).coerceAtLeast(0),
+                onSelect = { vm.select(switchTabs[it]) },
+                fill = true,
+                modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP),
+            )
+        }
         // `.tools`: the search field takes the room, then the order and Grid | List at the right. No categories
         // tool (owner, 12 Oct): the crumb under the title opens the same sheet.
         Row(

@@ -10,6 +10,13 @@
 ## Unreleased
 
 ### New features
+- **🏆 Sports: live scores, today's and tomorrow's matches and match pages, as on the television**
+- **🔎 Find channels: the channels in your guide that show a match, with a filter sheet**
+- **📺 Broadcasts tab, venue and round on every match page**
+- **🔔 Goal alerts and a live score card, also when OwnTV is closed**
+- **↕️ Long-press → Move to put your sports and leagues in your own order**
+- **🏠 Sports row on Home with a LIVE mark**
+- **📚 Library: Movies and Series share one tab, so Sports fits the bottom bar**
 - **🎭 Stage design: the television's new look on phone and tablet**
 - **🎨 Pixel app icon and Plus Jakarta Sans, the new default font**
 - **🔊 Volume swipe controls the phone's volume**
@@ -30,6 +37,7 @@
 - **🗂️ Downloads and recordings whose file is gone say "File missing"**
 
 ### Fixes
+- **🌍 Channels named "UK: …" or "IT: …" get their country and language, like "UK| …"**
 - **🖼️ Your own picture can be chosen while creating a profile**
 - **📺 Series no longer show "No episodes" when one episode is oddly written by the provider**
 - **💬 A series the provider refused says why instead of "No episodes"**

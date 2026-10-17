@@ -40,6 +40,10 @@ import tv.own.owntv.mobile.ui.screens.library.LibraryScreen
 import tv.own.owntv.mobile.ui.screens.library.LibraryTab
 import tv.own.owntv.mobile.ui.screens.live.LiveScreen
 import tv.own.owntv.mobile.ui.screens.search.SearchScreen
+import tv.own.owntv.mobile.ui.screens.sports.SportsLeagueScreen
+import tv.own.owntv.mobile.ui.screens.sports.SportsMatchScreen
+import tv.own.owntv.mobile.ui.screens.sports.SportsPlayback
+import tv.own.owntv.mobile.ui.screens.sports.SportsScreen
 import tv.own.owntv.mobile.ui.screens.settings.SettingsGroup
 import tv.own.owntv.mobile.ui.screens.settings.SettingsGroupScreen
 import tv.own.owntv.mobile.ui.screens.settings.LocalSettingsNav
@@ -77,6 +81,15 @@ fun MobileNavHost(
     // A channel opened from Home, Favourites or History plays full screen, as on the television.
     val playChannel = { channelId: Long -> tuner.tune(channelId); navController.navigate(PLAYER_ROUTE) }
     val previewOn by koinInject<SettingsRepository>().livePreviewEnabled.collectAsStateWithLifecycle(true)
+    // A goal alert, reminder or live score card was tapped: open that match (MainActivity reads the extra).
+    val sportsPlayback: SportsPlayback = koinInject()
+    androidx.compose.runtime.LaunchedEffect(sportsPlayback) {
+        sportsPlayback.openMatchKey.collect { key ->
+            if (key == null) return@collect
+            sportsPlayback.openMatchKey.value = null
+            navController.navigate(sportsMatchRoute(key)) { launchSingleTop = true }
+        }
+    }
     SharedTransitionLayout(modifier = modifier) {
         CompositionLocalProvider(LocalSharedTransition provides this) {
     // Navigation's own default is a 700 ms crossfade that ignores the reduce-motion setting. The
@@ -119,6 +132,7 @@ fun MobileNavHost(
                         },
                         onPlayerOpened = { navController.navigate(PLAYER_ROUTE) },
                         onOpenSearch = { query -> navController.navigate(searchRoute(query)) },
+                        onOpenMatch = { navController.navigate(sportsMatchRoute(it.key)) },
                     )
                     MobileDestination.GUIDE -> GuideScreen(
                         scrollToTop = scrollToTop,
@@ -133,7 +147,14 @@ fun MobileNavHost(
                         onPlayerOpened = { navController.navigate(PLAYER_ROUTE) },
                         onOpenGuide = { navController.navigateToTab(MobileDestination.GUIDE) },
                     )
-                    MobileDestination.MOVIES, MobileDestination.SERIES ->
+                    MobileDestination.SPORTS -> SportsScreen(
+                        scrollToTop = scrollToTop,
+                        route = destination.route,
+                        onOpenMatch = { navController.navigate(sportsMatchRoute(it.key)) },
+                        onPlayChannel = playChannel,
+                        onChooseSports = { navController.navigate(SettingsLeaf.SPORTS_LEAGUES.route) },
+                    )
+                    MobileDestination.MOVIES, MobileDestination.SERIES, MobileDestination.LIBRARY ->
                         LibraryScreen(
                             scrollToTop = scrollToTop,
                             route = destination.route,
@@ -170,6 +191,21 @@ fun MobileNavHost(
                     )
                 }
             }
+        }
+        // Sports Hub: a match and a league, pushed over the hub, so Back from the player lands on the match (C24).
+        page(SPORTS_MATCH_PATTERN, arguments = listOf(navArgument(ARG_KEY) { type = NavType.StringType })) { entry ->
+            SportsMatchScreen(
+                matchKey = entry.arguments?.getString(ARG_KEY).orEmpty(),
+                onPlayChannel = playChannel,
+                onOpenLeague = { navController.navigate("$SPORTS_LEAGUE/${Uri.encode(it)}") },
+                onAddPlaylist = { navController.navigate(setupRoute(SetupEntry.ADD_CONTENT)) },
+            )
+        }
+        page("$SPORTS_LEAGUE/{$ARG_KEY}", arguments = listOf(navArgument(ARG_KEY) { type = NavType.StringType })) { entry ->
+            SportsLeagueScreen(
+                leagueKey = entry.arguments?.getString(ARG_KEY).orEmpty(),
+                onOpenMatch = { navController.navigate(sportsMatchRoute(it.key)) },
+            )
         }
         page(
             route = SEARCH_ROUTE_PATTERN,
@@ -273,10 +309,11 @@ private fun NavGraphBuilder.page(
 private val LIBRARY_PARENTS = listOf(
     MobileDestination.MOVIES,
     MobileDestination.SERIES,
+    MobileDestination.LIBRARY,
     MobileDestination.HOME,
 )
 
-/** Movies and Series are one screen, each locked to its half. */
+/** Movies and Series are one screen, each locked to its half; Library switches between them. */
 private fun MobileDestination.fixedTab(): LibraryTab? = when (this) {
     MobileDestination.MOVIES -> LibraryTab.MOVIES
     MobileDestination.SERIES -> LibraryTab.SERIES
@@ -295,6 +332,14 @@ fun isTitleRoute(route: String?): Boolean = route?.endsWith("/{$ARG_TAB}/{$ARG_I
 
 private const val ARG_TAB = "tab"
 private const val ARG_ITEM_ID = "itemId"
+
+private const val ARG_KEY = "key"
+private const val SPORTS_MATCH = "sports/match"
+private const val SPORTS_LEAGUE = "sports/league"
+private const val SPORTS_MATCH_PATTERN = "$SPORTS_MATCH/{$ARG_KEY}"
+
+/** A match's page; its key carries slashes ("soccer/ger.1/…"), so it is encoded. */
+fun sportsMatchRoute(key: String): String = "$SPORTS_MATCH/${Uri.encode(key)}"
 
 /**
  * The full screen player. A route of its own, outside the tabs, because it is the one destination

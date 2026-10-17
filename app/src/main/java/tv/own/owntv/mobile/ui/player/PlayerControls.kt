@@ -152,6 +152,10 @@ fun PlayerControls(
     // Live only, and only once "Record what I'm watching" is switched on (D3). Null hides it.
     onRecordThis: (() -> Unit)? = null,
     recordingThis: Boolean = false,
+    /** Sports Hub: the match's score under the channel name, only for a channel started from a match. */
+    matchLine: (@Composable () -> Unit)? = null,
+    /** Sports Hub: the other channels showing that match; null hides the button. */
+    onOtherChannels: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     // Derived, so the ticking archive state above moves only its readers: the edge is crossed
@@ -186,6 +190,7 @@ fun PlayerControls(
                         showClock = showClock,
                         watchingWallMs = watchingWallMs,
                         onBack = onBack,
+                        matchLine = matchLine,
                     )
                     // Under the identity rather than beside it: the guide line is the longest text on
                     // the dock, and a phone has no width to spare on the row the title is already in.
@@ -249,6 +254,7 @@ fun PlayerControls(
                         recordingThis = recordingThis,
                         liveOnExo = liveOnExo,
                         onToggleLiveEngine = onToggleLiveEngine,
+                        onOtherChannels = onOtherChannels,
                     )
                 }
             }
@@ -266,6 +272,7 @@ private fun TopRow(
     showClock: Boolean,
     watchingWallMs: State<Long?>,
     onBack: () -> Unit,
+    matchLine: (@Composable () -> Unit)? = null,
 ) {
     val engine by player.engineChip.collectAsStateWithLifecycle()
     val resolution by player.videoRes.collectAsStateWithLifecycle()
@@ -293,6 +300,7 @@ private fun TopRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            matchLine?.invoke()
         }
         if (showClock) {
             MobilePlayerClock(
@@ -509,6 +517,7 @@ private fun ToolBar(
     recordingThis: Boolean = false,
     liveOnExo: Boolean = false,
     onToggleLiveEngine: (() -> Unit)? = null,
+    onOtherChannels: (() -> Unit)? = null,
     sleepTimer: SleepTimer = koinInject(),
 ) {
     val speed by engine.speed.collectAsStateWithLifecycle()
@@ -587,8 +596,12 @@ private fun ToolBar(
             PlayerControl.PREVIOUS_CHANNEL -> if (onPreviousChannel != null) {
                 CtrlButton(MobileIcons.History, stringResource(R.string.player_previous_channel), onPreviousChannel)
             }
-            // Sports Hub: the phone's player tools arrive with its match player (PLAN 4.7).
-            PlayerControl.OTHER_CHANNELS, PlayerControl.MATCH -> Unit
+            // Sports Hub: the other channels showing the match this one was started from, once Find
+            // channels found them. No Match button on either app (C27); Back returns to the match page.
+            PlayerControl.OTHER_CHANNELS -> if (onOtherChannels != null) {
+                CtrlButton(MobileIcons.Sports, stringResource(R.string.sports_other_channels), onOtherChannels)
+            }
+            PlayerControl.MATCH -> Unit
             // L3 - live has two engines now, so the button is real there too. It is NOT the VOD
             // toggle: on live it is the television's "compatibility mode", pinned per channel, so a
             // channel only mpv can play opens on mpv next time without being asked again. Null means

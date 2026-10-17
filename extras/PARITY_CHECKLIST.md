@@ -44,6 +44,8 @@ Two rows ended somewhere other than where the mockup put them. Both are explaine
 
 | Feature | Done | Shape it took |
 |---|---|---|
+| Sports (hub, match page, Find channels, filters, Broadcasts, league order, Home row, player score) | ✅ | 2026-10-17. Phone-shaped: list → leagues page (two panes on a tablet), filter **sheet**, no preview pane (a tap plays full screen), reorder by long-press → Move → the app's reorder sheet. Goal alerts and the live score card also work with the app closed — the television schedules none |
+| Bottom bar with Sports | ✅ | 2026-10-17. Movies and Series share one **Library** tab (Movies \| Series switch) so Sports fits in five; the tablet rail keeps them apart |
 | Live TV browse | ✅ | Three panels became a crumb + categories sheet, the list, and a preview on top (beside the list when wide) |
 | EPG / Guide | ✅ | The grid was kept, and *On now* added as the portrait default; Timeline is a third shape |
 | Movies / Series browse | ✅ | Two tabs, as the television's rail; a glass title card beside the grid when wide |

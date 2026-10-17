@@ -37,6 +37,7 @@ import tv.own.owntv.mobile.di.playerModule
 import tv.own.owntv.mobile.di.searchModule
 import tv.own.owntv.mobile.di.settingsModule
 import tv.own.owntv.mobile.di.shellModule
+import tv.own.owntv.mobile.di.sportsModule
 import tv.own.owntv.mobile.ui.theme.subtitleFontResource
 
 /**
@@ -151,14 +152,23 @@ class OwnTVMobileApp : Application(), androidx.work.Configuration.Provider {
         tv.own.owntv.player.SubtitleFontAssets.resourceOf = { it.subtitleFontResource }
         // The eight icon colours are MainActivity + a suffix (see MainActivityColours.kt); core switches them.
         tv.own.owntv.core.brand.AppIconSwitcher.mainActivityClass = MainActivity::class.java.name
+        // Sports goal alerts and reminders may run with the app closed — a phone is in a pocket, not off
+        // like a television. The permission request is assigned by MainActivity, which alone can ask.
+        tv.own.owntv.core.sports.MatchAlertHost.backgroundAllowed = true
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@OwnTVMobileApp)
             modules(
                 coreModule, databaseModule, dataModule, playerModule, shellModule,
                 liveModule, libraryModule, guideModule, homeModule, searchModule,
-                downloadsModule, settingsModule,
+                downloadsModule, settingsModule, sportsModule,
             )
+        }
+        // Sports: core decides from Auto rebuild whether the stored board is due ("on every app start", or
+        // older than the chosen hours) — well after launch, so it never competes with the first screen.
+        appScope.launch {
+            kotlinx.coroutines.delay(SPORTS_START_DELAY_MS)
+            runCatching { GlobalContext.get().get<tv.own.owntv.core.sports.SportsRepository>().appStarted() }
         }
         // A chosen icon colour ("Later", the first-run pick, a restore) reaches the launcher when the app
         // is next in the background, never while it is on screen.
@@ -195,6 +205,11 @@ class OwnTVMobileApp : Application(), androidx.work.Configuration.Provider {
                 )
             }
         }
+    }
+
+    private companion object {
+        /** Sports' Auto rebuild waits this long after launch (the television's own figure). */
+        const val SPORTS_START_DELAY_MS = 15_000L
     }
 
     /** Process-long scope for [tv.own.owntv.player.PlaybackStartup]; never cancelled. */

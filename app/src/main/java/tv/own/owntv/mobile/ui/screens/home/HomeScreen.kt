@@ -103,8 +103,10 @@ fun HomeScreen(
     onOpenSeries: (Long) -> Unit,
     onPlayerOpened: () -> Unit,
     onOpenSearch: (String) -> Unit,
+    onOpenMatch: (tv.own.owntv.core.sports.model.Match) -> Unit,
     modifier: Modifier = Modifier,
     vm: HomeViewModel = koinViewModel(),
+    sportsVm: tv.own.owntv.mobile.ui.screens.sports.SportsViewModel = koinViewModel(),
 ) {
     val feed by vm.feed.collectAsStateWithLifecycle()
     val favoriteChannels by vm.favoriteChannels.collectAsStateWithLifecycle()
@@ -173,7 +175,12 @@ fun HomeScreen(
         return
     }
     // Computed once per feed: hasContent walks each row's loaded items.
-    val rows = remember(state) { state.config.visibleOrder.filter { state.hasContent(it) } }
+    // The Sports row's matches, asked for only while the row is switched on (no request otherwise).
+    val sportsCards = if (HomeRow.LIVE_SPORTS in state.config.visibleOrder) sportsVm.homeRow.collectAsStateWithLifecycle().value else emptyList()
+    val sportsConfig by sportsVm.sportsConfig.collectAsStateWithLifecycle()
+    val rows = remember(state, sportsCards.isEmpty()) {
+        state.config.visibleOrder.filter { if (it == HomeRow.LIVE_SPORTS) sportsCards.isNotEmpty() else state.hasContent(it) }
+    }
 
     // The television's three states, in its order. None offers "add a playlist": a user with none is in
     // setup, not here.
@@ -346,8 +353,22 @@ fun HomeScreen(
                         onPlay = { item -> resumeGate(item.positionMs) { vm.playEpisode(item.targetItemId, it, onPlayerOpened) } },
                         onMenu = { menuFor = it },
                     )
-                    // Sports Hub: the phone's Live sports row arrives in Phase 4; hasContent keeps it undrawn.
-                    HomeRow.LIVE_SPORTS -> Unit
+                    // Sports (the TV's T7, C26): followed matches live or within the hour, in the user's
+                    // order; a tap opens the match, where its channels are found.
+                    HomeRow.LIVE_SPORTS -> Column {
+                        Text(
+                            stringResource(R.string.sports_title), style = stageText(17f, 800), color = LocalStagePalette.current.text,
+                            modifier = Modifier.padding(start = 14.dp, bottom = 8.dp),
+                        )
+                        LazyRow(contentPadding = PaddingValues(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            items(sportsCards, key = { it.key }) { m ->
+                                tv.own.owntv.mobile.ui.screens.sports.MatchCard(
+                                    m, featured = false, config = sportsConfig, reminded = false,
+                                    onClick = { onOpenMatch(m) }, onLongClick = { onOpenMatch(m) },
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -413,6 +434,7 @@ private fun HomeFeed.hasContent(row: HomeRow): Boolean = when (row) {
     HomeRow.FAVORITE_SERIES -> favoriteSeries.isNotEmpty()
     HomeRow.CONTINUE_MOVIES -> continueMovies.isNotEmpty()
     HomeRow.CONTINUE_SERIES -> continueSeries.isNotEmpty()
+    // Decided by the Sports row's own matches, in HomeScreen.
     HomeRow.LIVE_SPORTS -> false
 }
 

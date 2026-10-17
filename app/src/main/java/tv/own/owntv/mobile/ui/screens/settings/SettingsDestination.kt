@@ -35,6 +35,10 @@ fun SettingsLeafPage(leaf: SettingsLeaf, onSetup: (SetupEntry) -> Unit) {
         SettingsLeaf.LANGUAGE -> SettingsLanguagePage()
         SettingsLeaf.PROXY -> SettingsProxyPage()
         SettingsLeaf.DNS -> SettingsDnsPage()
+        SettingsLeaf.SPORTS -> tv.own.owntv.mobile.ui.screens.sports.SportsSettingsPage()
+        SettingsLeaf.SPORTS_LEAGUES -> tv.own.owntv.mobile.ui.screens.sports.SportsLeaguesPage()
+        SettingsLeaf.SPORTS_TEAMS -> tv.own.owntv.mobile.ui.screens.sports.SportsTeamsPage()
+        SettingsLeaf.SPORTS_ALERTS -> tv.own.owntv.mobile.ui.screens.sports.SportsAlertsPage()
         SettingsLeaf.CATCHUP_SOURCES, SettingsLeaf.LIVE_ENGINE_SOURCES, SettingsLeaf.VOD_ENGINE_SOURCES,
         SettingsLeaf.LATENCY_SOURCES, SettingsLeaf.PREROLL_SOURCES, SettingsLeaf.TUNE_TIMEOUT_SOURCES -> PerPlaylistPage(leaf)
     }

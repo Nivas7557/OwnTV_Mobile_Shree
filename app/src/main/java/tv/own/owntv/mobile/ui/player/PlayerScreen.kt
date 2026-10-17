@@ -368,6 +368,13 @@ fun PlayerScreen(
     // Pure except for the channel (and the cast route) it reads: recompute on those, not on ticks.
     val archiveWindowSec = remember(isLive, channel?.id, castDevice) { tuner.archiveWindowSec() }
     var sheet by remember { mutableStateOf<PlayerSheet?>(null) }
+    // Sports Hub: the extras exist only while the playing channel is one of the match's it was started from.
+    val sportsPlayback: tv.own.owntv.mobile.ui.screens.sports.SportsPlayback = koinInject()
+    val sportsSession by sportsPlayback.session.collectAsStateWithLifecycle()
+    val sportsConfig by koinInject<tv.own.owntv.core.settings.SettingsRepository>().activeSportsConfig
+        .collectAsStateWithLifecycle(tv.own.owntv.core.sports.SportsConfig())
+    val matchSession = sportsSession?.takeIf { s -> isLive && s.options.any { it.channel.id == channel?.id } }
+    var otherChannels by remember { mutableStateOf(false) }
     // Closing the sheet forgets which category was open, so the next press starts at the categories.
     LaunchedEffect(sheet) { if (sheet != PlayerSheet.CHANNELS) playerCategory = null }
     val recordWatchingEnabled by settings.recordWhatImWatching.collectAsStateWithLifecycle(initialValue = false)
@@ -802,7 +809,21 @@ fun PlayerScreen(
                 null
             },
             recordingThis = playerRecording != null,
+            matchLine = matchSession?.takeIf { sportsConfig.scoreInInfoBar }?.let { session ->
+                { tv.own.owntv.mobile.ui.screens.sports.MatchScoreLine(sportsPlayback, session.match, sportsConfig.spoilerFree) }
+            },
+            onOtherChannels = matchSession?.takeIf { it.options.size > 1 }?.let { { otherChannels = true } },
         )
+        if (otherChannels) {
+            val session = matchSession
+            if (session == null) otherChannels = false
+            else tv.own.owntv.mobile.ui.screens.sports.OtherChannelsSheet(
+                session = session,
+                playingId = channel?.id,
+                onSwitch = { tuner.switchTo(it); otherChannels = false },
+                onDismiss = { otherChannels = false },
+            )
+        }
 
         // Independent of the controls, so it still appears after they have faded out on their own.
         if (showNextCard) {
