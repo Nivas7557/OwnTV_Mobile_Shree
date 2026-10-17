@@ -30,6 +30,7 @@
 - **🗂️ Downloads and recordings whose file is gone say "File missing"**
 
 ### Fixes
+- **🖼️ Your own picture can be chosen while creating a profile**
 - **📺 Series no longer show "No episodes" when one episode is oddly written by the provider**
 - **💬 A series the provider refused says why instead of "No episodes"**
 - **📺 Live TV falls back to the other player and gives up on time again**
