@@ -76,7 +76,7 @@ fun SettingsEpgSourcesPage(
     var manualDaysFor by remember { mutableStateOf<EpgSource?>(null) }
     var confirmDelete by remember { mutableStateOf<EpgSource?>(null) }
 
-    // "‹ Settings · Sources & guide · 2 feeds", + Add EPG, the feeds, then the note on addresses (F2).
+    // "‹ Settings · Sources & guide · 2 feeds", + Add EPG, the feeds, then the note on addresses.
     SettingsCrumb(pluralStringResource(R.plurals.settings_epg_feed_count, sources.size, sources.size), SettingsGroup.SOURCES)
     SettingsStagePage(modifier) {
         item(key = "add") {
@@ -245,7 +245,7 @@ private fun EpgRow(
     }
     val palette = LocalStagePalette.current
     val portal = tv.own.owntv.core.repository.EpgRepository.stalkerSourceIdOf(source.url) != null
-    // Never the address (F2): it can carry the account's user name and password. A portal's own guide says so.
+    // Never the address: it can carry the account's user name and password. A portal's own guide says so.
     val first = if (portal && count == null && active == null) stringResource(R.string.settings_epg_sources_portal_guide) else status
     val second = listOfNotNull(
         source.lastSyncAt?.let { stringResource(R.string.settings_synced_at, syncedWhen(it)) },

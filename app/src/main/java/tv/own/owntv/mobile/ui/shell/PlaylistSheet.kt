@@ -28,7 +28,7 @@ import tv.own.owntv.mobile.ui.stage.StageSheetHeader
 import tv.own.owntv.mobile.ui.stage.stageText
 
 /**
- * Show playlist, the television's sheet: All playlists, then each playlist with its mark (rule D4)
+ * Show playlist, the television's sheet: All playlists, then each playlist with its mark
  * and its channel count ("55K channels"; Settings › Layout › Show counts). The current one is filled with
  * a ✓ and carries no count, as on the television. `All playlists` is id -1, the value Settings stores.
  */

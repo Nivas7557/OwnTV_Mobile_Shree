@@ -361,7 +361,7 @@ private fun androidx.compose.foundation.layout.BoxScope.TileCaption(name: String
  *
  * It never invents a number of provider connections. The television had a version that did, reading
  * a stopped tile as proof of the provider's limit, and it was wrong every time — including telling
- * the owner his provider allowed three streams while three of them played beside the message.
+ * the user their provider allowed three streams while three of them played beside the message.
  */
 @Composable
 private fun tileFailureText(failure: PlaybackFailure?): String = when {

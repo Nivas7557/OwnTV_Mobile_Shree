@@ -87,7 +87,7 @@ fun SettingsFontsPage(
 
         settingsSection(R.string.settings_main_interface_font) {
             AppFontFamily.entries.forEach { family ->
-                // One of many: a radio, not a switch (F6). RECOMMENDED beside Plus Jakarta Sans, the default.
+                // One of many: a radio, not a switch. RECOMMENDED beside Plus Jakarta Sans, the default.
                 ChoiceRow(
                     label = stringResource(family.labelRes()),
                     on = fonts.mainFamily == family,
@@ -98,7 +98,7 @@ fun SettingsFontsPage(
 
         settingsSection(R.string.settings_popup_font) {
             AppFontFamily.entries.forEach { family ->
-                // One of many: a radio, not a switch (F6). RECOMMENDED beside Plus Jakarta Sans, the default.
+                // One of many: a radio, not a switch. RECOMMENDED beside Plus Jakarta Sans, the default.
                 ChoiceRow(
                     label = stringResource(family.labelRes()),
                     on = fonts.popupFamily == family,

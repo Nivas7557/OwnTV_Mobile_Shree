@@ -64,7 +64,7 @@ import tv.own.owntv.mobile.ui.setup.labelRes
 /**
  * Settings › Sources & guide › Playlists: "+ Add source", then one row per playlist — its mark, its
  * name, the type with what it holds, when it synced and when it runs out — and on the right OK, Default, or the
- * import running. Addresses are never shown in the list (F3). A tap opens its actions.
+ * import running. Addresses are never shown in the list. A tap opens its actions.
  */
 @Composable
 fun SettingsPlaylistsPage(
@@ -249,7 +249,7 @@ private fun TestReport(result: SourceTestResult, limit: tv.own.owntv.core.live.C
     result.detailLines(res, limit).forEach { line -> Text(line, style = stageText(12.5f, 500), color = palette.muted) }
 }
 
-/** "Xtream · 55K channels · 179K movies · 48K series" — the type and what it holds, never its address (F3). */
+/** "Xtream · 55K channels · 179K movies · 48K series" — the type and what it holds, never its address. */
 @Composable
 private fun typeLine(source: SourceEntity, counts: String?): String {
     val type = stringResource(

@@ -125,7 +125,7 @@ fun PlayerScreen(
     val player = tuner.player
     val downloadWatchPrompt by downloadWatchGuard.prompt.collectAsStateWithLifecycle()
 
-    // L2 - live now has two engines. `liveOnExo` says which one holds the picture, so the stage knows
+    // Live now has two engines. `liveOnExo` says which one holds the picture, so the stage knows
     // whose surface to draw and the HUD's engine button knows which way it flips.
     val liveOnExo by tuner.liveOnExo.collectAsStateWithLifecycle()
 
@@ -208,7 +208,7 @@ fun PlayerScreen(
         }
         if (multiviewPickFor == null) multiviewCategory = null
     }
-    // Channels kept from the Live list (B5's second entry point). Playing any channel is what says
+    // Channels kept from the Live list (the second way into the grid). Playing any channel is what says
     // "now": the grid opens with them already in it, and the selection is spent.
     val multiviewSelection by tuner.multiviewSelection.collectAsStateWithLifecycle()
     LaunchedEffect(channel?.id, multiviewSelection.size, multiviewEnabled) {
@@ -217,7 +217,7 @@ fun PlayerScreen(
             val kept = multiviewSelection
             tuner.clearMultiviewSelection()
             // BOTH engines, exactly as the HUD button does. This is the *other* way into the grid —
-            // the one the owner actually uses — and it stopped only mpv, so a channel playing on the
+            // the one most used — and it stopped only mpv, so a channel playing on the
             // ExoPlayer engine carried on underneath: a second sound, and a connection spent on a
             // stream nobody could see.
             player.stop()
@@ -286,7 +286,7 @@ fun PlayerScreen(
     val replaying by tuner.replaying.collectAsStateWithLifecycle()
     val isLive = channel != null && !replaying
 
-    // "Go back to…", for a live channel whose provider keeps an archive — or its own saved copy (N4),
+    // "Go back to…", for a live channel whose provider keeps an archive — or its own saved copy,
     // which exists only once the tune has started saving. Recomputed per channel, since the depth of
     // the archive is the channel's, not the playlist's.
     val hasLocalCopy by tuner.hasLocalCopy.collectAsStateWithLifecycle()
@@ -296,7 +296,7 @@ fun PlayerScreen(
         }
     }
 
-    // N4 — back on a channel whose saved copy was kept: continue from there, or stay live.
+    // Back on a channel whose saved copy was kept: continue from there, or stay live.
     val timeshiftResumeAt by tuner.timeshiftResumeAt.collectAsStateWithLifecycle()
     if (timeshiftResumeAt != null) {
         // Resume clears the offer itself, so the sheet's dismiss after it is a no-op.
@@ -667,7 +667,7 @@ fun PlayerScreen(
             PlayerToast(Modifier.align(Alignment.Center)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp))
-                    // As on the TV (PR #237), a live channel that had been playing and has stalled for
+                    // As on the TV, a live channel that had been playing and has stalled for
                     // 10 s says so under the spinner; gone as soon as the picture returns.
                     val stalledSince = stalledSinceMs
                     if (isLive && stalledSince != null) {
@@ -710,7 +710,7 @@ fun PlayerScreen(
             timelineProgrammes = timelineProgrammes,
             channelNumber = channel?.number?.takeIf { showChannelNumbers },
             liveOnExo = liveOnExo,
-            // L3 - offered only where a swap makes sense. Rewound into the archive, a swap would
+            // Offered only where a swap makes sense. Rewound into the archive, a swap would
             // re-open the channel at the live edge and throw the user out of the rewind; a protected
             // channel has only one engine that can obtain its key, so swapping would trade a playing
             // picture for a guaranteed failure. `isLive` already excludes a replay.
@@ -761,7 +761,7 @@ fun PlayerScreen(
                     // The fullscreen stream goes first: tile 1 opens its own engine, and a playlist
                     // that allows two streams would otherwise be asked for three.
                     val current = channel
-                    // BOTH engines. Live plays on the ExoPlayer engine (L2) whenever that is the
+                    // BOTH engines. Live plays on the ExoPlayer engine whenever that is the
                     // chosen engine, and stopping only mpv left that stream running behind the grid —
                     // audible, and holding one of the provider's connections, while a tile played the
                     // same or another channel over the top of it. Two sounds at once.
@@ -799,9 +799,9 @@ fun PlayerScreen(
             },
             onToast = { toast = it },
             gestureScrubMs = scrubFraction?.takeIf { duration > 0 }?.let { (it * duration).toLong() },
-            // H1 — Report is offered only while Info is open, the television's rule on both apps.
+            // Report is offered only while Info is open, the television's rule on both apps.
             infoOpen = sheet == PlayerSheet.INFO,
-            // D3 — live channels only, and only once the setting is on. Null hides the button.
+            // Live channels only, and only once the setting is on. Null hides the button.
             onRecordThis = if (recordWatchingEnabled && isLive && channel != null) {
                 { tuner.togglePlayerRecording() }
             } else {
@@ -868,7 +868,7 @@ fun PlayerScreen(
                 grid.releaseAll()
                 multiview = null
                 multiviewPickFor = null
-                // Leaving the grid leaves *playback*, by the owner's decision (2026-09-13).
+                // Leaving the grid leaves *playback*, by design.
                 //
                 // It used to promote whichever tile had the sound to the single stream. In use that
                 // is wrong twice over: a grid is put away by someone who has finished watching, and

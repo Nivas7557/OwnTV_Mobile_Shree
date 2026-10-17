@@ -263,7 +263,7 @@ private fun rebuildLabel(mode: AutoRebuild): String = when (mode) {
     else -> SportsRefreshPolicy.hoursOf(mode).let { h -> pluralStringResource(R.plurals.sports_auto_rebuild_hours, h, h) }
 }
 
-/** What a long press on a sport or a chosen league reorders (the phone's Move, owner 2026-10-17). */
+/** What a long press on a sport or a chosen league reorders (the phone's Move). */
 private class MoveList(val title: String, val names: List<String>, val start: Int, val commit: (List<Int>) -> Unit)
 
 /**

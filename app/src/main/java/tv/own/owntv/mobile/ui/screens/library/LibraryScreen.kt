@@ -219,7 +219,7 @@ fun LibraryScreen(
             )
         }
         // `.tools`: the search field takes the room, then the order and Grid | List at the right. No categories
-        // tool (owner, 12 Oct): the crumb under the title opens the same sheet.
+        // tool: the crumb under the title opens the same sheet.
         Row(
             Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = TOOLS_TOP, bottom = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),

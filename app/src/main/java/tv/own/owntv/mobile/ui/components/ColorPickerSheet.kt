@@ -89,7 +89,7 @@ fun ColorPickerSheet(
         }
     }
     // Keyed on the seed: the setting arrives a frame after the sheet opens, and the picker must move to it
-    // rather than stay on the default (it opened on Teal over a custom green, #16).
+    // rather than stay on the default (it opened on Teal over a custom green).
     var hue by remember(seed) { mutableFloatStateOf(seed[0]) }
     var sat by remember(seed) { mutableFloatStateOf(seed[1]) }
     var value by remember(seed) { mutableFloatStateOf(seed[2]) }

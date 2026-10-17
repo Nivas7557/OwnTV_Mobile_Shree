@@ -48,7 +48,7 @@ import tv.own.owntv.mobile.ui.stage.stageText
 /**
  * Settings: the line "Hold a row to pin it to Quick" under the title, the search over every setting,
  * then the twelve groups as cards in two columns — icon, count, name and what the group holds. Searching
- * lists every setting whose own name matches (F4: names only), its path above it and its value beside.
+ * lists every setting whose own name matches (names only), its path above it and its value beside.
  */
 @Composable
 fun SettingsScreen(
@@ -159,7 +159,7 @@ private fun highlighted(title: String, query: String): AnnotatedString {
 private class SearchHit(val title: String, val path: String, val value: String?, val icon: androidx.compose.ui.graphics.vector.ImageVector, val route: String)
 
 /**
- * Settings search (F4): every word must be in the setting's own name — not a bag of keywords, which listed whole
+ * Settings search: every word must be in the setting's own name — not a bag of keywords, which listed whole
  * groups for "subt". The rows of every group page, then the rows inside the full pages.
  */
 @Composable

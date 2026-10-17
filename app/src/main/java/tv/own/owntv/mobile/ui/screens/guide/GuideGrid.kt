@@ -116,7 +116,7 @@ internal fun GuideGrid(
         val minutePx = with(LocalDensity.current) { minuteWidth.toPx() }
         fun x(ms: Long): Dp = minuteWidth * ((ms - window.start).toFloat() / MINUTE_MS)
         val nowIn = nowMs in window.start until window.end
-        // The now-line in the middle of the cells (owner, 11 Oct), so what is on now keeps its title in
+        // The now-line in the middle of the cells, so what is on now keeps its title in
         // view — measured from this grid's own width, which a rail or a turned phone makes narrower.
         val areaPx = with(LocalDensity.current) { area.toPx() }
         LaunchedEffect(nowRequests, window.start, minutePx, areaPx) {

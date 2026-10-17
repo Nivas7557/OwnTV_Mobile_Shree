@@ -346,7 +346,7 @@ private fun AspectSheet(player: PlaybackEngine, onDismiss: () -> Unit) {
     }
 }
 
-/** N11 — Auto (Settings → Maximum video quality), then every height this stream offers, highest first. */
+/** Auto (Settings → Maximum video quality), then every height this stream offers, highest first. */
 @Composable
 private fun QualitySheet(player: PlaybackEngine, onDismiss: () -> Unit) {
     val heights by player.videoQualities.collectAsStateWithLifecycle()

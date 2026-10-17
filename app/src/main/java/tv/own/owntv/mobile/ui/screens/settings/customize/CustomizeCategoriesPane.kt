@@ -386,6 +386,6 @@ private fun CategoryActionsSheet(
 
 /**
  * A TV label without the TV's own decorations — the 🔒 and the ▾ it draws in text — for a row that has a Stage
- * icon and chevron of its own (#21).
+ * icon and chevron of its own.
  */
 internal fun plainLabel(text: String): String = text.replace("🔒", "").replace("▾", "").trim()

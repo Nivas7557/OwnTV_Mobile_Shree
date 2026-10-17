@@ -23,7 +23,7 @@ class SportsPlayback(private val repository: SportsRepository) {
     private val _session = MutableStateFlow<SportsSession?>(null)
     val session: StateFlow<SportsSession?> = _session.asStateFlow()
 
-    /** The hub's chosen sport and league chips: kept while the app runs, back to All on a fresh start (owner). */
+    /** The hub's chosen sport and league chips: kept while the app runs, back to All on a fresh start. */
     var hubChips: Set<HubChip> = emptySet()
     var hubLeagues: Set<String> = emptySet()
 

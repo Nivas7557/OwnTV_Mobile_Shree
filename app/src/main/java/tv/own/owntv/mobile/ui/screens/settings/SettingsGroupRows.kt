@@ -189,7 +189,7 @@ private fun sourcesSections(vm: SettingsViewModel): List<SettingSection> {
                 choiceItem(
                     "epg_offset", MobileIcons.Schedule, g, stringResource(R.string.content_epg_time_offset),
                     stringResource(R.string.settings_line_epg_offset), stringResource(R.string.settings_epg_offset_dialog_description),
-                    // Whole hours: the guide shift keeps hours, only catch-up went to quarter hours (N20).
+                    // Whole hours: the guide shift keeps hours, only catch-up went to quarter hours.
                     (-12..14).map { SettingsChoice(it * 60, offsetOrOff(it * 60)) },
                     offset, 0, { m -> vm.edit { setEpgOffsetMinutes(m) } },
                     valueText = offsetOrOff(offset),
@@ -295,7 +295,7 @@ private fun appearanceSections(vm: SettingsViewModel): List<SettingSection> {
     val sep = stringResource(R.string.content_epg_bits_separator)
     val nav = LocalSettingsNav.current
 
-    // The zoom a step below the low-memory point is waiting on; asked once a visit (#51).
+    // The zoom a step below the low-memory point is waiting on; asked once a visit.
     var pendingZoom by remember { mutableStateOf<Int?>(null) }
     var lowZoomAccepted by remember { mutableStateOf(false) }
     pendingZoom?.let { target ->

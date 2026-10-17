@@ -318,7 +318,7 @@ class QuickPins(val keys: List<String>, private val save: (List<String>) -> Unit
     /** The rows Quick draws, in order — set by the Quick page; moves step over keys it does not draw. */
     var shown: List<String> = emptyList()
 
-    /** The stored positions of the drawn rows: a TV-only pin in between is never a step (#28). */
+    /** The stored positions of the drawn rows: a TV-only pin in between is never a step. */
     private fun shownIndices() = keys.indices.filter { (QUICK_ALIASES[keys[it]] ?: keys[it]) in shown }
     fun position(key: String): Int = shownIndices().indexOfFirst { (QUICK_ALIASES[keys[it]] ?: keys[it]) == key }
     fun canStep(key: String, delta: Int): Boolean = position(key).let { it >= 0 && it + delta in shownIndices().indices }

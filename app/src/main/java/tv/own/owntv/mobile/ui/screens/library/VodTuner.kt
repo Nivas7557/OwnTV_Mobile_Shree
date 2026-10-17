@@ -207,7 +207,7 @@ class VodTuner(
         if (!AdultCategoryClassifier.allows(pid, movie.categoryId, profileDao, categoryDao)) return false
         val source = withContext(Dispatchers.IO) { sourceDao.getById(movie.sourceId) }
 
-        // #115 — a protected item cannot go to an external player: no intent extra carries a licence
+        // A protected item cannot go to an external player: no intent extra carries a licence
         // URL, so the other app would open it and fail on the first segment.
         if (settings.externalPlayerMovies.first() && movie.drmConfig == null) {
             return handOver(movie.name, source, movie.streamUrl, movie.httpHeaders, pid, MediaType.MOVIE, movie.id, startPositionMs)

@@ -130,7 +130,7 @@ object MobileIcons {
     /**
      * Catch-up: a television with a replay loop inside it, and a single antenna.
      *
-     * Drawn to match the television app's `OwnTVIcon.CATCHUP` (H3). It used to be [History] here and
+     * Drawn to match the television app's `OwnTVIcon.CATCHUP`. It used to be [History] here and
      * a screen-with-a-loop there — the same function wearing two faces, which is one of the four
      * mismatches Feature H exists to remove. One antenna rather than a V: it says "television" for
      * the cost of a single line and stays clear of the loop's arrowhead.
@@ -140,7 +140,7 @@ object MobileIcons {
     /**
      * Over-ear headphones — a headband arc and two earcups.
      *
-     * Drawn to match the television's `OwnTVIcon.HEADPHONES` (H3). It was a [MusicNote] here, which
+     * Drawn to match the television's `OwnTVIcon.HEADPHONES`. It was a [MusicNote] here, which
      * says "audio" but not "sound only, no picture", and the television has never used one.
      */
     val Headphones: ImageVector by lazy { stage(StageGlyph.HEADPHONES) }
@@ -148,7 +148,7 @@ object MobileIcons {
     /**
      * Share: three nodes and the two lines between them.
      *
-     * Drawn to match the television's `OwnTVIcon.SHARE` (H3). Reporting a stream was a [BugReport]
+     * Drawn to match the television's `OwnTVIcon.SHARE`. Reporting a stream was a [BugReport]
      * here and this there; the television's is the reference, and "share this readout" is nearer to
      * what the button does than "file a bug" is.
      */

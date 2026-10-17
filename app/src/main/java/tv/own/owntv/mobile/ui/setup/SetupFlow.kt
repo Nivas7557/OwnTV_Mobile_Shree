@@ -200,7 +200,7 @@ fun SetupFlow(
         when (step) {
             Step.WELCOME -> WelcomeStep(onNext = { step = Step.DISPLAY_SIZE })
             // Before the disclaimer, which is the first screen that is mostly words: if the text is
-            // too small to read, that is the screen it first hurts on (#179).
+            // too small to read, that is the screen it first hurts on.
             Step.DISPLAY_SIZE -> DisplaySizeStep(onNext = { step = Step.DISCLAIMER }, onBack = { step = Step.WELCOME })
             Step.DISCLAIMER -> DisclaimerStep(onAgree = { step = Step.CHOICE }, onBack = { step = Step.DISPLAY_SIZE })
             Step.CHOICE -> SetupChoiceStep(

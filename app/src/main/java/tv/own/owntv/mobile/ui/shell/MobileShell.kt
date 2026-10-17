@@ -391,7 +391,7 @@ fun MobileShell(
         )
     }
 
-    // The header (F24): the page names itself; a page pushed on top of another says where it came from
+    // The header: the page names itself; a page pushed on top of another says where it came from
     // in the crumb, and that crumb is the way back. A tab, Home and More are places, not pages, so they
     // carry no crumb; a detail page (a film, a channel) draws its own title and keeps only the crumb.
     val topLevel = headerRoute == MobileDestination.MORE.route ||
@@ -430,7 +430,7 @@ fun MobileShell(
                 activePlaylist != null -> activePlaylist.displayName()
                 else -> stringResource(tv.own.owntv.mobile.R.string.content_all_playlists)
             },
-            // A playlist's own mark only means something next to the others' (rule D4).
+            // A playlist's own mark only means something next to the others'.
             mark = if (activePlaylist != null && playlists.size > 1) PlaylistMark.of(activePlaylist.displayName(), activeIndex) else null,
             switchable = playlists.size > 1,
             iconOnly = false,
@@ -656,7 +656,7 @@ fun MobileShell(
         )
     }
 
-    // Programme reminders (G6): when one comes up, ask to switch, or switch — over whatever is on screen,
+    // Programme reminders: when one comes up, ask to switch, or switch — over whatever is on screen,
     // the player included. Notify only is a notification (ReminderNotifier), so nothing is drawn here.
     val reminders: tv.own.owntv.core.reminder.ReminderManager = koinInject()
     val dueReminders by reminders.due.collectAsStateWithLifecycle()

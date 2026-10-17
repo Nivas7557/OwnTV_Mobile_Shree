@@ -189,7 +189,7 @@ internal fun pictureSections(vm: SettingsViewModel): List<SettingSection> {
                     s.maxVideoHeightChoices.map { SettingsChoice(it, qualityLabel(it, R.string.settings_auto)) }, maxHeight, 0,
                     { h -> vm.edit { setMaxVideoHeight(h) } },
                 ),
-                // Only where a decoder can tunnel (N19); after a failure the line says why it is off.
+                // Only where a decoder can tunnel; after a failure the line says why it is off.
                 if (tv.own.owntv.player.Tunneling.supported) switchItem(
                     "vp_tunneled", MobileIcons.PlayArrow, stringResource(R.string.settings_title_tunneled),
                     stringResource(R.string.settings_line_tunneled) +
@@ -477,7 +477,7 @@ internal fun watchingSections(vm: SettingsViewModel): List<SettingSection> {
     val recordWatching = s.recordWhatImWatching.pref(false)
     val recordingsVm: RecordingsViewModel = koinViewModel()
 
-    // D3: the player's record button costs the one spare connection, so turning it on says so first.
+    // The player's record button costs the one spare connection, so turning it on says so first.
     var warnRecordWatching by remember { mutableStateOf(false) }
     if (warnRecordWatching) {
         StageConfirmSheet(
@@ -801,12 +801,12 @@ private fun trackLanguageChoices(withOriginal: Boolean): List<SettingsChoice<Str
     return codes.map { SettingsChoice(it, trackLanguageName(it)) }
 }
 
-/** [noneRes] ("Auto" / "Off") for 0, else the picture height ("1080p") — N11. */
+/** [noneRes] ("Auto" / "Off") for 0, else the picture height ("1080p"). */
 @Composable
 private fun qualityLabel(height: Int, noneRes: Int): String =
     if (height <= 0) stringResource(noneRes) else stringResource(R.string.settings_video_quality_lines, height)
 
-/** "Auto" for 0, else seconds ("60s") — the film buffer and network timeout choices (N18). */
+/** "Auto" for 0, else seconds ("60s") — the film buffer and network timeout choices. */
 @Composable
 private fun autoOrSeconds(secs: Int): String =
     if (secs <= 0) stringResource(R.string.settings_vod_network_auto) else stringResource(R.string.settings_live_buffer_seconds, secs)

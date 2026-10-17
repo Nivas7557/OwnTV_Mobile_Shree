@@ -222,7 +222,7 @@ fun SettingsGlassPage(
     }
 }
 
-/** The phone's glass opacity for a new user and for Reset (owner, 2026-10-14); the TV's is core's 50 %. */
+/** The phone's glass opacity for a new user and for Reset; the TV's is core's 50 %. */
 internal const val PHONE_GLASS_DEFAULT_PCT = 51
 
 /** Darken / Blur: "50%" in a stepper, [step] at a time within 0…[max]. */

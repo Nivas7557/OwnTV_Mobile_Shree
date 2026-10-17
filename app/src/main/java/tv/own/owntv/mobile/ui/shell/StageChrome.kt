@@ -381,7 +381,7 @@ private val MobileDestination.railIcon
 
 /**
  * The page header (`.hdr`): the page's own title (28 / 800) with the top-right [cluster] beside it, and
- * under it the crumb — "‹ where you came from" on a pushed page, which goes back when tapped (F24: the
+ * under it the crumb — "‹ where you came from" on a pushed page, which goes back when tapped (the
  * title names the page, the crumb says where from). Home has no title, only its [heading] once scrolled;
  * a detail page has only the crumb. A title page ([backPill]: a film, a show) has neither — the glass ‹
  * pill, then the cluster, over its own backdrop; the page names itself below.

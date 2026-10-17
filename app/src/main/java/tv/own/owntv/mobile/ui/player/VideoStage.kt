@@ -81,7 +81,7 @@ fun VideoStage(
      */
     autoFrameRate: Boolean = false,
 ) {
-    // L2 — which engine holds the picture. Resolved HERE rather than passed in, and that is the whole
+    // Which engine holds the picture. Resolved HERE rather than passed in, and that is the whole
     // point: this composable is used at four sizes (Live TV's preview, full screen, the
     // docked mini player and the floating window) and the first attempt passed the engine to ONE of
     // them. The other three drew mpv's surface while ExoPlayer held the stream, so ExoPlayer had no

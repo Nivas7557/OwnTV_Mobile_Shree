@@ -251,7 +251,7 @@ class LibraryViewModel(
     val sheetCounts: StateFlow<Boolean> = settings.sheetCounts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
-    /** Which playlist a poster or row comes from — only when more than one is shown (rule D4), as on Live TV. */
+    /** Which playlist a poster or row comes from — only when more than one is shown, as on Live TV. */
     val playlistMarks: StateFlow<Map<Long, PlaylistMark>> = combine(ctx, mediaType) { c, type ->
         if (c.sourceIdsFor(type).size < 2) emptyMap()
         else c.sources.withIndex().associate { (i, s) -> s.id to PlaylistMark.of(s.name, i) }
@@ -510,7 +510,7 @@ class LibraryViewModel(
         }
     }
 
-    /** Back to the playlist's order and contents (core's restoreCategoryToDefault, the TV's PR #235). */
+    /** Back to the playlist's order and contents (core's restoreCategoryToDefault). */
     fun restoreCategory(key: LiveKey) {
         val contextKey = categoryContextKey(key) ?: return
         viewModelScope.launch {
@@ -946,5 +946,5 @@ internal fun episodeFileName(name: String, episodeNumber: Int, containerExt: Str
     return "$stem.${containerExt ?: StorageAccess.extOf(streamUrl)}"
 }
 
-/** Where films go on disk. Core owns the name so the two apps cannot drift apart (D1). */
+/** Where films go on disk. Core owns the name so the two apps cannot drift apart. */
 internal val MOVIES_DIR: String = MediaFolders.MOVIES

@@ -968,7 +968,7 @@ internal fun ProgrammeSheet(
                             onDismiss()
                         },
                         icon = if (programme.stopMs <= nowMs && recording == null) MobileIcons.Catchup else MobileIcons.Record,
-                        // The clash, said before committing (D10).
+                        // The clash, said before committing.
                         value = clash?.takeIf { recording == null && upcoming }?.let { stringResource(R.string.recording_clash_with, it) },
                     )
                     // "Every showing" only for a programme still to come — a rule is about the future.

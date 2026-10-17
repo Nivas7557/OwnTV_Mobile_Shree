@@ -181,7 +181,7 @@ class DetailViewModel(
     }
 
     /** The seasons this show actually has episodes for, in the order the user chose — Specials
-     *  (season 0) after the numbered seasons in either order, as on the television (#228). */
+     *  (season 0) after the numbered seasons in either order, as on the television. */
     val seasons: StateFlow<List<Int>> = combine(episodes, order) { list, o ->
         val numbers = list.map { it.seasonNumber }.distinct().sorted()
         (if (o.seasonsDescending) numbers.reversed() else numbers).sortedBy { it == 0 }

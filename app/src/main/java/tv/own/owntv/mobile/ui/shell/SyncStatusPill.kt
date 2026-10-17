@@ -66,7 +66,7 @@ fun SyncStatusPill(
      * Show recordings and nothing else. Over the player the pill used to be hidden outright, so a
      * running recording was invisible for as long as the user was watching — which is most of the
      * time it is running. A catalogue sync over the picture is noise; a recording is the one line
-     * that is time-critical and unrecoverable (D13), so it is the one that earns the space.
+     * that is time-critical and unrecoverable, so it is the one that earns the space.
      */
     recordingsOnly: Boolean = false,
     onOpenDownloads: () -> Unit = {},
@@ -136,7 +136,7 @@ fun SyncStatusPill(
     // same maps.
     val rows = remember(activeCatalog, activeEpg, activeTrending, activeDownload, activeRecordings, recordingsOnly, sportsRebuild) {
         buildList {
-        // Recordings first, always (D13): they are time-critical and unrecoverable, so they are never
+        // Recordings first, always: they are time-critical and unrecoverable, so they are never
         // the line that gets collapsed into "+N more". Then downloads, which the user also started
         // deliberately. The background syncs are the ones that can afford to be hidden.
         activeRecordings.values.sortedBy { it.id }.forEach { add(SyncLine.Recording(it)) }

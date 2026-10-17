@@ -233,7 +233,7 @@ class GuideViewModel(
             val cal = Calendar.getInstance()
             if (offset == 0) {
                 // An hour back, so the now-line can sit in the middle of the grid with the current
-                // programme's title in view (owner, 11 Oct).
+                // programme's title in view.
                 cal.add(Calendar.HOUR_OF_DAY, -1)
                 cal.set(Calendar.MINUTE, if (cal.get(Calendar.MINUTE) < 30) 0 else 30)
                 cal.set(Calendar.SECOND, 0)
@@ -480,7 +480,7 @@ class GuideViewModel(
                 globalShiftMinutes = epgOffset.value,
                 atMs = System.currentTimeMillis(),
                 lookAheadMs = ON_NOW_LOOK_AHEAD_MS,
-                // F1: the grid's rows fall back to the provider's short guide; without the same
+                // The grid's rows fall back to the provider's short guide; without the same
                 // fallback here every such channel said "No guide." beside a grid full of programmes.
                 providerFallback = true,
             )
@@ -569,7 +569,7 @@ class GuideViewModel(
     fun cancelRecording(recording: tv.own.owntv.core.database.entity.RecordingEntity) =
         recordings.cancel(recording)
 
-    /** The standing "record every showing" rule covering this programme, or null (D7). */
+    /** The standing "record every showing" rule covering this programme, or null. */
     suspend fun seriesRuleFor(
         channel: ChannelEntity,
         programme: EpgProgrammeEntity,
@@ -591,7 +591,7 @@ class GuideViewModel(
         viewModelScope.launch { recordings.removeSeriesRule(rule) }
     }
 
-    /** The title of a recording this one would contend with, shown before the user commits (D10). */
+    /** The title of a recording this one would contend with, shown before the user commits. */
     suspend fun clashFor(channel: ChannelEntity, programme: EpgProgrammeEntity): String? {
         val window = recordings.windowFor(programme.startMs, programme.stopMs)
         val existing = recordingFor(channel, programme)
@@ -625,7 +625,7 @@ class GuideViewModel(
         if (programme.id <= 0) programme
         else withContext(Dispatchers.IO) { runCatching { epgDao.programmeById(programme.id) }.getOrNull() } ?: programme
 
-    // --- Programme reminders (G6): core keeps them and wakes the app; the shell draws the prompt. ---
+    // --- Programme reminders: core keeps them and wakes the app; the shell draws the prompt. ---
 
     val reminderRows: StateFlow<List<tv.own.owntv.core.database.entity.ReminderEntity>> =
         settings.activeProfileId

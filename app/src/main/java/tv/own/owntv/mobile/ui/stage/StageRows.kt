@@ -379,7 +379,7 @@ fun StageTextRow(
     )
     if (editing) {
         var text by remember { mutableStateOf(value) }
-        // The field takes the keyboard as the sheet opens: a sheet for one field is there to type in (#11).
+        // The field takes the keyboard as the sheet opens: a sheet for one field is there to type in.
         val focus = remember { androidx.compose.ui.focus.FocusRequester() }
         androidx.compose.runtime.LaunchedEffect(Unit) {
             kotlinx.coroutines.delay(150)

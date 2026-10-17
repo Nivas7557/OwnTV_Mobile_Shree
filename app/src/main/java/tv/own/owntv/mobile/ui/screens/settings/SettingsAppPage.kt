@@ -85,7 +85,7 @@ fun AboutPage(onOpenLanguage: () -> Unit, modifier: Modifier = Modifier) {
     val sep = stringResource(R.string.content_epg_bits_separator)
 
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 18.dp, end = 18.dp, top = 35.dp, bottom = 24.dp)) {
-        // The app icon on its dark tile (radius 24 %), the #227 wordmark, the version with what the last
+        // The app icon on its dark tile (radius 24 %), the wordmark, the version with what the last
         // check found, and when that was.
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(

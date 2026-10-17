@@ -18,7 +18,7 @@ private val HISTORY_SCOPES: List<MediaType?> =
     listOf(null, MediaType.LIVE, MediaType.MOVIE, MediaType.SERIES)
 
 /**
- * Throwing watch history away: pick a scope, then confirm it — two Stage sheets (F20), the same title,
+ * Throwing watch history away: pick a scope, then confirm it — two Stage sheets, the same title,
  * description, four scopes and confirm the old Settings → Data page had. Reached from More › History's
  * red trash tool, where it acts.
  */

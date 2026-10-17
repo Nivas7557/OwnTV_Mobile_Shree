@@ -180,7 +180,7 @@ fun SettingsOpenSubtitlesPage(
                 title = stringResource(R.string.player_subtitles_filter_title),
                 subtitle = stringResource(R.string.player_subtitles_filter_description),
                 role = Role.Switch,
-                // On / off: a switch (#24); the whole row flips it.
+                // On / off: a switch; the whole row flips it.
                 onClick = {
                     // Turning the filter on with nothing chosen would silently behave like "off",
                     // so seed it from the device's language, falling back to English.

@@ -196,7 +196,7 @@ class OwnTVMobileApp : Application(), androidx.work.Configuration.Provider {
             reminders = org.koin.core.context.GlobalContext.get().get(),
             settings = org.koin.core.context.GlobalContext.get().get(),
         )
-        // A new user starts on Stage with glass on (owner, 2026-10-14); an existing install keeps its look.
+        // A new user starts on Stage with glass on; an existing install keeps its look.
         appScope.launch {
             runCatching {
                 org.koin.core.context.GlobalContext.get().get<tv.own.owntv.core.settings.SettingsRepository>().applyPhoneStageDefaults(

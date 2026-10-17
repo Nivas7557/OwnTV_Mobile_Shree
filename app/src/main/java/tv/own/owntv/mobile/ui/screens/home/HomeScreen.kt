@@ -463,7 +463,7 @@ private fun RowHeading(title: String, count: Int? = null, mode: String? = null, 
 
 /**
  * Keep watching: 190 dp 16:9 stills with the watch progress, the title (12.5 / 700) and its
- * line. The still is the best picture there is (G12); a channel is its logo on the dark card, no white tile.
+ * line. The still is the best picture there is; a channel is its logo on the dark card, no white tile.
  */
 @Composable
 private fun KeepWatchingRow(

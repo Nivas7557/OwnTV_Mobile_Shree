@@ -89,7 +89,7 @@ fun WelcomeStep(onNext: () -> Unit) {
 }
 
 /**
- * How big everything is, before the first screen that is mostly words (#179): UI zoom and Font size as
+ * How big everything is, before the first screen that is mostly words: UI zoom and Font size as
  * steppers, written straight through — `MobileTheme` scales the whole step under the finger — the app icon, and
  * the sample row to judge them by. Below [UiZoom.LOW_RAM_WARN] the same accept-the-risk question Settings asks
  * comes first, once per visit.
@@ -402,7 +402,7 @@ fun ExistingSourcesStep(sources: List<SourceEntity>, onAdd: (Set<Long>) -> Unit,
     ) {
         sources.forEach { source ->
             val checked = source.id in selected
-            // The name only: an address can carry a user name and password (F3).
+            // The name only: an address can carry a user name and password.
             StageSettingRow(
                 title = source.name,
                 icon = MobileIcons.PlaylistPlay,
