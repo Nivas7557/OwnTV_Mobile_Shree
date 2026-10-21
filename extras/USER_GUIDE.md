@@ -523,7 +523,10 @@ finds any setting by its name, and **Quick** holds the rows you pin yourself by 
 | **Record what I'm watching** | Watching & recording | Adds the Record button to the player |
 | **Auto frame rate** | Picture | Off by default; full screen, seamless switches only; warns where the display can't be asked |
 | **Film buffer** · **Network timeout** · **Reconnect attempts** | Player | Films, episodes and catch-up on a bad line. Auto / 1 = as before |
-| **Reset saved live TV player choices** · **Forget learned stream fixes** | Player | Undo per-channel player choices; forget what the player learned about a provider |
+| **Reset saved live TV player choices** | Player | Undo per-channel player choices |
+| **Delay for this output** | Sound & subtitles | An audio delay for the output playing now — Bluetooth, the phone's speakers, headphones, HDMI — each kept on its own |
+| **FFmpeg audio for ExoPlayer** | Sound & subtitles | Decode sound the phone has no decoder for. Off by default; applies after a restart |
+| **Prefer SDR** | Picture | When a stream offers both SDR and HDR, play the SDR one. Off by default |
 | **Dolby and DTS passthrough** · **Night mode** · **Volume leveling** | Sound & subtitles | Send Dolby/DTS undecoded (on) or decode in the app; turn loud scenes down; even out loudness between channels. Night mode and leveling work on both engines |
 | **Maximum video quality** · **Maximum quality on mobile data** | Picture | The highest picture played when a stream offers several; the mobile-data limit follows a Wi-Fi ⇄ mobile switch while playing |
 | **Software decoding above 1080p** | Picture | Off. Lets 4K play in software when hardware decoding is off or fails; only for a fast phone |
